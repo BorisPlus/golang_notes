@@ -7,7 +7,7 @@ import (
 // go test -v -bench=. dataset.go stack_mine.go stack_mine_test.go
 func BenchmarkSimplestMine10Values(b *testing.B) {
 	stack := StackMine{}
-	for num := range array10 {
+	for _, num := range array10 {
 		stack.Push(num)
 	}
 	for stack.len > 0 {
@@ -17,7 +17,7 @@ func BenchmarkSimplestMine10Values(b *testing.B) {
 
 func BenchmarkSimplestMine1000Values(b *testing.B) {
 	stack := StackMine{}
-	for num := range array1000 {
+	for _, num := range array1000 {
 		stack.Push(num)
 	}
 	for stack.len > 0 {
@@ -27,7 +27,7 @@ func BenchmarkSimplestMine1000Values(b *testing.B) {
 
 func BenchmarkSimplestMine100000Values(b *testing.B) {
 	stack := StackMine{}
-	for num := range array100000 {
+	for _, num := range array100000 {
 		stack.Push(num)
 	}
 	for stack.len > 0 {

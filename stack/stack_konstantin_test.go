@@ -8,7 +8,7 @@ import (
 func BenchmarkSimplestKonstantin10Values(b *testing.B) {
 
 	stack := StackKonstantin{}
-	for num := range array10 {
+	for _, num := range array10 {
 		stack.Push(num)
 	}
 	for stack.len > 0 {
@@ -19,7 +19,7 @@ func BenchmarkSimplestKonstantin10Values(b *testing.B) {
 func BenchmarkSimplestKonstantin1000Values(b *testing.B) {
 
 	stack := StackKonstantin{}
-	for num := range array1000 {
+	for _, num := range array1000 {
 		stack.Push(num)
 	}
 	for stack.len > 0 {
@@ -29,7 +29,7 @@ func BenchmarkSimplestKonstantin1000Values(b *testing.B) {
 func BenchmarkSimplestKonstantin100000Values(b *testing.B) {
 
 	stack := StackKonstantin{}
-	for num := range array100000 {
+	for _, num := range array100000 {
 		stack.Push(num)
 	}
 	for stack.len > 0 {
