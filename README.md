@@ -95,7 +95,7 @@ import (
 func BenchmarkSimplest(b *testing.B) {
     stack := Stack{}
     // заполняем стек
-    for num := range array {
+    for _, num := range array {
         stack.Push(num)
     }
     // высвобождаем стек
