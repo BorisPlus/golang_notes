@@ -60,29 +60,6 @@ func (stack *StackRoman) Pop() int {
 }
 ```
 
-### Mine
-
-```go
-package main
-
-type StackMine struct {
-    items []int
-    len uint
-}
-
-func (stack *StackMine) Push(i int) {
-    stack.items = append(stack.items, i)
-    stack.len++
-}
-
-func (stack *StackMine) Pop() int {
-    filo := stack.items[0]
-    stack.items = stack.items[1:]
-    stack.len--
-    return filo
-}
-```
-
 ## Тестирвание
 
 Тестирование происходит по одной схеме
@@ -134,37 +111,31 @@ goarch: amd64
 pkg: stack/stack
 cpu: Intel(R) Core(TM) i3-2310M CPU @ 2.10GHz
 BenchmarkSimplestKonstantin10Values
-BenchmarkSimplestKonstantin10Values-4           1000000000               0.0000074 ns/op
+BenchmarkSimplestKonstantin10Values-4           1000000000               0.0000095 ns/op
 BenchmarkSimplestKonstantin1000Values
-BenchmarkSimplestKonstantin1000Values-4         1000000000               0.001418 ns/op
+BenchmarkSimplestKonstantin1000Values-4         1000000000               0.001856 ns/op
 BenchmarkSimplestKonstantin100000Values
-BenchmarkSimplestKonstantin100000Values-4              1        17876335812 ns/op
-BenchmarkSimplestMine10Values
-BenchmarkSimplestMine10Values-4                 1000000000               0.0000044 ns/op
-BenchmarkSimplestMine1000Values
-BenchmarkSimplestMine1000Values-4               1000000000               0.0000270 ns/op
-BenchmarkSimplestMine100000Values
-BenchmarkSimplestMine100000Values-4             1000000000               0.003949 ns/op
+BenchmarkSimplestKonstantin100000Values-4              1        16548906905 ns/op
 BenchmarkSimplestRoman10Values
-BenchmarkSimplestRoman10Values-4                1000000000               0.0000075 ns/op
+BenchmarkSimplestRoman10Values-4                1000000000               0.0000052 ns/op
 BenchmarkSimplestRoman1000Values
-BenchmarkSimplestRoman1000Values-4              1000000000               0.0000265 ns/op
+BenchmarkSimplestRoman1000Values-4              1000000000               0.0000362 ns/op
 BenchmarkSimplestRoman100000Values
-BenchmarkSimplestRoman100000Values-4            1000000000               0.003324 ns/op
+BenchmarkSimplestRoman100000Values-4            1000000000               0.002220 ns/op
 PASS
-ok      stack/stack     17.987s
+ok      stack/stack     16.625s
 ```
 
 Наглядно таблицей
 
-| Dataset \ ns/op   | Konstantin    | Mine      |   Roman   |
-| :---------------- | :-----------: | :-------: | --------: |
-| 10                | 0.0000074     | 0.0000044 | 0.0000075 |
-| 1000              | 0.001418      | 0.0000270 | 0.0000265 |
-| 100000            | 17876335812   | 0.003949  | 0.003324  |
+| Dataset \ ns/op   | Konstantin    |   Roman   |
+| :---------------- | :-----------: | --------: |
+| 10                | 0.0000095     | 0.0000052 |
+| 1000              | 0.001856      | 0.0000362 |
+| 100000            | 16548906905   | 0.002220  |
 
 ## Вывод
 
-Вариант от Roman на значительном объеме эффективнее остальных.
+Вариант от Roman на значительном объеме эффективнее.
 
 Roman, мои поздравления 🏆.
