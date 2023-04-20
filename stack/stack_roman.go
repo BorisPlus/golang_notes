@@ -12,8 +12,9 @@ func (stack *StackRoman) Push(i int) {
 }
 
 func (stack *StackRoman) Pop() int {
-	filo := stack.items[len(stack.items)-1]
-	stack.items = stack.items[:len(stack.items)-1]
+	stack_items_len := len(stack.items)
+	filo := stack.items[stack_items_len-1]
+	stack.items = stack.items[:stack_items_len-1]
 	stack.len--
 	return filo
 }

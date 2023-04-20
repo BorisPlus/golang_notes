@@ -139,3 +139,61 @@ ok      stack/stack     16.625s
 Вариант от Roman на значительном объеме эффективнее.
 
 Roman, мои поздравления 🏆.
+
+## Дополнительно
+
+Если избавиться от stack.len, введя defer в Pop
+
+```go
+package main
+
+type StackRomanWL struct {
+    items []int
+}
+
+func (stack *StackRomanWL) Push(i int) {
+    stack.items = append(stack.items, i)
+}
+
+func (stack *StackRomanWL) Pop() (filo int, err error) {
+    defer func() {
+        if r := recover(); r != nil {
+            err = r.(error)
+        }
+    }()
+    stack_items_len := len(stack.items)
+    filo = stack.items[stack_items_len-1]
+    stack.items = stack.items[:stack_items_len-1]
+    return
+}
+```
+
+то это замедлит
+
+```shell
+go test -v -bench=. stack_roman.go stack_roman_without_len.go \
+stack_roman_test.go stack_roman_without_len_test.go \
+dataset.go
+```
+
+```text
+goos: linux
+goarch: amd64
+cpu: Intel(R) Core(TM) i3-2310M CPU @ 2.10GHz
+BenchmarkSimplestRoman10Values
+BenchmarkSimplestRoman10Values-4                        1000000000               0.0000053 ns/op
+BenchmarkSimplestRoman1000Values
+BenchmarkSimplestRoman1000Values-4                      1000000000               0.0000205 ns/op
+BenchmarkSimplestRoman100000Values
+BenchmarkSimplestRoman100000Values-4                    1000000000               0.002607 ns/op
+BenchmarkSimplestRomanWithoutLen10Values
+BenchmarkSimplestRomanWithoutLen10Values-4              1000000000               0.0000119 ns/op
+BenchmarkSimplestRomanWithoutLen1000Values
+BenchmarkSimplestRomanWithoutLen1000Values-4            1000000000               0.0000954 ns/op
+BenchmarkSimplestRomanWithoutLen100000Values
+BenchmarkSimplestRomanWithoutLen100000Values-4          1000000000               0.003979 ns/op
+PASS
+ok      command-line-arguments  0.093s
+```
+
+Изящность кода с `defer` и `"naked" return` не добавляет скорости.
