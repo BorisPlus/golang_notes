@@ -11,9 +11,6 @@ func read(file_name string) string {
 	if err != nil {
 		log.Fatal(err)
 	}
-	// TODO: нужна опция
-	// file_name_data_str := string(file_name_data)
-	// file_name_data_str = strings.Replace(file_name_data_str, "```", "'''", -1)
 	return string(file_name_data)
 }
 
@@ -27,7 +24,6 @@ func MakeReportFromTemplate(template_file_name string, data map[string]string, r
 		result_file_data = strings.Replace(result_file_data, k, data[k], -1)
 	}
 
-	// TODO: нужно изящнее 
 	result_file_data = strings.Replace(result_file_data, "\n\t\t\t\t", "\n                ", -1)
 	result_file_data = strings.Replace(result_file_data, "\n\t\t\t", "\n            ", -1)
 	result_file_data = strings.Replace(result_file_data, "\n\t\t", "\n        ", -1)

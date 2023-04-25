@@ -1,4 +1,4 @@
-package interfacer
+package main
 
 import (
 	"fmt"
@@ -19,7 +19,7 @@ func (p Person) IsAdult() bool {
 }
 
 func (p Person) String() string {
-	return p.name + " is " + p.name + " years old"
+	return fmt.Sprintf("%s is %d years old.", p.name , p.age)
 }
 
 func adultFilter(people []Adult) []Adult {
