@@ -1,6 +1,8 @@
 # Интерфейсы
 
-Вариант
+Оба варианта
+
+* `value receiver`
 
 ```go
 package main
@@ -37,14 +39,14 @@ func adultFilter(people []Adult) []Adult {
     return adults
 }
 
-func main() {
+func _main() {
     people := []Adult{Person{15, "John"}, Person{18, "Joe"}, Person{45, "Mary"}}
     fmt.Println(adultFilter(people))
 }
 
 ```
 
-или с `pointed receiver`
+* `pointed receiver`
 
 ```go
 package main
@@ -81,14 +83,14 @@ func adultFilter(people []Adult) []Adult {
     return adults
 }
 
-func main() {
+func _main() {
     people := []Adult{&Person{15, "John"}, &Person{18, "Joe"}, &Person{45, "Mary"}}
     fmt.Println(adultFilter(people))
 }
 
 ```
 
-дадут
+приведут к успешной фильтрации
 
 ```text
 [Joe is 18 years old. Mary is 45 years old.]

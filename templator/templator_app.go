@@ -1,13 +1,25 @@
 package main
 
-// go run ./templator.go ./templator_app.go
+// go run ./
 func main() {
-	// Карта подсток шаблона, заменяемых на конкретные значения, получаемые в результате исполнения шаблона
-	data_mapped := make(map[string]string)
-	data_mapped["var:notice"] = "П.С. Избегайте рекурсивной вложенности." // переменная
-	data_mapped["content:./templator.go"] = read("./templator.go")
-	data_mapped["content:./templator_app.go"] = read("./templator_app.go")
 	//
-	MakeReportFromTemplate("./README.template.md", data_mapped, "./README.md")
-
+	templator_go := Template{}
+	templator_go.loadFromFile("./templator.go", false)
+	//
+	templator_app_go := Template{}
+	templator_app_go.loadFromFile("./templator_app.go", false)
+	//
+	readme_template := Template{}
+	readme_template.loadFromFile("./README.template.md", true)
+	//
+	substitutions := make(map[string]string)
+	substitutions["README.template.md"] = readme_template.render()
+	substitutions["templator.go"] = tab_escaping(templator_go.render())
+	substitutions["templator_app.go"] = tab_escaping(templator_app_go.render())
+	substitutions["notice"] = "П.С. Избегайте рекурсивной вложенности."
+	//
+	readme := Template{}
+	readme.loadFromFile("./README.template.md", false)
+	readme.substitutions = substitutions
+	readme.renderToFile("./README.md")
 }

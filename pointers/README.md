@@ -1,5 +1,7 @@
 # Указатель
 
+Исполнение
+
 ```go
 package main
 
@@ -23,20 +25,20 @@ fmt.Printf("%s",sFunctionWithName)
 дает
 
 ```text
-%!s(func() (func() int, *func() int)=0x493c60)
+%!s(func() (func() int, *func() int)=0x4916e0)
 ```
 
-Оператор &NamedFunction недопустим, однако
+Оператор & для NamedFunction недопустим, однако
 
 ```go
 fmt.Printf("%p",pFunctionWithName)
 ```
 
 ```text
-0x493c60 
+0x4916e0
 ```
 
-0x493c60 :
+0x4916e0 :
 
 * он всегда постоянный.
 * что это такое? как это интерпритировать?

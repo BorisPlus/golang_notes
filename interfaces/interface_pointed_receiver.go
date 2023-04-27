@@ -32,7 +32,7 @@ func adultFilter(people []Adult) []Adult {
 	return adults
 }
 
-func main() {
+func _main() {
 	people := []Adult{&Person{15, "John"}, &Person{18, "Joe"}, &Person{45, "Mary"}}
 	fmt.Println(adultFilter(people))
 }

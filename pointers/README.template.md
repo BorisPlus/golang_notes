@@ -1,7 +1,9 @@
 # Указатель
 
+Исполнение
+
 ```go
-content:./pointer.go
+{{ pointer.go }}
 ```
 
 ```go
@@ -11,20 +13,20 @@ fmt.Printf("%s",sFunctionWithName)
 дает
 
 ```text
-var:sFunctionWithName
+{{ sFunctionWithName }}
 ```
 
-Оператор &NamedFunction недопустим, однако
+Оператор & для NamedFunction недопустим, однако
 
 ```go
 fmt.Printf("%p",pFunctionWithName)
 ```
 
 ```text
-var:pFunctionWithName 
+{{ pFunctionWithName }}
 ```
 
-var:pFunctionWithName :
+{{ pFunctionWithName }} :
 
 * он всегда постоянный.
 * что это такое? как это интерпритировать?

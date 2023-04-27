@@ -1,23 +1,34 @@
 # Шаблонизатор отчетов
 
-Этот отчет был составлен с задействованием функции
+Этот отчет был составлен с задействованием
 
-```go
-content:./templator.go
+* шаблона [README.template.md](./README.template.md)
+
+<details>
+<summary>см. шаблон</summary>
+
+```text
+{{ README.template.md }}
 ```
 
-посредством вызова
+</details>
+
+* структуры
+
+```go
+{{ templator.go }}
+```
+
+* приложения
+
+```go
+{{ templator_app.go }}
+```
+
+* посредством вызова
 
 ```shell
 go run ./templator.go ./templator_app.go 
 ```
 
-приложения
-
-```go
-content:./templator_app.go
-```
-
-и шаблона [README.template.md](./README.template.md)
-
-var:notice
+{{ notice }}

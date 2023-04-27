@@ -1,47 +1,61 @@
 package main
 
 import (
-	"log"
 	"os"
 	"strings"
 )
 
-func read(file_name string) string {
-	file_name_data, err := os.ReadFile(file_name)
-	if err != nil {
-		log.Fatal(err)
-	}
-	// TODO: нужна опция
-	// file_name_data_str := string(file_name_data)
-	// file_name_data_str = strings.Replace(file_name_data_str, "```", "'''", -1)
-	return string(file_name_data)
+type Template struct {
+	content       string
+	substitutions map[string]string
 }
 
-func MakeReportFromTemplate(template_file_name string, data map[string]string, result_file_name string) {
-
-	template_file_data := read(template_file_name)
-
-	result_file_data := template_file_data
-
-	for k := range data {
-		result_file_data = strings.Replace(result_file_data, k, data[k], -1)
+func (template *Template) loadFromFile(filepath string, with_escaping bool) error {
+	data, err := os.ReadFile(filepath)
+	if err != nil {
+		template.content = ""
 	}
+	template.content = string(data)
+	if with_escaping {
+		template.content = escaping(template.content)
+	}
+	return err
+}
 
-	// TODO: нужно изящнее 
-	result_file_data = strings.Replace(result_file_data, "\n\t\t\t\t", "\n                ", -1)
-	result_file_data = strings.Replace(result_file_data, "\n\t\t\t", "\n            ", -1)
-	result_file_data = strings.Replace(result_file_data, "\n\t\t", "\n        ", -1)
-	result_file_data = strings.Replace(result_file_data, "\n\t", "\n    ", -1)
+func (template *Template) render() string {
+	result := template.content
+	for k := range template.substitutions {
+		result = strings.Replace(result, "{{ "+k+" }}", template.substitutions[k], -1)
+	}
+	return result
+}
 
-	f, errCreate := os.Create(result_file_name)
+func escaping(content string) string {
+	content = tab_escaping(content)
+	content = strings.Replace(content, "\n```\n", "\n'''\n", -1)
+	content = strings.Replace(content, "\n```text\n", "\n'''text\n", -1)
+	content = strings.Replace(content, "\n```go\n", "\n'''go\n", -1)
+	content = strings.Replace(content, "{{ ", "{"+string('\x02')+"{ ", -1)
+	content = strings.Replace(content, " }}", " }"+string('\x02')+"}", -1)
+	return content
+}
+
+func tab_escaping(content string) string {
+	content = strings.Replace(content, "\t", "    ", -1)
+	return content
+}
+
+func (template *Template) renderToFile(filepath string) error {
+	f, errCreate := os.Create(filepath)
 	if errCreate != nil {
-		log.Fatal(errCreate)
+		return errCreate
 	}
-
+	result := template.render()
 	defer f.Close()
 
-	_, errWrite := f.WriteString(result_file_data)
+	_, errWrite := f.WriteString(result)
 	if errWrite != nil {
-		log.Fatal(errWrite)
+		return errWrite
 	}
+	return nil
 }

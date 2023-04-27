@@ -1,10 +1,23 @@
 package main
 
-// go run templator_app.go templator.go
+// go run ./templator.go ./templator_app.go ./interface.go ./printed.go
 func main() {
-	data_mapped := make(map[string]string)
-	data_mapped["content:./interface.go"] = read("./interface.go")
-	data_mapped["content:./interface_pointed_receiver.go"] = read("./interface_pointed_receiver.go")
-	// 
-	MakeReportFromTemplate("./README.template.md", data_mapped, "./README.md")
+	//
+	interface_go := Template{}
+	interface_go.loadFromFile("./interface.go", false)
+	//
+	interface_pointed_receiver_go := Template{}
+	interface_pointed_receiver_go.loadFromFile("./interface_pointed_receiver.go", false)
+	//
+	readme_template := Template{}
+	readme_template.loadFromFile("./README.template.md", true)
+	//
+	substitutions := make(map[string]string)
+	substitutions["interface.go"] = tab_escaping(interface_go.render())
+	substitutions["interface_pointed_receiver.go"] = tab_escaping(interface_pointed_receiver_go.render())
+	substitutions["printed"] = printed()
+	//
+	readme := Template{"", substitutions}
+	readme.loadFromFile("./README.template.md", false)
+	readme.renderToFile("./README.md")
 }

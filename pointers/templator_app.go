@@ -2,18 +2,23 @@ package main
 
 import (
 	"fmt"
-	"strings"
 )
 
-
-// go run ./pointer.go ./templator.go ./templator_app.go 
+// go run ./
 func main() {
-	data_mapped := make(map[string]string)
-	// 
-	data_mapped["content:./pointer.go"] = strings.Replace(read("./pointer.go"), "```", "'''", -1)
-	data_mapped["var:sFunctionWithName"] = fmt.Sprintf("%s", FunctionWithName)
-	data_mapped["var:pFunctionWithName"] = fmt.Sprintf("%p", FunctionWithName)
-	// 
-	MakeReportFromTemplate("./README.template.md", data_mapped, "./README.md")
-
+	//
+	pointer_go := Template{}
+	pointer_go.loadFromFile("./pointer.go", false)
+	//
+	readme_template := Template{}
+	readme_template.loadFromFile("./README.template.md", true)
+	//
+	substitutions := make(map[string]string)
+	substitutions["pointer.go"] = tab_escaping(pointer_go.render())
+	substitutions["sFunctionWithName"] = fmt.Sprintf("%s", FunctionWithName)
+	substitutions["pFunctionWithName"] = fmt.Sprintf("%p", FunctionWithName)
+	//
+	readme := Template{"", substitutions}
+	readme.loadFromFile("./README.template.md", false)
+	readme.renderToFile("./README.md")
 }

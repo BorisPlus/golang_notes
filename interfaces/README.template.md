@@ -1,19 +1,21 @@
 # Интерфейсы
 
-Вариант
+Оба варианта
+
+* `value receiver`
 
 ```go
-content:./interface.go
+{{ interface.go }}
 ```
 
-или с `pointed receiver`
+* `pointed receiver`
 
 ```go
-content:./interface_pointed_receiver.go
+{{ interface_pointed_receiver.go }}
 ```
 
-дадут
+приведут к успешной фильтрации
 
 ```text
-[Joe is 18 years old. Mary is 45 years old.]
+{{ printed }}
 ```
