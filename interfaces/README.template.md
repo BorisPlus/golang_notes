@@ -1,5 +1,7 @@
 # Интерфейсы
 
+## Варианты
+
 Оба варианта
 
 * `value receiver`
@@ -18,4 +20,10 @@
 
 ```text
 {{ printed }}
+```
+
+## Поведение
+
+```go
+{{ interface_type_switch.go }}
 ```

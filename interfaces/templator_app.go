@@ -9,12 +9,16 @@ func main() {
 	interface_pointed_receiver_go := Template{}
 	interface_pointed_receiver_go.loadFromFile("./interface_pointed_receiver.go", false)
 	//
+	interface_type_switch_go := Template{}
+	interface_type_switch_go.loadFromFile("./interface_type_switch.go", false)
+	//
 	readme_template := Template{}
 	readme_template.loadFromFile("./README.template.md", true)
 	//
 	substitutions := make(map[string]string)
 	substitutions["interface.go"] = tab_escaping(interface_go.render())
 	substitutions["interface_pointed_receiver.go"] = tab_escaping(interface_pointed_receiver_go.render())
+	substitutions["interface_type_switch.go"] = tab_escaping(interface_type_switch_go.render())
 	substitutions["printed"] = printed()
 	//
 	readme := Template{"", substitutions}
