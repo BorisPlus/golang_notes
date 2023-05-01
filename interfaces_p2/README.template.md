@@ -12,6 +12,15 @@
 {{ classificator.go }}
 ```
 
+``shell
+go run ./classificator.go > ./classificator.go.txt
+```
+
+
+```text
+{{ classificator.go.txt }}
+```
+
 ## Вывод
 
 Интерфейс как составляющая часть инкапсуляции добавляет гибкости для будущих решений.

@@ -67,7 +67,7 @@ type XYPoint struct {
 }
 
 func (p XYPoint) String() string {
-    return fmt.Sprintf("[x: %v, y: %v]", p.x, p.y)
+    return fmt.Sprintf("(%v;%v)", p.x, p.y)
 }
 
 // EuclidianXYPow2 - пусть расстояние между точками это Евклидова-метрика без ее корня
@@ -84,7 +84,7 @@ type XYZPoint struct {
 }
 
 func (p XYZPoint) String() string {
-    return fmt.Sprintf("[x: %v, y: %v, z: %v]", p.x, p.y, p.z)
+    return fmt.Sprintf("(%v;%v;%v)", p.x, p.y, p.z)
 }
 
 // Decart - пусть расстояние между точками - это вариация на Декартову метрику
@@ -99,34 +99,59 @@ func Decart(p1, p2 Pointer) float64 {
 
 // ПРИМЕР ===========================
 
-func _main() {
-    // Это координаты вершин квадрата 10x10
+func main() {
+    // Это координаты вершин квадрата 10x10:
+    // 
+    // ↑ y
+    // |
+    // |(0;10)
+    // ├------┐ (10;10)
+    // |      |
+    // |      |     x
+    // └------┚-----→ 
+    // (0;0)   (10;0)
+    // 
     centroids := []Pointer{
         XYPoint{x: 0, y: 0},
         XYPoint{x: 10, y: 0},
         XYPoint{x: 0, y: 10},
         XYPoint{x: 10, y: 10}}
     classificator := Classificator{centroids, make(map[Pointer][]Pointer, 0)}
-    fmt.Println(classificator)
+    fmt.Println("Classificator", classificator)
     // Берем точку с координатами
-    point_1_1 := Pointer(XYPoint{x: 1, y: 1})
+    point := Pointer(XYPoint{x: 1, y: 1})
     // Выясняем какой центройд ей ближе по Евклиду
-    fmt.Println(classificator.getNearestCentroid(point_1_1, EuclidianXYPow2))
+    fmt.Println("Point", point, "was classified to", classificator.getNearestCentroid(point, EuclidianXYPow2), "centroid")
+    // 
+    fmt.Println()
     // А теперь трехмерный вариант
-    // Это координаты вершин квадрата 10x10
     centroids = []Pointer{
         XYZPoint{x: 0, y: 0, z: 0},
         XYZPoint{x: 10, y: 0, z: 10},
         XYZPoint{x: 0, y: 10, z: 5},
         XYZPoint{x: 10, y: 10, z: 10}}
     classificator = Classificator{centroids, make(map[Pointer][]Pointer, 0)}
-    fmt.Println(classificator)
+    fmt.Println("Classificator", classificator)
     // Берем точку с координатами
-    point_1_1_2 := Pointer(XYZPoint{x: 1, y: 1, z: 2})
-    // Выясняем какой центроид ей ближе по Евклиду
-    fmt.Println(classificator.getNearestCentroid(point_1_1_2, Decart))
+    point = Pointer(XYZPoint{x: 1, y: 1, z: 2})
+    // Выясняем какой центроид ей ближе по Декарту
+    fmt.Println("Point", point, "was classified to", classificator.getNearestCentroid(point, Decart), "centroid")
     // А теперь ... вводим понятие расстояния между "синим" и "тёплым"
 }
+
+```
+
+``shell
+go run ./classificator.go > ./classificator.go.txt
+```
+
+
+```text
+Classificator {[{0 0} {10 0} {0 10} {10 10}] map[]}
+Point (1;1) was classified to (0;0) centroid
+
+Classificator {[{0 0 0} {10 0 10} {0 10 5} {10 10 10}] map[]}
+Point (1;1;2) was classified to (0;0;0) centroid
 
 ```
 
