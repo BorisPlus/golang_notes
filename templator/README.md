@@ -154,8 +154,11 @@ func main() {
 go run ./templator.go ./templator_app.go 
 ```
 
+
+>
 > ```text
 > Данный документ составлен с использованием 
 > разработанного [шаблонизатора](https://github.com/BorisPlus/golang_notes/tree/master/templator). 
 > При его использовании избегайте рекурсивной вложенности.
 > ```
+>
