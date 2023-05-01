@@ -12,10 +12,9 @@
 {{ classificator.go }}
 ```
 
-``shell
+```shell
 go run ./classificator.go > ./classificator.go.txt
 ```
-
 
 ```text
 {{ classificator.go.txt }}

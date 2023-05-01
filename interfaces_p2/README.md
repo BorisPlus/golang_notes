@@ -141,10 +141,9 @@ func main() {
 
 ```
 
-``shell
+```shell
 go run ./classificator.go > ./classificator.go.txt
 ```
-
 
 ```text
 Classificator {[{0 0} {10 0} {0 10} {10 10}] map[]}
