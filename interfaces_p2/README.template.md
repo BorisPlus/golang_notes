@@ -22,6 +22,4 @@
 ... DistanceFunc func(a, b Pointer) float64 ... 
 ```
 
-```go
 {{ notice }}
-```

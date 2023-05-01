@@ -140,13 +140,12 @@ func _main() {
 ... DistanceFunc func(a, b Pointer) float64 ... 
 ```
 
-```go
 ## Послесловие
 
+>
 > ```text
 > Данный документ составлен с использованием разработанного шаблонизатора. 
 > При его использовании избегайте рекурсивной вложенности.
 > ```
 
 см. ["Шаблонизатор"](https://github.com/BorisPlus/golang_notes/tree/master/templator)
-```
