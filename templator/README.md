@@ -157,7 +157,8 @@ go run ./templator.go ./templator_app.go
 ## Послесловие
 
 > ```text
-> Данный документ составлен с использованием 
-> разработанного [шаблонизатора](https://github.com/BorisPlus/golang_notes/tree/master/templator). 
+> Данный документ составлен с использованием разработанного шаблонизатора. 
 > При его использовании избегайте рекурсивной вложенности.
 > ```
+
+см. ["Шаблонизатор"](https://github.com/BorisPlus/golang_notes/tree/master/templator)
