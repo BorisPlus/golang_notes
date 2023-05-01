@@ -1,6 +1,6 @@
 package main
 
-// go run ./
+// go run ./templator.go ./templator_app.go
 func main() {
 	//
 	classificator_go := Template{}

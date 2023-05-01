@@ -88,7 +88,7 @@ func Decart(p1, p2 Pointer) float64 {
 
 // ПРИМЕР ===========================
 
-func main() {
+func _main() {
 	// Это координаты вершин квадрата 10x10
 	centroids := []Pointer{
 		XYPoint{x: 0, y: 0},
@@ -114,5 +114,5 @@ func main() {
 	point_1_1_2 := Pointer(XYZPoint{x: 1, y: 1, z: 2})
 	// Выясняем какой центроид ей ближе по Евклиду
 	fmt.Println(classificator.getNearestCentroid(point_1_1_2, Decart))
-	// А теперь ... вводим понятие расстояния между "синим" и "теплым" Ж)
+	// А теперь ... вводим понятие расстояния между "синим" и "тёплым"
 }
