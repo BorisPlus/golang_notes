@@ -9,7 +9,7 @@ type Classificator struct {
 }
 
 // Classificator.getNearestCentroid - получает ближайший центр класса в зависимости от
-// переданной функции расстояния DistanceFunc (заранее не известной)
+// переданной функции расстояния - DistanceBetween (заранее не известной)
 func (c *Classificator) getNearestCentroid(point Pointer, DistanceBetween func(a, b Pointer) float64) Pointer {
 	distance := float64(-1)
 	var pointCentroid Pointer

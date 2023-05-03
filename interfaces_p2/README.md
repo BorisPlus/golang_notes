@@ -21,13 +21,13 @@ import "fmt"
 // (без функции расчёта расстояния между точками и размерности пространства).
 
 type Valuer interface {
-    fmt.Stringer
     getValue() string
 }
 
 // Интерфейс точки (разной размерности и функции расстояния).
 type Pointer interface {
     Valuer
+    fmt.Stringer
 }
 
 func Eq(p1, p2 Pointer) bool {
@@ -50,7 +50,7 @@ type Classificator struct {
 }
 
 // Classificator.getNearestCentroid - получает ближайший центр класса в зависимости от
-// переданной функции расстояния DistanceFunc (заранее не известной)
+// переданной функции расстояния - DistanceBetween (заранее не известной)
 func (c *Classificator) getNearestCentroid(point Pointer, DistanceBetween func(a, b Pointer) float64) Pointer {
     distance := float64(-1)
     var pointCentroid Pointer

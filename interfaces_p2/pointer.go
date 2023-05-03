@@ -6,13 +6,13 @@ import "fmt"
 // (без функции расчёта расстояния между точками и размерности пространства).
 
 type Valuer interface {
-	fmt.Stringer
 	getValue() string
 }
 
 // Интерфейс точки (разной размерности и функции расстояния).
 type Pointer interface {
 	Valuer
+	fmt.Stringer
 }
 
 func Eq(p1, p2 Pointer) bool {
