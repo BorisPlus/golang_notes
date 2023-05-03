@@ -4,8 +4,6 @@ package main
 type Classificator struct {
 	// centroids - это центры классов.
 	centroids []Pointer
-	// classes - это сами классы со всеми точками.
-	classes map[Pointer][]Pointer
 }
 
 // Classificator.getNearestCentroid - получает ближайший центр класса в зависимости от

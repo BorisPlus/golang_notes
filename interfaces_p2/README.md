@@ -34,6 +34,10 @@ func Eq(p1, p2 Pointer) bool {
     return p1.getValue() == p2.getValue()
 }
 
+func Nearest(p Pointer, points []Pointer) bool {
+    return p1.getValue() == p2.getValue()
+}
+
 ```
 
 Реализация классификатора:
@@ -45,8 +49,6 @@ package main
 type Classificator struct {
     // centroids - это центры классов.
     centroids []Pointer
-    // classes - это сами классы со всеми точками.
-    classes map[Pointer][]Pointer
 }
 
 // Classificator.getNearestCentroid - получает ближайший центр класса в зависимости от

@@ -18,3 +18,7 @@ type Pointer interface {
 func Eq(p1, p2 Pointer) bool {
 	return p1.getValue() == p2.getValue()
 }
+
+func Nearest(p Pointer, points []Pointer) bool {
+	return p1.getValue() == p2.getValue()
+}
