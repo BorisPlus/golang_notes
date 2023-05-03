@@ -90,16 +90,16 @@ func Decart(p1, p2 Pointer) float64 {
 
 func _main() {
 	// Это координаты вершин квадрата 10x10:
-	// 
+	//
 	// ↑ y
 	// |
 	// |(0;10)
 	// ├------┐ (10;10)
 	// |      |
 	// |      |     x
-	// └------┚-----→ 
+	// └------┚-----→
 	// (0;0)   (10;0)
-	// 
+	//
 	centroids := []Pointer{
 		XYPoint{x: 0, y: 0},
 		XYPoint{x: 10, y: 0},
@@ -111,7 +111,7 @@ func _main() {
 	point := Pointer(XYPoint{x: 1, y: 1})
 	// Выясняем какой центройд ей ближе по Евклиду
 	fmt.Println("Point", point, "was classified to", classificator.getNearestCentroid(point, EuclidianXYPow2), "centroid")
-	// 
+	//
 	fmt.Println()
 	// А теперь трехмерный вариант
 	centroids = []Pointer{
