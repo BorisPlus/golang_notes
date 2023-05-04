@@ -17,8 +17,8 @@ func (p XYPoint) String() string {
 	return fmt.Sprintf("(%v;%v)", p.x, p.y)
 }
 
-func (p XYPoint) getValue() string {
-	return p.String()
+func (p XYPoint) getCoordinates() interface{} {
+	return [2]float64{p.x, p.y}
 }
 
 // EuclidianXYPow2 - пусть расстояние между точками это Евклидова-метрика без ее корня
@@ -48,7 +48,7 @@ func TestXY(t *testing.T) {
 	//
 	centroids = append(centroids, awaitedCentroid)
 	fmt.Println("Centroids", centroids)
-	classificator := Classificator{centroids, make(map[Pointer][]Pointer, 0)}
+	classificator := Classificator{centroids}
 	fmt.Println("Classificator", classificator)
 	// Берем точку с координатами
 	point := Pointer(XYPoint{x: 1, y: 1})
@@ -74,12 +74,12 @@ func (p XYZPoint) String() string {
 	return fmt.Sprintf("(%v;%v;%v)", p.x, p.y, p.z)
 }
 
-func (p XYZPoint) getValue() string {
-	return p.String()
+func (p XYZPoint) getCoordinates() interface{} {
+	return [3]float64{p.x, p.y, p.z}
 }
 
-// Decart - пусть расстояние между точками - это вариация на Декартову метрику
-func Decart(p1, p2 Pointer) float64 {
+// Minkovski - пусть расстояние между точками - это манхэттоновское
+func Minkovski(p1, p2 Pointer) float64 {
 	dXdYdZ := math.Abs(p1.(XYZPoint).x-p2.(XYZPoint).x) +
 		math.Abs(p1.(XYZPoint).y-p2.(XYZPoint).y) +
 		math.Abs(p1.(XYZPoint).z-p2.(XYZPoint).z)
@@ -95,11 +95,11 @@ func TestXYZ(t *testing.T) {
 	centroids = append(centroids, awaitedCentroid)
 	fmt.Println("Centroids", centroids)
 	//
-	classificator := Classificator{centroids, make(map[Pointer][]Pointer, 0)}
+	classificator := Classificator{centroids}
 	fmt.Println("Classificator", classificator)
 	point := Pointer(XYZPoint{x: 0, y: 0, z: 0})
 	fmt.Println("Point", point)
-	classifiedTo := classificator.getNearestCentroid(point, Decart)
+	classifiedTo := classificator.getNearestCentroid(point, Minkovski)
 	fmt.Println("ClassifiedTo", classifiedTo)
 	// if classifiedTo != awaitedCentroid {
 	if !Eq(classifiedTo, awaitedCentroid) {

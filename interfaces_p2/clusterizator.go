@@ -2,10 +2,7 @@ package main
 
 // Clusterizator - кластеризатор.
 type Clusterizator struct {
-	// clasters - это центры кластеров.
-	clusters []Pointer
-	// clastersMap - это сами кластеры со всеми точками.
-	clustersMap map[Pointer][]Pointer
+	clusters [][]Pointer
 }
 
 // Критерий останова
@@ -16,11 +13,10 @@ type Clusterizator struct {
 // 	return false
 // }
 
-func (c *Clusterizator) clusterize(p Pointer, samples []Pointer, DistanceBetween func(a, b Pointer) float64) (float64, Pointer) {
-	distance := float64(-1)
+func Nearest(point Pointer, samples []Pointer, DistanceBetween func(a, b Pointer) float64) (float64, Pointer) {
+	default_distance := float64(-1)
+	distance := default_distance
 	var unionTo Pointer
-	// for i, candidateToCluster := range c.clusters[:len(c.clusters)-2]  {
-	// 	for _, clusterEthalon := range c.clusters[i+1:] {
 	for _, sample := range samples {
 		pointToSampleDistance := DistanceBetween(p, sample)
 		if distance == -1 {
@@ -33,11 +29,18 @@ func (c *Clusterizator) clusterize(p Pointer, samples []Pointer, DistanceBetween
 			unionTo = sample
 		}
 	}
+	// if distance == default_distance {
+	// 	0, point
+	// }
 	return distance, unionTo
 }
 
-// Добавляет точку в тот или иной класс классификатора
-// func (c *Classificator) classify(point Pointer, DistanceFunc func(a, b Pointer) float64) {
-// 	pointCentroid := c.getNearestCentroid(point, DistanceFunc)
-// 	c.classes[pointCentroid] = append(c.classes[pointCentroid], point)
-// }
+
+func (c *Clusterizator) clusterize(p Pointer, samples []Pointer, DistanceBetween func(a, b Pointer) float64) (float64, Pointer) {
+	distance := float64(-1)
+	var unionTo Pointer
+	for i, candidateToCluster := range c.clusters[:len(c.clusters)-2]  {
+		distance, clusterEthalon := Nearest(candidateToCluster, c.clusters[i+1:])
+	}
+	return distance, unionTo
+}
