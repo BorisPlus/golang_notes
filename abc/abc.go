@@ -22,4 +22,8 @@ func main() {
 	for _, item := range a {
 		fmt.Println("OK", item)
 	}
+
+	a = []*int{&one, &two, &three}
+	fmt.Println("A", a[:0])
+	fmt.Println("A", a[:1])
 }

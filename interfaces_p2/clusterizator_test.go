@@ -45,9 +45,23 @@ func Euclidian(p1, p2 Pointer) float64 {
 		(p1.(Point2D).y-p2.(Point2D).y)*(p1.(Point2D).y-p2.(Point2D).y))
 }
 
-func Limit10(c *Clusterizator) bool {
-	return len(c.clusters) <= 10
+
+func CountLimit(c *Clusterizator, count int) bool {
+	if count < 1 {
+		count = 1
+	}
+	return len(c.clusters) <= count
 }
+
+func Limit10(c *Clusterizator) bool {
+	return CountLimit(c, 10)
+}
+
+func MustBeOne(c *Clusterizator) bool {
+	return CountLimit(c, 1)
+}
+
+
 
 func TestClusterizator(t *testing.T) {
 	points := []XPointer{
@@ -58,7 +72,7 @@ func TestClusterizator(t *testing.T) {
 
 	clz := Clusterizator{
 		metrica:      Euclidian,
-		stopCriteria: Limit10,
+		stopCriteria: MustBeOne,
 	}
 	clz.Init(points)
 	//
@@ -89,13 +103,36 @@ func TestClusterizator(t *testing.T) {
 	fmt.Println("Шаг кластеризации:")
 	fmt.Println("Кандидаты на слияние:")
 	fmt.Println(clz.mergeStep())
-	clz.step()
+	stoped := clz.step()
 	fmt.Println("Новые кластеры")
 	for _, obj := range clz.clusters {
 		fmt.Println(obj)
 	}
 	fmt.Println(len(clz.clusters))
 	fmt.Println(cap(clz.clusters))
+	fmt.Println(stoped)
+	fmt.Println("Шаг кластеризации:")
+	fmt.Println("Кандидаты на слияние:")
+	fmt.Println(clz.mergeStep())
+	stoped = clz.step()
+	fmt.Println("Новые кластеры")
+	for _, obj := range clz.clusters {
+		fmt.Println(obj)
+	}
+	fmt.Println(len(clz.clusters))
+	fmt.Println(cap(clz.clusters))
+	fmt.Println(stoped)
+	fmt.Println("Шаг кластеризации:")
+	fmt.Println("Кандидаты на слияние:")
+	fmt.Println(clz.mergeStep())
+	stoped = clz.step()
+	fmt.Println("Новые кластеры")
+	for _, obj := range clz.clusters {
+		fmt.Println(obj)
+	}
+	fmt.Println(len(clz.clusters))
+	fmt.Println(cap(clz.clusters))
+	fmt.Println(stoped)
 	// fmt.Println("Шаг кластеризации:")
 	// fmt.Println(clz.mergeStep())
 	// clz.step()

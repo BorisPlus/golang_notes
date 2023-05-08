@@ -20,18 +20,19 @@ type Cluster struct {
 }
 
 var clusterStringTemplate = `
+=====================
 Cluster: %p
------------
+---------------------
 origin:  %s
-X:       %s
-Y:       %s
-`
+source:  %s
+target:  %s
+=====================`
 
 func tabDecorate(c *Cluster) string {
 	if c == nil {
 		return fmt.Sprintf("%s", c) // c.String() не работает в этом варианте, но линтер упорно его требует.
 	}
-	return strings.Replace(c.String(), string('\n'), "\n\t", -1)
+	return "⤵" + strings.Replace(c.String(), string('\n'), "\n\t", -1)
 }
 
 func (c Cluster) String() string {
@@ -46,12 +47,13 @@ type SimilarCluster struct {
 }
 
 var similarClusterStringTemplate = `
+=====================
 Similar: %p
------------
+---------------------
 source:  %p %p
 target:  %p %p
 distance:%f
-`
+=====================`
 
 func (s SimilarCluster) String() string {
 	return fmt.Sprintf(similarClusterStringTemplate, &s, s.source, *s.source, s.target, *s.target, s.distance)
@@ -96,7 +98,7 @@ func (clz *Clusterizator) Init(points []XPointer) {
 // CalculateDistinctMatrix - вычисление матрицы расстояний кластеров.
 func (clz *Clusterizator) calculateSimilarest() {
 	clz.similarestAsMap = make(map[*Cluster]*SimilarCluster)
-	// 
+	//
 	for srcIndx, sourceCluster := range clz.clusters[:len(clz.clusters)-1] {
 		// нижеследующее вычисление можно загорутинить
 		for _, targetCluster := range clz.clusters[srcIndx+1:] {
@@ -126,48 +128,56 @@ func (clz *Clusterizator) mergeStep() *SimilarCluster {
 	return clz.similarest[0]
 }
 
-func (clz *Clusterizator) step() bool{
+func (clz *Clusterizator) step() bool {
+	// Выбранные кандидаты на слияние.
 	similarClusters := clz.mergeStep()
+	// Новый кластер из выбранных кандидатов.
 	newCluster := Cluster{
 		origin:        similarClusters.source.origin.Avg(similarClusters.target.origin),
-		clusterSource: similarClusters.source, // TODO: clusterSource naming
-		clusterTarget: similarClusters.target, // TODO: clusterTarget naming
+		clusterSource: similarClusters.source, 
+		clusterTarget: similarClusters.target, 
 	}
-
-	// Recalculate similarest Cluster for prev source and newCluster
-
+	// Вычисляем расстояния от кластеров (за исключением выбранных кандидатов) до нового кластера.
 	fmt.Println("Recalculate similarest")
 
+	// В рамках словарей похожих.
 	for _, cluster := range clz.clusters {
 		if cluster == newCluster.clusterSource {
-			// clz.similarestAsMap[cluster] = nil
+			clz.similarestAsMap[cluster] = nil
 			continue
 		}
 		if cluster == newCluster.clusterTarget {
-			// clz.similarestAsMap[cluster] = nil
+			clz.similarestAsMap[cluster] = nil
 			continue
 		}
-		
+
 		fmt.Println(cluster.origin, "<--->", newCluster.origin)
+		fmt.Println("Для")
+		fmt.Println(cluster)
+		fmt.Println("Был")
 		fmt.Println(clz.similarestAsMap[cluster])
 		// fmt.Println(clz.similarestAsMap[cluster].source.origin)
-		
+
 		distance := clz.metrica(
 			cluster.origin,
 			newCluster.origin,
 		)
-		if distance <= clz.similarestAsMap[cluster].distance {
+		if (clz.similarestAsMap[cluster] == nil) ||
+			(clz.similarestAsMap[cluster] != nil && distance < clz.similarestAsMap[cluster].distance) {
 			clz.similarestAsMap[cluster] = &SimilarCluster{
-				source:   clz.similarestAsMap[cluster].source,
+				source:   cluster,
 				target:   &newCluster,
 				distance: distance,
 			}
+			fmt.Println("Стал")
+			fmt.Println(clz.similarestAsMap[cluster])
 		}
 	}
-	clz.similarestAsMap[newCluster.clusterSource] = nil
-	clz.similarestAsMap[newCluster.clusterTarget] = nil
+	// clz.similarestAsMap[newCluster.clusterSource] = nil
+	// clz.similarestAsMap[newCluster.clusterTarget] = nil
 
-	clz.similarest = make([]*SimilarCluster, len(clz.clusters)-1)
+	// В рамках слайсов похожих.
+	clz.similarest = make([]*SimilarCluster, len(clz.clusters)-2)
 	idx := 0
 	for _, similarCluster := range clz.similarestAsMap {
 		if similarCluster != nil {
@@ -179,24 +189,22 @@ func (clz *Clusterizator) step() bool{
 	// ---------------------
 	// TODO: this is big-O(n)!!!
 
-	indicator := 0
 	for index, clusterToPop := range clz.clusters {
 		if clusterToPop == newCluster.clusterSource {
 			clz.clusters = append(clz.clusters[:index], clz.clusters[index+1:]...)
-			indicator++
-		}
-		if clusterToPop == newCluster.clusterTarget {
-			clz.clusters = append(clz.clusters[:index], clz.clusters[index+1:]...)
-			indicator++
-		}
-		if indicator == 2 {
 			break
 		}
 	}
+	for index, clusterToPop := range clz.clusters {
+		if clusterToPop == newCluster.clusterTarget {
+			clz.clusters = append(clz.clusters[:index], clz.clusters[index+1:]...)
+			break
+		}
+	}
+	clz.clusters = append(clz.clusters, &newCluster)
 
 	// ---------------------
 
-	clz.clusters = append(clz.clusters, &newCluster)
 
 	// ---------------------
 	// TODO: the same operations
