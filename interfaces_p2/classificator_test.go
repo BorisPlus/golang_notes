@@ -17,7 +17,7 @@ func (p XYPoint) String() string {
 	return fmt.Sprintf("(%v;%v)", p.x, p.y)
 }
 
-func (p XYPoint) getCoordinates() interface{} {
+func (p XYPoint) Coordinates() interface{} {
 	return [2]float64{p.x, p.y}
 }
 
@@ -74,9 +74,15 @@ func (p XYZPoint) String() string {
 	return fmt.Sprintf("(%v;%v;%v)", p.x, p.y, p.z)
 }
 
-func (p XYZPoint) getCoordinates() interface{} {
+func (p XYZPoint) Coordinates() interface{} {
 	return [3]float64{p.x, p.y, p.z}
 }
+
+// func (p XYZPoint) Add(additional Pointer) Pointer {
+// 	return XYZPoint{p.x + additional.(XYZPoint).x,
+// 		p.y + additional.(XYZPoint).y,
+// 		p.z + additional.(XYZPoint).z}
+// }
 
 // Minkovski - пусть расстояние между точками - это манхэттоновское
 func Minkovski(p1, p2 Pointer) float64 {
