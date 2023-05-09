@@ -27,8 +27,8 @@ func main() {
 	substitutions["list.doc.txt"] = list_doc_txt.render()
 	substitutions["list_test.go"] = tab_escaping(list_test_go.render())
 	substitutions["list_test.go.txt"] = list_test_go_txt.render()
-	substitutions["list_sort_test.go"] = tab_escaping(list_test_go.render())
-	substitutions["list_sort_test.go.txt"] = list_test_go_txt.render()
+	substitutions["list_sort_test.go"] = tab_escaping(list_sort_test_go.render())
+	substitutions["list_sort_test.go.txt"] = list_sort_test_go_txt.render()
 	substitutions["notice"] = notice.render()
 	//
 	readme := tTemplate{}
