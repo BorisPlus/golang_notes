@@ -10,7 +10,7 @@
 {{ interface.go }}
 ```
 
-* `pointed receiver`
+* `pointed receiver` (код видоизменен в силу индикации линтера в IDE на однообразные именования, но суть понятна)
 
 ```go
 {{ interface_pointed_receiver.go }}

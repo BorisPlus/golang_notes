@@ -48,7 +48,7 @@ func _main() {
 
 ```
 
-* `pointed receiver`
+* `pointed receiver` (код видоизменен в силу индикации линтера в IDE на однообразные именования, но суть понятна)
 
 ```go
 package main
@@ -57,25 +57,25 @@ import (
     "fmt"
 )
 
-type Adult interface {
-    IsAdult() bool
+type PAdult interface {
+    IsPAdult() bool
     fmt.Stringer
 }
 
-type Person struct {
+type PPerson struct {
     age  int
     name string
 }
 
-func (p *Person) IsAdult() bool {
+func (p *PPerson) IsPAdult() bool {
     return p.age >= 18 
 }
 
-func (p *Person) String() string {
+func (p *PPerson) String() string {
     return fmt.Sprintf("%s is %d years old.", p.name , p.age)
 }
 
-func adultFilter(people []Adult) []Adult {
+func adultPFilter(people []Adult) []Adult {
     adults := make([]Adult, 0)
     for _, p := range people {
         if p.IsAdult() {
@@ -85,7 +85,7 @@ func adultFilter(people []Adult) []Adult {
     return adults
 }
 
-func _main() {
+func Pmain() {
     people := []Adult{&Person{15, "John"}, &Person{18, "Joe"}, &Person{45, "Mary"}}
     fmt.Println(adultFilter(people))
 }
