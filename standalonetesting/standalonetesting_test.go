@@ -13,5 +13,5 @@ func TestPow2(t *testing.T) {
 	if y != x*x {
 		t.Errorf("Result was incorrect, got: %v, want: %v.", x*x, y)
 	}
-	fmt.Printf("Result is correct, got: %d. OK.\n", x*x)
+	fmt.Printf("Result is correct, got: %d^2 = %d. OK.\n", x , x*x*x)
 }

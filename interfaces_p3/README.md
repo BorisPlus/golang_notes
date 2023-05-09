@@ -2,10 +2,13 @@
 
 ## Реализация
 
-Интерфейс:
+Интерфейсы и структуры:
+
+<details>
+<summary>см. "list.go":</summary>
 
 ```go
-package main
+package interfaces_p3
 
 import (
     "fmt"
@@ -18,29 +21,34 @@ type ListItem struct {
     rightNeighbour *ListItem
 }
 
-// LeftNeighbour() - получить стоящий слева элемент.
+// LeftNeighbour() - метод получения стоящего слева элемента.
 func (listItem *ListItem) LeftNeighbour() *ListItem {
     return listItem.leftNeighbour
 }
 
-// SetLeftNeighbour(item *ListItem) - установить стоящий слева элемент.
+// SetLeftNeighbour(item *ListItem) - метод присвоения стоящего слева элемента.
 func (listItem *ListItem) SetLeftNeighbour(item *ListItem) {
     listItem.leftNeighbour = item
 }
 
-// RightNeighbour() - получить стоящий справа элемент.
+// RightNeighbour() - метод получения стоящего справа элемента.
 func (listItem *ListItem) RightNeighbour() *ListItem {
     return listItem.rightNeighbour
 }
 
-// SetRightNeighbour(item *ListItem) - установить стоящий слева элемент.
+// SetRightNeighbour(item *ListItem) - метод присвоения стоящего справа элемента.
 func (listItem *ListItem) SetRightNeighbour(item *ListItem) {
     listItem.rightNeighbour = item
 }
 
-// Value() - получить значение из элемента.
+// Value() - метод получения значения из элемента.
 func (listItem *ListItem) Value() interface{} {
     return listItem.value
+}
+
+// SetValue() - метод присвоения значения в элементе.
+func (listItem *ListItem) SetValue(value interface{}) {
+    listItem.value = value
 }
 
 // Eq(x, y ListItem) - элементы равны тогда и только тогда, когда это один и тот же элемент по памяти.
@@ -50,7 +58,7 @@ func Eq(x, y ListItem) bool {
 
 // Lister - интерфейс двусвязного списка.
 type Lister interface {
-    Length() int
+    Len() int
     LeftEdge() *ListItem
     RightEdge() *ListItem
     PushToLeftEdge(value interface{}) *ListItem
@@ -66,22 +74,22 @@ type List struct {
     rightEdge *ListItem
 }
 
-// Length() - получить длину двусвязного списка.
-func (list *List) Length() int {
+// Len() - метод получения длины двусвязного списка.
+func (list *List) Len() int {
     return list.len
 }
 
-// LeftEdge() - получить элемент из левого края двусвязного списка.
+// LeftEdge() - метод получения элемента из левого края двусвязного списка.
 func (list *List) LeftEdge() *ListItem {
     return list.leftEdge
 }
 
-// RightEdge() - получить элемент из правого края двусвязного списка.
+// RightEdge() - метод получения элемента из правого края двусвязного списка.
 func (list *List) RightEdge() *ListItem {
     return list.rightEdge
 }
 
-// PushToLeftEdge(value interface{}) - добавить значение в левый край двусвязного списка.
+// PushToLeftEdge(value interface{}) - метод добавления значения в левый край двусвязного списка.
 func (list *List) PushToLeftEdge(value interface{}) *ListItem {
     item := &ListItem{
         value:          value,
@@ -100,7 +108,7 @@ func (list *List) PushToLeftEdge(value interface{}) *ListItem {
     return item
 }
 
-// PushToRightEdge(value interface{}) - добавить значение в правый край двусвязного списка.
+// PushToRightEdge(value interface{}) - метод добавления значения в правый край двусвязного списка.
 func (list *List) PushToRightEdge(value interface{}) *ListItem {
     item := &ListItem{
         value:          value,
@@ -119,7 +127,7 @@ func (list *List) PushToRightEdge(value interface{}) *ListItem {
     return item
 }
 
-// Contains(item *ListItem) - проверить, есть ли элемент в списке.
+// Contains(item *ListItem) - метод проверки наличия элемента в списке.
 func (list *List) Contains(item *ListItem) bool {
     if (list.LeftEdge() == item) || // Это левый элемент
         (list.RightEdge() == item) || // Это правый элемент
@@ -130,7 +138,7 @@ func (list *List) Contains(item *ListItem) bool {
     return false
 }
 
-// Remove(item *ListItem) - удалить элемент из двусвязного списка.
+// Remove(item *ListItem) - метод удаления элемента из двусвязного списка.
 func (list *List) Remove(item *ListItem) (*ListItem, error) {
     if !list.Contains(item) {
         return nil, fmt.Errorf("it seems that item %s is not in the list", item)
@@ -152,7 +160,7 @@ func (list *List) Remove(item *ListItem) (*ListItem, error) {
     return item, nil
 }
 
-// SwapItems(x, y *ListItem) - поменять элементы двусвязного списка местами.
+// SwapItems(x, y *ListItem) - метод перестановки местами элементов двусвязного списка.
 func (list *List) SwapItems(x, y *ListItem) error {
     if !list.Contains(x) {
         return fmt.Errorf("it seems that item %s is not in the list", x)
@@ -230,7 +238,7 @@ func (list *List) SwapItems(x, y *ListItem) error {
     return nil
 }
 
-// MoveToFront(item *ListItem) - переместить элемент в начало двусвязного списка.
+// MoveToFront(item *ListItem) - метод перемещения элемента в начало двусвязного списка.
 func (list *List) MoveToLeftEdge(item *ListItem) error {
     if !list.Contains(item) {
         return fmt.Errorf("it seems that item %s is not in the list", item)
@@ -258,16 +266,52 @@ func (list *List) MoveToLeftEdge(item *ListItem) error {
     return nil
 }
 
+// GetByIndex(i int) - метод получения i-того слева элемента двусвязного списка.
+// Реализовано ИСКЛЮЧИТЕЛЬНО для демонстрации использования интерфейсных методов sort.Sort().
+func (list *List) GetByIndex(i int) (*ListItem, error) {
+    if i >= list.Len() {
+        return nil, fmt.Errorf("index is out of range")
+    }
+    item := list.LeftEdge()
+    for j := 0; j < i; j++ {
+        item = item.RightNeighbour()
+    }
+    return item, nil
+}
+
+// Swap(i, j int) - метод перестановки i-того и j-того слева элементов двусвязного списка.
+// Реализовано ИСКЛЮЧИТЕЛЬНО для демонстрации использования интерфейсных методов sort.Sort().
+func (list *List) Swap(i, j int) {
+    iItem, _ := list.GetByIndex(i)
+    jItem, _ := list.GetByIndex(j)
+    list.SwapItems(iItem, jItem)
+}
+
+// Less(i, j int) - метод сравнения убывания i-того и j-того слева элементов двусвязного списка.
+// Реализовано ИСКЛЮЧИТЕЛЬНО для демонстрации использования интерфейсных методов sort.Sort()
+// ПРИ УСЛОВИИ хранения INT-значений в поле value.
+func (list *List) Less(i, j int) bool {
+    iItem, _ := list.GetByIndex(i)
+    jItem, _ := list.GetByIndex(j)
+    return iItem.Value().(int) < jItem.Value().(int)
+}
+
+// NewList() - функция инициализации нового двусвязного списка.
 func NewList() Lister {
     return new(List)
 }
 
 ```
 
+</details>
+
 Наглядность:
 
+<details>
+<summary>см. "list_stringer.go":</summary>
+
 ```go
-package main
+package interfaces_p3
 
 import (
     "fmt"
@@ -355,39 +399,47 @@ func (list *List) String() string {
 
 ```
 
+</details>
+
 Тестирование:
 
+<details>
+<summary>см. "list_test.go":</summary>
+
 ```go
-package main
+package interfaces_p3_test
 
 import (
     "fmt"
+    "sort"
     "testing"
 
     "github.com/stretchr/testify/require"
+
+    dlist "github.com/BorisPlus/golang_notes/interfaces_p3" 
 )
 
 // go test -v list.go list_string.go list_test.go
 
-func ElementsLeftToRight(list *List) []int {
-    elements := make([]int, 0, list.Length())
+func ElementsLeftToRight(list *dlist.List) []int {
+    elements := make([]int, 0, list.Len())
     for i := list.LeftEdge(); i != nil; i = i.RightNeighbour() {
         elements = append(elements, i.Value().(int))
     }
     return elements
 }
 
-func ElementsRightToLeft(list *List) []int {
-    elements := make([]int, 0, list.Length())
+func ElementsRightToLeft(list *dlist.List) []int {
+    elements := make([]int, 0, list.Len())
     for i := list.RightEdge(); i != nil; i = i.LeftNeighbour() {
         elements = append([]int{i.Value().(int)}, elements...)
     }
     return elements
 }
 
-func TestList(t *testing.T) {
+func TestListSimple(t *testing.T) {
     t.Run("Zero-value ListItem test.", func(t *testing.T) {
-        zeroValueItem := ListItem{}
+        zeroValueItem := dlist.ListItem{}
         require.Nil(t, zeroValueItem.Value())
         require.Nil(t, zeroValueItem.LeftNeighbour())
         require.Nil(t, zeroValueItem.RightNeighbour())
@@ -397,29 +449,20 @@ func TestList(t *testing.T) {
 
     t.Run("ListItem direct and vice versa referencies test.", func(t *testing.T) {
         fmt.Println("\n[1] <--> [2] <--> [3]")
-        first := &ListItem{
-            value:          1,
-            leftNeighbour:  nil,
-            rightNeighbour: nil,
-        }
+        first := &dlist.ListItem{}
+        first.SetValue(1)
         fmt.Println("\n[1] is:", first)
 
-        second := &ListItem{
-            value:          2,
-            leftNeighbour:  first,
-            rightNeighbour: nil,
-        }
-
+        second := &dlist.ListItem{}
+        second.SetValue(2)
+        second.SetLeftNeighbour(first)
         first.SetRightNeighbour(second)
         fmt.Println("\nadd [2]:", second)
         fmt.Println("\n[1] become:", first)
 
-        third := ListItem{
-            value:          3,
-            leftNeighbour:  second,
-            rightNeighbour: nil,
-        }
-
+        third := dlist.ListItem{}
+        third.SetValue(3)
+        third.SetLeftNeighbour(second)
         second.SetRightNeighbour(&third)
         fmt.Println("\nadd [3]:", &third)
         fmt.Println("\n[2] become:", second)
@@ -437,8 +480,8 @@ func TestList(t *testing.T) {
     })
 
     t.Run("Empty List test.", func(t *testing.T) {
-        list := NewList()
-        require.Equal(t, 0, list.Length())
+        list := dlist.NewList()
+        require.Equal(t, 0, list.Len())
         require.Nil(t, list.LeftEdge())
         require.Nil(t, list.RightEdge())
         fmt.Println("\nList is:\n", list)
@@ -446,7 +489,7 @@ func TestList(t *testing.T) {
     })
 
     t.Run("List init test.", func(t *testing.T) {
-        list := NewList()
+        list := dlist.NewList()
 
         fmt.Println("\nList was:\n", list)
 
@@ -461,7 +504,7 @@ func TestList(t *testing.T) {
     })
 
     t.Run("Little List test.", func(t *testing.T) {
-        list := NewList()
+        list := dlist.NewList()
         fmt.Println("\nList was:\n", list)
 
         itemFirst := list.PushToLeftEdge(1) // [1]
@@ -507,22 +550,22 @@ func TestList(t *testing.T) {
 
 func TestListComplex(t *testing.T) {
     t.Run("Сomplex List processing test.", func(t *testing.T) {
-        list := NewList()
+        list := dlist.NewList()
         list.PushToRightEdge(10) // [10]
         list.PushToRightEdge(20) // [10, 20]
         list.PushToRightEdge(30) // [10, 20, 30]
-        require.Equal(t, []int{10, 20, 30}, ElementsLeftToRight(list.(*List)))
-        require.Equal(t, []int{10, 20, 30}, ElementsRightToLeft(list.(*List)))
+        require.Equal(t, []int{10, 20, 30}, ElementsLeftToRight(list.(*dlist.List)))
+        require.Equal(t, []int{10, 20, 30}, ElementsRightToLeft(list.(*dlist.List)))
         fmt.Println("Forward stroke check for [10, 20, 30]. OK.")
-        require.Equal(t, 3, list.Length())
+        require.Equal(t, 3, list.Len())
         middle := list.LeftEdge().RightNeighbour()
         require.Equal(t, middle.Value(), 20)
         fmt.Printf("middle.Value() is %v. OK.\n", middle.Value())
         list.Remove(middle)
         fmt.Printf("middle was removed. OK.\n")
-        require.Equal(t, 2, list.Length())
-        require.Equal(t, []int{10, 30}, ElementsLeftToRight(list.(*List)))
-        require.Equal(t, []int{10, 30}, ElementsRightToLeft(list.(*List)))
+        require.Equal(t, 2, list.Len())
+        require.Equal(t, []int{10, 30}, ElementsLeftToRight(list.(*dlist.List)))
+        require.Equal(t, []int{10, 30}, ElementsRightToLeft(list.(*dlist.List)))
         fmt.Println("Forward stroke check for [10, 30]. OK.")
         for i, v := range [...]int{40, 50, 60, 70, 80} {
             if i%2 == 0 {
@@ -533,15 +576,15 @@ func TestListComplex(t *testing.T) {
         } // [80, 60, 40, 10, 30, 50, 70]
         fmt.Println("List [10, 30] mixing values {40, 50, 60, 70, 80} with mod(2, index).")
 
-        require.Equal(t, 7, list.Length())
-        fmt.Printf("list.Length() is %v. OK.\n", list.Length())
+        require.Equal(t, 7, list.Len())
+        fmt.Printf("list.Len() is %v. OK.\n", list.Len())
         require.Equal(t, 80, list.LeftEdge().Value())
         fmt.Printf("list.LeftEdge().Value() is %v. OK.\n", list.LeftEdge().Value())
         require.Equal(t, 70, list.RightEdge().Value())
         fmt.Printf("list.RightEdge().Value() is %v. OK.\n", list.RightEdge().Value())
 
-        require.Equal(t, []int{80, 60, 40, 10, 30, 50, 70}, ElementsLeftToRight(list.(*List)))
-        require.Equal(t, []int{80, 60, 40, 10, 30, 50, 70}, ElementsRightToLeft(list.(*List)))
+        require.Equal(t, []int{80, 60, 40, 10, 30, 50, 70}, ElementsLeftToRight(list.(*dlist.List)))
+        require.Equal(t, []int{80, 60, 40, 10, 30, 50, 70}, ElementsRightToLeft(list.(*dlist.List)))
         fmt.Println("Forward stroke check for [80, 60, 40, 10, 30, 50, 70]. OK.")
 
         rightEnd := list.RightEdge()
@@ -564,356 +607,136 @@ func TestListComplex(t *testing.T) {
 
 func TestListSwap(t *testing.T) {
     t.Run("List swap test.", func(t *testing.T) {
-        list := NewList()
+        list := dlist.NewList()
         one := list.PushToRightEdge(10)   // [10]
         two := list.PushToRightEdge(20)   // [10, 20]
         three := list.PushToRightEdge(30) // [10, 20, 30]
         four := list.PushToRightEdge(40)  // [10, 20, 30, 40]
         five := list.PushToRightEdge(50)  // [10, 20, 30, 40, 50]
-        require.Equal(t, []int{10, 20, 30, 40, 50}, ElementsLeftToRight(list.(*List)))
-        require.Equal(t, []int{10, 20, 30, 40, 50}, ElementsRightToLeft(list.(*List)))
+        require.Equal(t, []int{10, 20, 30, 40, 50}, ElementsLeftToRight(list.(*dlist.List)))
+        require.Equal(t, []int{10, 20, 30, 40, 50}, ElementsRightToLeft(list.(*dlist.List)))
         fmt.Println("[10, 20, 30, 40, 50]. OK.")
         list.SwapItems(two, four)
         fmt.Println("swap different element-pairs")
-        require.Equal(t, []int{10, 40, 30, 20, 50}, ElementsLeftToRight(list.(*List)))
-        require.Equal(t, []int{10, 40, 30, 20, 50}, ElementsRightToLeft(list.(*List)))
+        require.Equal(t, []int{10, 40, 30, 20, 50}, ElementsLeftToRight(list.(*dlist.List)))
+        require.Equal(t, []int{10, 40, 30, 20, 50}, ElementsRightToLeft(list.(*dlist.List)))
         fmt.Println("[10, 40, 30, 20, 50]. OK.")
         list.SwapItems(two, four)
-        require.Equal(t, []int{10, 20, 30, 40, 50}, ElementsLeftToRight(list.(*List)))
-        require.Equal(t, []int{10, 20, 30, 40, 50}, ElementsRightToLeft(list.(*List)))
+        require.Equal(t, []int{10, 20, 30, 40, 50}, ElementsLeftToRight(list.(*dlist.List)))
+        require.Equal(t, []int{10, 20, 30, 40, 50}, ElementsRightToLeft(list.(*dlist.List)))
         fmt.Println("[10, 20, 30, 40, 50]. OK.")
         list.SwapItems(one, five)
-        require.Equal(t, []int{50, 20, 30, 40, 10}, ElementsLeftToRight(list.(*List)))
-        require.Equal(t, []int{50, 20, 30, 40, 10}, ElementsRightToLeft(list.(*List)))
+        require.Equal(t, []int{50, 20, 30, 40, 10}, ElementsLeftToRight(list.(*dlist.List)))
+        require.Equal(t, []int{50, 20, 30, 40, 10}, ElementsRightToLeft(list.(*dlist.List)))
         fmt.Println("[50, 20, 30, 40, 10]. OK.")
         list.SwapItems(one, five)
-        require.Equal(t, []int{10, 20, 30, 40, 50}, ElementsLeftToRight(list.(*List)))
-        require.Equal(t, []int{10, 20, 30, 40, 50}, ElementsRightToLeft(list.(*List)))
+        require.Equal(t, []int{10, 20, 30, 40, 50}, ElementsLeftToRight(list.(*dlist.List)))
+        require.Equal(t, []int{10, 20, 30, 40, 50}, ElementsRightToLeft(list.(*dlist.List)))
         fmt.Println("[10, 20, 30, 40, 50]. OK.")
         list.SwapItems(one, three)
-        require.Equal(t, []int{30, 20, 10, 40, 50}, ElementsLeftToRight(list.(*List)))
-        require.Equal(t, []int{30, 20, 10, 40, 50}, ElementsRightToLeft(list.(*List)))
+        require.Equal(t, []int{30, 20, 10, 40, 50}, ElementsLeftToRight(list.(*dlist.List)))
+        require.Equal(t, []int{30, 20, 10, 40, 50}, ElementsRightToLeft(list.(*dlist.List)))
         fmt.Println("[30, 20, 10, 40, 50]. OK.")
         list.SwapItems(one, three)
-        require.Equal(t, []int{10, 20, 30, 40, 50}, ElementsLeftToRight(list.(*List)))
-        require.Equal(t, []int{10, 20, 30, 40, 50}, ElementsRightToLeft(list.(*List)))
+        require.Equal(t, []int{10, 20, 30, 40, 50}, ElementsLeftToRight(list.(*dlist.List)))
+        require.Equal(t, []int{10, 20, 30, 40, 50}, ElementsRightToLeft(list.(*dlist.List)))
         fmt.Println("[10, 20, 30, 40, 50]. OK.")
         list.SwapItems(five, two)
-        require.Equal(t, []int{10, 50, 30, 40, 20}, ElementsLeftToRight(list.(*List)))
-        require.Equal(t, []int{10, 50, 30, 40, 20}, ElementsRightToLeft(list.(*List)))
+        require.Equal(t, []int{10, 50, 30, 40, 20}, ElementsLeftToRight(list.(*dlist.List)))
+        require.Equal(t, []int{10, 50, 30, 40, 20}, ElementsRightToLeft(list.(*dlist.List)))
         fmt.Println("[10, 50, 30, 40, 20]. OK.")
         list.SwapItems(two, five)
-        require.Equal(t, []int{10, 20, 30, 40, 50}, ElementsLeftToRight(list.(*List)))
-        require.Equal(t, []int{10, 20, 30, 40, 50}, ElementsRightToLeft(list.(*List)))
+        require.Equal(t, []int{10, 20, 30, 40, 50}, ElementsLeftToRight(list.(*dlist.List)))
+        require.Equal(t, []int{10, 20, 30, 40, 50}, ElementsRightToLeft(list.(*dlist.List)))
         fmt.Println("[10, 20, 30, 40, 50]. OK.")
         list.SwapItems(two, three)
-        require.Equal(t, []int{10, 30, 20, 40, 50}, ElementsLeftToRight(list.(*List)))
-        require.Equal(t, []int{10, 30, 20, 40, 50}, ElementsRightToLeft(list.(*List)))
+        require.Equal(t, []int{10, 30, 20, 40, 50}, ElementsLeftToRight(list.(*dlist.List)))
+        require.Equal(t, []int{10, 30, 20, 40, 50}, ElementsRightToLeft(list.(*dlist.List)))
         fmt.Println("[10, 30, 20, 40, 50]. OK.")
         list.SwapItems(two, three)
-        require.Equal(t, []int{10, 20, 30, 40, 50}, ElementsLeftToRight(list.(*List)))
-        require.Equal(t, []int{10, 20, 30, 40, 50}, ElementsRightToLeft(list.(*List)))
+        require.Equal(t, []int{10, 20, 30, 40, 50}, ElementsLeftToRight(list.(*dlist.List)))
+        require.Equal(t, []int{10, 20, 30, 40, 50}, ElementsRightToLeft(list.(*dlist.List)))
         fmt.Println("[10, 20, 30, 40, 50]. OK.")
         list.SwapItems(four, three)
-        require.Equal(t, []int{10, 20, 40, 30, 50}, ElementsLeftToRight(list.(*List)))
-        require.Equal(t, []int{10, 20, 40, 30, 50}, ElementsRightToLeft(list.(*List)))
+        require.Equal(t, []int{10, 20, 40, 30, 50}, ElementsLeftToRight(list.(*dlist.List)))
+        require.Equal(t, []int{10, 20, 40, 30, 50}, ElementsRightToLeft(list.(*dlist.List)))
         fmt.Println("[10, 20, 40, 30, 50]. OK.")
         list.SwapItems(five, three)
-        require.Equal(t, []int{10, 20, 40, 50, 30}, ElementsLeftToRight(list.(*List)))
-        require.Equal(t, []int{10, 20, 40, 50, 30}, ElementsRightToLeft(list.(*List)))
+        require.Equal(t, []int{10, 20, 40, 50, 30}, ElementsLeftToRight(list.(*dlist.List)))
+        require.Equal(t, []int{10, 20, 40, 50, 30}, ElementsRightToLeft(list.(*dlist.List)))
         fmt.Println("[10, 20, 40, 50, 30]. OK.")
         list.SwapItems(one, two)
-        require.Equal(t, []int{20, 10, 40, 50, 30}, ElementsLeftToRight(list.(*List)))
-        require.Equal(t, []int{20, 10, 40, 50, 30}, ElementsRightToLeft(list.(*List)))
+        require.Equal(t, []int{20, 10, 40, 50, 30}, ElementsLeftToRight(list.(*dlist.List)))
+        require.Equal(t, []int{20, 10, 40, 50, 30}, ElementsRightToLeft(list.(*dlist.List)))
         fmt.Println("[20, 10, 40, 50, 30]. OK.")
         list.SwapItems(one, two)
-        require.Equal(t, []int{10, 20, 40, 50, 30}, ElementsLeftToRight(list.(*List)))
-        require.Equal(t, []int{10, 20, 40, 50, 30}, ElementsRightToLeft(list.(*List)))
+        require.Equal(t, []int{10, 20, 40, 50, 30}, ElementsLeftToRight(list.(*dlist.List)))
+        require.Equal(t, []int{10, 20, 40, 50, 30}, ElementsRightToLeft(list.(*dlist.List)))
         fmt.Println("[10, 20, 40, 50, 30]. OK.")
         list.SwapItems(three, five)
-        require.Equal(t, []int{10, 20, 40, 30, 50}, ElementsLeftToRight(list.(*List)))
-        require.Equal(t, []int{10, 20, 40, 30, 50}, ElementsRightToLeft(list.(*List)))
+        require.Equal(t, []int{10, 20, 40, 30, 50}, ElementsLeftToRight(list.(*dlist.List)))
+        require.Equal(t, []int{10, 20, 40, 30, 50}, ElementsRightToLeft(list.(*dlist.List)))
         fmt.Println("[10, 20, 40, 30, 50]. OK.")
         list.SwapItems(three, four)
-        require.Equal(t, []int{10, 20, 30, 40, 50}, ElementsLeftToRight(list.(*List)))
-        require.Equal(t, []int{10, 20, 30, 40, 50}, ElementsRightToLeft(list.(*List)))
+        require.Equal(t, []int{10, 20, 30, 40, 50}, ElementsLeftToRight(list.(*dlist.List)))
+        require.Equal(t, []int{10, 20, 30, 40, 50}, ElementsRightToLeft(list.(*dlist.List)))
         fmt.Println("[10, 20, 30, 40, 50]. OK.")
+    })
+}
+
+
+func TestListSortInterface(t *testing.T) {
+
+    t.Run("Let's sort double-linked list.", func(t *testing.T) {
+        list := dlist.NewList()
+        list.PushToRightEdge(10) // [10]
+        list.PushToRightEdge(30) // [10, 30]
+        list.PushToRightEdge(20) // [10, 30, 20]
+        list.PushToRightEdge(50) // [10, 30, 20, 50]
+        list.PushToRightEdge(40) // [10, 30, 20, 50, 40]
+        sample := []int{10, 30, 20, 50, 40}
+        require.Equal(t, sample, ElementsLeftToRight(list.(*dlist.List)))
+        require.Equal(t, sample, ElementsRightToLeft(list.(*dlist.List)))
+        fmt.Printf("\nTest list before sort: %v. OK.\n", sample)
+        fmt.Printf("\nList before sort with Stringer() formatting:\n%s\n", list)
+        sort.Sort(list.(*dlist.List))
+        expected := []int{10, 20, 30, 40, 50}
+        require.Equal(t, expected, ElementsLeftToRight(list.(*dlist.List)))
+        require.Equal(t, expected, ElementsRightToLeft(list.(*dlist.List)))
+        fmt.Printf("\nTest list after sort: %v. OK.\n", expected)
+        fmt.Printf("\nList after sort with Stringer() formatting:\n%s\n", list)
     })
 }
 
 ```
 
+</details>
+
+* TestListSimple
+
 ```shell
-go test -v ./list.go ./list_stringer.go ./list_test.go  > list_test.go.txt
+go test -v -run TestListSimple ./list.go ./list_stringer.go ./list_test.go  > list_test.go.simple.txt
 ```
 
-Лог:
+<details>
+<summary>см. лог:</summary>
 
 ```text
-=== RUN   TestList
-=== RUN   TestList/Zero-value_ListItem_test.
+{{ list_test.go.txt }}
+```
 
-[zero-value] is: 
--------------------
- Item: 0xc00002e2e0
--------------------
-value: <nil>
- left: 0x0
-right: 0x0
--------------------
+</details>
 
-=== RUN   TestList/ListItem_direct_and_vice_versa_referencies_test.
+* TestListComplex
 
-[1] <--> [2] <--> [3]
+```shell
+go test -v -run TestListComplex ./list.go ./list_stringer.go ./list_test.go  > list_test.go.complex.txt
+```
 
-[1] is: 
--------------------
- Item: 0xc00002e300
--------------------
-value: 1
- left: 0x0
-right: 0x0
--------------------
+<details>
+<summary>см. лог:</summary>
 
-add [2]: 
--------------------
- Item: 0xc00002e320
--------------------
-value: 2
- left: 0xc00002e300
-right: 0x0
--------------------
-
-[1] become: 
--------------------
- Item: 0xc00002e300
--------------------
-value: 1
- left: 0x0
-right: 0xc00002e320
--------------------
-
-add [3]: 
--------------------
- Item: 0xc00002e340
--------------------
-value: 3
- left: 0xc00002e320
-right: 0x0
--------------------
-
-[2] become: 
--------------------
- Item: 0xc00002e320
--------------------
-value: 2
- left: 0xc00002e300
-right: 0xc00002e340
--------------------
-
-first.RightNeighbour().RightNeighbour().RightNeighbour() is nil. OK.
-first.RightNeighbour().RightNeighbour() is third. OK.
-third.LeftNeighbour().LeftNeighbour().LeftNeighbour() is nil. OK.
-third.LeftNeighbour().LeftNeighbour() is first. OK.
-
-=== RUN   TestList/Empty_List_test.
-
-List is:
- 
- (nil:0x0)
-    ^|
-    L|R
-     |v
- (nil:0x0)
-
-=== RUN   TestList/List_init_test.
-
-List was:
- 
- (nil:0x0)
-    ^|
-    L|R
-     |v
- (nil:0x0)
-
-Item was: 
--------------------
- Item: 0xc00002e360
--------------------
-value: 1
- left: 0x0
-right: 0x0
--------------------
-
-list.LeftEdge() and list.RightEdge() is item. OK.
-
-List become:
- 
- (nil:0x0)
-    ^|
-    L|R
-     |v
--------------------
- Item: 0xc00002e360
--------------------
-value: 1
- left: 0x0
-right: 0x0
--------------------
-    ^|
-    L|R
-     |v
- (nil:0x0)
-
-=== RUN   TestList/Little_List_test.
-
-List was:
- 
- (nil:0x0)
-    ^|
-    L|R
-     |v
- (nil:0x0)
-
-Item [1] become:
- 
--------------------
- Item: 0xc00002e380
--------------------
-value: 1
- left: 0x0
-right: 0x0
--------------------
-
-list.LeftEdge() become:
- 
--------------------
- Item: 0xc00002e380
--------------------
-value: 1
- left: 0x0
-right: 0x0
--------------------
-
-list.RightEdge() become:
- 
--------------------
- Item: 0xc00002e380
--------------------
-value: 1
- left: 0x0
-right: 0x0
--------------------
-
-Item [2] become:
- 
--------------------
- Item: 0xc00002e3a0
--------------------
-value: 2
- left: 0x0
-right: 0xc00002e380
--------------------
-
-list.LeftEdge() become:
- 
--------------------
- Item: 0xc00002e3a0
--------------------
-value: 2
- left: 0x0
-right: 0xc00002e380
--------------------
-
-list.RightEdge() become:
- 
--------------------
- Item: 0xc00002e380
--------------------
-value: 1
- left: 0xc00002e3a0
-right: 0x0
--------------------
-
-List become:
- 
- (nil:0x0)
-    ^|
-    L|R
-     |v
--------------------
- Item: 0xc00002e3a0
--------------------
-value: 2
- left: 0x0
-right: 0xc00002e380
--------------------
-    ^|
-    L|R
-     |v
--------------------
- Item: 0xc00002e380
--------------------
-value: 1
- left: 0xc00002e3a0
-right: 0x0
--------------------
-    ^|
-    L|R
-     |v
- (nil:0x0)
-
-Was removed:
- 
--------------------
- Item: 0xc00002e3a0
--------------------
-value: 2
- left: 0x0
-right: 0xc00002e380
--------------------
-
-List become:
- 
- (nil:0x0)
-    ^|
-    L|R
-     |v
--------------------
- Item: 0xc00002e380
--------------------
-value: 1
- left: 0x0
-right: 0x0
--------------------
-    ^|
-    L|R
-     |v
- (nil:0x0)
-
-Was removed:
- 
--------------------
- Item: 0xc00002e380
--------------------
-value: 1
- left: 0x0
-right: 0x0
--------------------
-
-List become:
- 
- (nil:0x0)
-    ^|
-    L|R
-     |v
- (nil:0x0)
---- PASS: TestList (0.00s)
-    --- PASS: TestList/Zero-value_ListItem_test. (0.00s)
-    --- PASS: TestList/ListItem_direct_and_vice_versa_referencies_test. (0.00s)
-    --- PASS: TestList/Empty_List_test. (0.00s)
-    --- PASS: TestList/List_init_test. (0.00s)
-    --- PASS: TestList/Little_List_test. (0.00s)
+```text
 === RUN   TestListComplex
 === RUN   TestListComplex/Сomplex_List_processing_test.
 Forward stroke check for [10, 20, 30]. OK.
@@ -921,7 +744,7 @@ middle.Value() is 20. OK.
 middle was removed. OK.
 Forward stroke check for [10, 30]. OK.
 List [10, 30] mixing values {40, 50, 60, 70, 80} with mod(2, index).
-list.Length() is 7. OK.
+list.Len() is 7. OK.
 list.LeftEdge().Value() is 80. OK.
 list.RightEdge().Value() is 70. OK.
 Forward stroke check for [80, 60, 40, 10, 30, 50, 70]. OK.
@@ -931,40 +754,39 @@ Check for list.LeftEdge() is 80 and list.RightEdge() is 70. OK.
 Check for list.LeftEdge().Left() and list.RightEdge().Right() is nils. OK.
 --- PASS: TestListComplex (0.00s)
     --- PASS: TestListComplex/Сomplex_List_processing_test. (0.00s)
-=== RUN   TestListSwap
-=== RUN   TestListSwap/List_swap_test.
-[10, 20, 30, 40, 50]. OK.
-swap different element-pairs
-[10, 40, 30, 20, 50]. OK.
-[10, 20, 30, 40, 50]. OK.
-[50, 20, 30, 40, 10]. OK.
-[10, 20, 30, 40, 50]. OK.
-[30, 20, 10, 40, 50]. OK.
-[10, 20, 30, 40, 50]. OK.
-[10, 50, 30, 40, 20]. OK.
-[10, 20, 30, 40, 50]. OK.
-[10, 30, 20, 40, 50]. OK.
-[10, 20, 30, 40, 50]. OK.
-[10, 20, 40, 30, 50]. OK.
-[10, 20, 40, 50, 30]. OK.
-[20, 10, 40, 50, 30]. OK.
-[10, 20, 40, 50, 30]. OK.
-[10, 20, 40, 30, 50]. OK.
-[10, 20, 30, 40, 50]. OK.
---- PASS: TestListSwap (0.00s)
-    --- PASS: TestListSwap/List_swap_test. (0.00s)
 PASS
 ok  	command-line-arguments	0.006s
 
 ```
 
-Документация:
+</details>
+
+* TestListComplex
+
+```shell
+go test -v -run TestListSwap ./list.go ./list_stringer.go ./list_test.go  > list_test.go.swap.txt
+```
+
+<details>
+<summary>см. лог:</summary>
+
+```text
+{{ list_test.go.txt }}
+```
+
+</details>
+
+## Документация
 
 ```shell
 go doc -all ./ > list.doc.txt
 ```
 
+<details>
+<summary>см. документацию:</summary>
+
 ```text
+package interfaces_p3 // import "github.com/BorisPlus/golang_notes/interfaces_p3"
 
 
 FUNCTIONS
@@ -982,31 +804,42 @@ type List struct {
     List - структура двусвязного списка.
 
 func (list *List) Contains(item *ListItem) bool
-    Contains(item *ListItem) - проверить, есть ли элемент в списке.
+    Contains(item *ListItem) - метод проверки наличия элемента в списке.
+
+func (list *List) GetByIndex(i int) (*ListItem, error)
+    GetByIndex(i int) - метод получения i-того слева элемента двусвязного
+    списка. Реализовано ИСКЛЮЧИТЕЛЬНО для демонстрации использования
+    интерфейсных методов sort.Sort().
 
 func (list *List) LeftEdge() *ListItem
-    LeftEdge() - получить элемент из левого края двусвязного списка.
+    LeftEdge() - метод получения элемента из левого края двусвязного списка.
 
-func (list *List) Length() int
-    Length() - получить длину двусвязного списка.
+func (list *List) Len() int
+    Len() - метод получения длины двусвязного списка.
+
+func (list *List) Less(i, j int) bool
+    Less(i, j int) - метод сравнения убывания i-того и j-того слева элементов
+    двусвязного списка. Реализовано ИСКЛЮЧИТЕЛЬНО для демонстрации использования
+    интерфейсных методов sort.Sort() ПРИ УСЛОВИИ хранения INT-значений в поле
+    value.
 
 func (list *List) MoveToLeftEdge(item *ListItem) error
-    MoveToFront(item *ListItem) - переместить элемент в начало двусвязного
-    списка.
+    MoveToFront(item *ListItem) - метод перемещения элемента в начало
+    двусвязного списка.
 
 func (list *List) PushToLeftEdge(value interface{}) *ListItem
-    PushToLeftEdge(value interface{}) - добавить значение в левый край
+    PushToLeftEdge(value interface{}) - метод добавления значения в левый край
     двусвязного списка.
 
 func (list *List) PushToRightEdge(value interface{}) *ListItem
-    PushToRightEdge(value interface{}) - добавить значение в правый край
+    PushToRightEdge(value interface{}) - метод добавления значения в правый край
     двусвязного списка.
 
 func (list *List) Remove(item *ListItem) (*ListItem, error)
-    Remove(item *ListItem) - удалить элемент из двусвязного списка.
+    Remove(item *ListItem) - метод удаления элемента из двусвязного списка.
 
 func (list *List) RightEdge() *ListItem
-    RightEdge() - получить элемент из правого края двусвязного списка.
+    RightEdge() - метод получения элемента из правого края двусвязного списка.
 
 func (list *List) String() string
     String() - представление двусвязного списка.
@@ -1049,8 +882,14 @@ func (list *List) String() string
              |v
          (nil:0x0)
 
+func (list *List) Swap(i, j int)
+    Swap(i, j int) - метод перестановки i-того и j-того слева элементов
+    двусвязного списка. Реализовано ИСКЛЮЧИТЕЛЬНО для демонстрации использования
+    интерфейсных методов sort.Sort().
+
 func (list *List) SwapItems(x, y *ListItem) error
-    SwapItems(x, y *ListItem) - поменять элементы двусвязного списка местами.
+    SwapItems(x, y *ListItem) - метод перестановки местами элементов двусвязного
+    списка.
 
 type ListItem struct {
 	// Has unexported fields.
@@ -1058,16 +897,20 @@ type ListItem struct {
     ListItem - структура элемента двусвязного списка.
 
 func (listItem *ListItem) LeftNeighbour() *ListItem
-    LeftNeighbour() - получить стоящий слева элемент.
+    LeftNeighbour() - метод получения стоящего слева элемента.
 
 func (listItem *ListItem) RightNeighbour() *ListItem
-    RightNeighbour() - получить стоящий справа элемент.
+    RightNeighbour() - метод получения стоящего справа элемента.
 
 func (listItem *ListItem) SetLeftNeighbour(item *ListItem)
-    SetLeftNeighbour(item *ListItem) - установить стоящий слева элемент.
+    SetLeftNeighbour(item *ListItem) - метод присвоения стоящего слева элемента.
 
 func (listItem *ListItem) SetRightNeighbour(item *ListItem)
-    SetRightNeighbour(item *ListItem) - установить стоящий слева элемент.
+    SetRightNeighbour(item *ListItem) - метод присвоения стоящего справа
+    элемента.
+
+func (listItem *ListItem) SetValue(value interface{})
+    SetValue() - метод присвоения значения в элементе.
 
 func (listItem *ListItem) String() string
     String() - представление элемента двусвязного списка.
@@ -1083,10 +926,10 @@ func (listItem *ListItem) String() string
         -------------------             -------------------
 
 func (listItem *ListItem) Value() interface{}
-    Value() - получить значение из элемента.
+    Value() - метод получения значения из элемента.
 
 type Lister interface {
-	Length() int
+	Len() int
 	LeftEdge() *ListItem
 	RightEdge() *ListItem
 	PushToLeftEdge(value interface{}) *ListItem
@@ -1097,96 +940,36 @@ type Lister interface {
     Lister - интерфейс двусвязного списка.
 
 func NewList() Lister
+    NewList() - функция инициализации нового двусвязного списка.
 
 
 ```
+
+</details>
 
 ## Сортировка
 
-Пример сортировки в соответствии с интерфейсом sort.Sort() - в случае, когда сортируем не слайсы и sort.Slice() не подходит.
+Я, как мне кажется (😉), подобрал хороший пример для наглядной демонстрации интерфейса, требуемого sort.Sort (уже присутствуют в коде выше):
 
-Тестирование:
+* `func (list *List) Less(i, j int) bool`
+* `func (list *List) Swap(i, j int)`
 
-```go
-package main
+В данном варианте не подойдет sort.Slice, так как перестановка элементов в двусвязном списке влечет перестановку указателей на соседей и с соседей на переставляемые элементы.
 
-import (
-    "fmt"
-    "sort"
-    "testing"
+Особенность в том, что заранее зная, что будет реализован интерфейса sort.Sort, пришлось отказаться от именования Swap в самой структуре двусвязного списка, так как сигнатура должна быть `Swap (i, j int)`, а не как положено для двусвязного `Swap (i, j *ListItem)`. Это подводный камень для рефакторинга, стоит заранее избегать именований интерфейсных методов.
 
-    "github.com/stretchr/testify/require"
-)
-
-// go test -v list.go list_stringer.go list_sort_test.go > list_sort_test.go.txt
-
-func Elements(list *List) []int {
-    elements := make([]int, 0, list.Length())
-    for i := list.LeftEdge(); i != nil; i = i.RightNeighbour() {
-        elements = append(elements, i.Value().(int))
-    }
-    return elements
-}
-
-func (list *List) Len() int {
-    return list.Length()
-}
-
-func (list *List) GetByIndex(i int) (*ListItem, error) {
-    if i >= list.Length() {
-        return nil, fmt.Errorf("index is out of range")
-    }
-    item := list.LeftEdge()
-    for j := 0; j < i; j++ {
-        item = item.RightNeighbour()
-    }
-    return item, nil
-}
-
-func (list *List) Swap(i, j int) {
-    iItem, _ := list.GetByIndex(i)
-    jItem, _ := list.GetByIndex(j)
-    list.SwapItems(iItem, jItem)
-}
-
-func (list *List) Less(i, j int) bool {
-    iItem, _ := list.GetByIndex(i)
-    jItem, _ := list.GetByIndex(j)
-    return iItem.Value().(int) < jItem.Value().(int)
-}
-
-func TestSort(t *testing.T) {
-
-    t.Run("Let's sort double-linked list.", func(t *testing.T) {
-        list := NewList()
-        list.PushToRightEdge(10) // [10]
-        list.PushToRightEdge(30) // [10, 30]
-        list.PushToRightEdge(20) // [10, 30, 20]
-        list.PushToRightEdge(50) // [10, 30, 20, 50]
-        list.PushToRightEdge(40) // [10, 30, 20, 50, 40]
-        sample := []int{10, 30, 20, 50, 40}
-        require.Equal(t, sample, Elements(list.(*List)))
-        fmt.Printf("\nTest list before sort: %v. OK.\n", sample)
-        fmt.Printf("\nList before sort with Stringer() formatting:\n%s\n", list)
-        sort.Sort(list.(*List))
-        expected := []int{10, 20, 30, 40, 50}
-        require.Equal(t, expected, Elements(list.(*List)))
-        fmt.Printf("\nTest list after sort: %v. OK.\n", expected)
-        fmt.Printf("\nList after sort with Stringer() formatting:\n%s\n", list)
-    })
-}
-
-```
+* TestListSortInterface
 
 ```shell
-go test -v ./list.go ./list_stringer.go ./list_sort_test.go  > list_sort_test.go.txt
+go test -v -run TestListSortInterface ./list.go ./list_stringer.go ./list_test.go  > list_test.go.sort.txt
 ```
 
-Лог (список упорядочился):
+<details>
+<summary>см. лог (список упорядочился):</summary>
 
 ```text
-=== RUN   TestSort
-=== RUN   TestSort/Let's_sort_double-linked_list.
+=== RUN   TestListSortInterface
+=== RUN   TestListSortInterface/Let's_sort_double-linked_list.
 
 Test list before sort: [10 30 20 50 40]. OK.
 
@@ -1197,50 +980,50 @@ List before sort with Stringer() formatting:
     L|R
      |v
 -------------------
- Item: 0xc00015c2a0
+ Item: 0xc0000e42c0
 -------------------
 value: 10
  left: 0x0
-right: 0xc00015c2c0
+right: 0xc0000e42e0
 -------------------
     ^|
     L|R
      |v
 -------------------
- Item: 0xc00015c2c0
+ Item: 0xc0000e42e0
 -------------------
 value: 30
- left: 0xc00015c2a0
-right: 0xc00015c2e0
+ left: 0xc0000e42c0
+right: 0xc0000e4300
 -------------------
     ^|
     L|R
      |v
 -------------------
- Item: 0xc00015c2e0
+ Item: 0xc0000e4300
 -------------------
 value: 20
- left: 0xc00015c2c0
-right: 0xc00015c300
+ left: 0xc0000e42e0
+right: 0xc0000e4320
 -------------------
     ^|
     L|R
      |v
 -------------------
- Item: 0xc00015c300
+ Item: 0xc0000e4320
 -------------------
 value: 50
- left: 0xc00015c2e0
-right: 0xc00015c320
+ left: 0xc0000e4300
+right: 0xc0000e4340
 -------------------
     ^|
     L|R
      |v
 -------------------
- Item: 0xc00015c320
+ Item: 0xc0000e4340
 -------------------
 value: 40
- left: 0xc00015c300
+ left: 0xc0000e4320
 right: 0x0
 -------------------
     ^|
@@ -1257,62 +1040,64 @@ List after sort with Stringer() formatting:
     L|R
      |v
 -------------------
- Item: 0xc00015c2a0
+ Item: 0xc0000e42c0
 -------------------
 value: 10
  left: 0x0
-right: 0xc00015c2e0
+right: 0xc0000e4300
 -------------------
     ^|
     L|R
      |v
 -------------------
- Item: 0xc00015c2e0
+ Item: 0xc0000e4300
 -------------------
 value: 20
- left: 0xc00015c2a0
-right: 0xc00015c2c0
+ left: 0xc0000e42c0
+right: 0xc0000e42e0
 -------------------
     ^|
     L|R
      |v
 -------------------
- Item: 0xc00015c2c0
+ Item: 0xc0000e42e0
 -------------------
 value: 30
- left: 0xc00015c2e0
-right: 0xc00015c320
+ left: 0xc0000e4300
+right: 0xc0000e4340
 -------------------
     ^|
     L|R
      |v
 -------------------
- Item: 0xc00015c320
+ Item: 0xc0000e4340
 -------------------
 value: 40
- left: 0xc00015c2c0
-right: 0xc00015c300
+ left: 0xc0000e42e0
+right: 0xc0000e4320
 -------------------
     ^|
     L|R
      |v
 -------------------
- Item: 0xc00015c300
+ Item: 0xc0000e4320
 -------------------
 value: 50
- left: 0xc00015c320
+ left: 0xc0000e4340
 right: 0x0
 -------------------
     ^|
     L|R
      |v
  (nil:0x0)
---- PASS: TestSort (0.00s)
-    --- PASS: TestSort/Let's_sort_double-linked_list. (0.00s)
+--- PASS: TestListSortInterface (0.00s)
+    --- PASS: TestListSortInterface/Let's_sort_double-linked_list. (0.00s)
 PASS
-ok  	command-line-arguments	0.007s
+ok  	command-line-arguments	0.006s
 
 ```
+
+</details>
 
 ## Послесловие
 

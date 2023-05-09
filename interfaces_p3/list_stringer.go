@@ -1,4 +1,4 @@
-package main
+package interfaces_p3
 
 import (
 	"fmt"

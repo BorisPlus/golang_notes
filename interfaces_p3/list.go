@@ -1,4 +1,4 @@
-package main
+package interfaces_p3
 
 import (
 	"fmt"
@@ -11,29 +11,34 @@ type ListItem struct {
 	rightNeighbour *ListItem
 }
 
-// LeftNeighbour() - получить стоящий слева элемент.
+// LeftNeighbour() - метод получения стоящего слева элемента.
 func (listItem *ListItem) LeftNeighbour() *ListItem {
 	return listItem.leftNeighbour
 }
 
-// SetLeftNeighbour(item *ListItem) - установить стоящий слева элемент.
+// SetLeftNeighbour(item *ListItem) - метод присвоения стоящего слева элемента.
 func (listItem *ListItem) SetLeftNeighbour(item *ListItem) {
 	listItem.leftNeighbour = item
 }
 
-// RightNeighbour() - получить стоящий справа элемент.
+// RightNeighbour() - метод получения стоящего справа элемента.
 func (listItem *ListItem) RightNeighbour() *ListItem {
 	return listItem.rightNeighbour
 }
 
-// SetRightNeighbour(item *ListItem) - установить стоящий слева элемент.
+// SetRightNeighbour(item *ListItem) - метод присвоения стоящего справа элемента.
 func (listItem *ListItem) SetRightNeighbour(item *ListItem) {
 	listItem.rightNeighbour = item
 }
 
-// Value() - получить значение из элемента.
+// Value() - метод получения значения из элемента.
 func (listItem *ListItem) Value() interface{} {
 	return listItem.value
+}
+
+// SetValue() - метод присвоения значения в элементе.
+func (listItem *ListItem) SetValue(value interface{}) {
+	listItem.value = value
 }
 
 // Eq(x, y ListItem) - элементы равны тогда и только тогда, когда это один и тот же элемент по памяти.
@@ -43,7 +48,7 @@ func Eq(x, y ListItem) bool {
 
 // Lister - интерфейс двусвязного списка.
 type Lister interface {
-	Length() int
+	Len() int
 	LeftEdge() *ListItem
 	RightEdge() *ListItem
 	PushToLeftEdge(value interface{}) *ListItem
@@ -59,22 +64,22 @@ type List struct {
 	rightEdge *ListItem
 }
 
-// Length() - получить длину двусвязного списка.
-func (list *List) Length() int {
+// Len() - метод получения длины двусвязного списка.
+func (list *List) Len() int {
 	return list.len
 }
 
-// LeftEdge() - получить элемент из левого края двусвязного списка.
+// LeftEdge() - метод получения элемента из левого края двусвязного списка.
 func (list *List) LeftEdge() *ListItem {
 	return list.leftEdge
 }
 
-// RightEdge() - получить элемент из правого края двусвязного списка.
+// RightEdge() - метод получения элемента из правого края двусвязного списка.
 func (list *List) RightEdge() *ListItem {
 	return list.rightEdge
 }
 
-// PushToLeftEdge(value interface{}) - добавить значение в левый край двусвязного списка.
+// PushToLeftEdge(value interface{}) - метод добавления значения в левый край двусвязного списка.
 func (list *List) PushToLeftEdge(value interface{}) *ListItem {
 	item := &ListItem{
 		value:          value,
@@ -93,7 +98,7 @@ func (list *List) PushToLeftEdge(value interface{}) *ListItem {
 	return item
 }
 
-// PushToRightEdge(value interface{}) - добавить значение в правый край двусвязного списка.
+// PushToRightEdge(value interface{}) - метод добавления значения в правый край двусвязного списка.
 func (list *List) PushToRightEdge(value interface{}) *ListItem {
 	item := &ListItem{
 		value:          value,
@@ -112,7 +117,7 @@ func (list *List) PushToRightEdge(value interface{}) *ListItem {
 	return item
 }
 
-// Contains(item *ListItem) - проверить, есть ли элемент в списке.
+// Contains(item *ListItem) - метод проверки наличия элемента в списке.
 func (list *List) Contains(item *ListItem) bool {
 	if (list.LeftEdge() == item) || // Это левый элемент
 		(list.RightEdge() == item) || // Это правый элемент
@@ -123,7 +128,7 @@ func (list *List) Contains(item *ListItem) bool {
 	return false
 }
 
-// Remove(item *ListItem) - удалить элемент из двусвязного списка.
+// Remove(item *ListItem) - метод удаления элемента из двусвязного списка.
 func (list *List) Remove(item *ListItem) (*ListItem, error) {
 	if !list.Contains(item) {
 		return nil, fmt.Errorf("it seems that item %s is not in the list", item)
@@ -145,7 +150,7 @@ func (list *List) Remove(item *ListItem) (*ListItem, error) {
 	return item, nil
 }
 
-// SwapItems(x, y *ListItem) - поменять элементы двусвязного списка местами.
+// SwapItems(x, y *ListItem) - метод перестановки местами элементов двусвязного списка.
 func (list *List) SwapItems(x, y *ListItem) error {
 	if !list.Contains(x) {
 		return fmt.Errorf("it seems that item %s is not in the list", x)
@@ -223,7 +228,7 @@ func (list *List) SwapItems(x, y *ListItem) error {
 	return nil
 }
 
-// MoveToFront(item *ListItem) - переместить элемент в начало двусвязного списка.
+// MoveToFront(item *ListItem) - метод перемещения элемента в начало двусвязного списка.
 func (list *List) MoveToLeftEdge(item *ListItem) error {
 	if !list.Contains(item) {
 		return fmt.Errorf("it seems that item %s is not in the list", item)
@@ -251,6 +256,37 @@ func (list *List) MoveToLeftEdge(item *ListItem) error {
 	return nil
 }
 
+// GetByIndex(i int) - метод получения i-того слева элемента двусвязного списка.
+// Реализовано ИСКЛЮЧИТЕЛЬНО для демонстрации использования интерфейсных методов sort.Sort().
+func (list *List) GetByIndex(i int) (*ListItem, error) {
+	if i >= list.Len() {
+		return nil, fmt.Errorf("index is out of range")
+	}
+	item := list.LeftEdge()
+	for j := 0; j < i; j++ {
+		item = item.RightNeighbour()
+	}
+	return item, nil
+}
+
+// Swap(i, j int) - метод перестановки i-того и j-того слева элементов двусвязного списка.
+// Реализовано ИСКЛЮЧИТЕЛЬНО для демонстрации использования интерфейсных методов sort.Sort().
+func (list *List) Swap(i, j int) {
+	iItem, _ := list.GetByIndex(i)
+	jItem, _ := list.GetByIndex(j)
+	list.SwapItems(iItem, jItem)
+}
+
+// Less(i, j int) - метод сравнения убывания i-того и j-того слева элементов двусвязного списка.
+// Реализовано ИСКЛЮЧИТЕЛЬНО для демонстрации использования интерфейсных методов sort.Sort()
+// ПРИ УСЛОВИИ хранения INT-значений в поле value.
+func (list *List) Less(i, j int) bool {
+	iItem, _ := list.GetByIndex(i)
+	jItem, _ := list.GetByIndex(j)
+	return iItem.Value().(int) < jItem.Value().(int)
+}
+
+// NewList() - функция инициализации нового двусвязного списка.
 func NewList() Lister {
 	return new(List)
 }

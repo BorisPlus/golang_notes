@@ -1,0 +1,6 @@
+go 1.19
+
+use ./standalonetesting/
+use ./standalonetesting_part2/
+use ./interfaces_p3/
+use ./templator/
