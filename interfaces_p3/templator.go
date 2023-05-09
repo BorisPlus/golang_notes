@@ -5,12 +5,12 @@ import (
 	"strings"
 )
 
-type Template struct {
+type tTemplate struct {
 	content       string
 	substitutions map[string]string
 }
 
-func (template *Template) loadFromFile(filepath string, with_escaping bool) error {
+func (template *tTemplate) loadFromFile(filepath string, with_escaping bool) error {
 	data, err := os.ReadFile(filepath)
 	if err != nil {
 		template.content = ""
@@ -22,7 +22,7 @@ func (template *Template) loadFromFile(filepath string, with_escaping bool) erro
 	return err
 }
 
-func (template *Template) render() string {
+func (template *tTemplate) render() string {
 	result := template.content
 	for k := range template.substitutions {
 		result = strings.Replace(result, "{{ "+k+" }}", template.substitutions[k], -1)
@@ -45,7 +45,7 @@ func tab_escaping(content string) string {
 	return content
 }
 
-func (template *Template) renderToFile(filepath string) error {
+func (template *tTemplate) renderToFile(filepath string) error {
 	f, errCreate := os.Create(filepath)
 	if errCreate != nil {
 		return errCreate

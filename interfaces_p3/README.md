@@ -13,19 +13,29 @@ import (
 
 // ListItem - структура элемента двусвязного списка.
 type ListItem struct {
-    value interface{}
-    left  *ListItem
-    right *ListItem
+    value          interface{}
+    leftNeighbour  *ListItem
+    rightNeighbour *ListItem
 }
 
-// Left() - получить стоящий слева элемент.
-func (listItem *ListItem) Left() *ListItem {
-    return listItem.left
+// LeftNeighbour() - получить стоящий слева элемент.
+func (listItem *ListItem) LeftNeighbour() *ListItem {
+    return listItem.leftNeighbour
 }
 
-// Right() - получить стоящий справа элемент.
-func (listItem *ListItem) Right() *ListItem {
-    return listItem.right
+// SetLeftNeighbour(item *ListItem) - установить стоящий слева элемент.
+func (listItem *ListItem) SetLeftNeighbour(item *ListItem) {
+    listItem.leftNeighbour = item
+}
+
+// RightNeighbour() - получить стоящий справа элемент.
+func (listItem *ListItem) RightNeighbour() *ListItem {
+    return listItem.rightNeighbour
+}
+
+// SetRightNeighbour(item *ListItem) - установить стоящий слева элемент.
+func (listItem *ListItem) SetRightNeighbour(item *ListItem) {
+    listItem.rightNeighbour = item
 }
 
 // Value() - получить значение из элемента.
@@ -33,77 +43,77 @@ func (listItem *ListItem) Value() interface{} {
     return listItem.value
 }
 
-// Eq(x, y ListItem) - элементs равны тогда и только тогда, когда это один и тот же элемент.
+// Eq(x, y ListItem) - элементы равны тогда и только тогда, когда это один и тот же элемент по памяти.
 func Eq(x, y ListItem) bool {
     return &x == &y
 }
 
 // Lister - интерфейс двусвязного списка.
 type Lister interface {
-    Len() int
-    LeftEnd() *ListItem
-    RightEnd() *ListItem
-    PushToLeftEnd(value interface{}) *ListItem
-    PushToRightEnd(value interface{}) *ListItem
+    Length() int
+    LeftEdge() *ListItem
+    RightEdge() *ListItem
+    PushToLeftEdge(value interface{}) *ListItem
+    PushToRightEdge(value interface{}) *ListItem
     Remove(item *ListItem) (*ListItem, error)
-    Swap(x, y *ListItem) error
+    SwapItems(x, y *ListItem) error
 }
 
 // List - структура двусвязного списка.
 type List struct {
-    len      int
-    leftEnd  *ListItem
-    rightEnd *ListItem
+    len       int
+    leftEdge  *ListItem
+    rightEdge *ListItem
 }
 
-// Len() - получить длину двусвязного списка.
-func (list *List) Len() int {
+// Length() - получить длину двусвязного списка.
+func (list *List) Length() int {
     return list.len
 }
 
-// LeftEnd() - получить элемент из левого края двусвязного списка.
-func (list *List) LeftEnd() *ListItem {
-    return list.leftEnd
+// LeftEdge() - получить элемент из левого края двусвязного списка.
+func (list *List) LeftEdge() *ListItem {
+    return list.leftEdge
 }
 
-// RightEnd() - получить элемент из правого края двусвязного списка.
-func (list *List) RightEnd() *ListItem {
-    return list.rightEnd
+// RightEdge() - получить элемент из правого края двусвязного списка.
+func (list *List) RightEdge() *ListItem {
+    return list.rightEdge
 }
 
-// PushToLeftEnd() - добавить значение в левый край двусвязного списка.
-func (list *List) PushToLeftEnd(value interface{}) *ListItem {
+// PushToLeftEdge(value interface{}) - добавить значение в левый край двусвязного списка.
+func (list *List) PushToLeftEdge(value interface{}) *ListItem {
     item := &ListItem{
-        value: value,
-        left:  nil,
-        right: nil,
+        value:          value,
+        leftNeighbour:  nil,
+        rightNeighbour: nil,
     }
     if list.len == 0 {
-        list.leftEnd = item
-        list.rightEnd = item
+        list.leftEdge = item
+        list.rightEdge = item
     } else {
-        item.right = list.leftEnd
-        list.leftEnd.left = item
-        list.leftEnd = item
+        item.rightNeighbour = list.LeftEdge()
+        list.LeftEdge().leftNeighbour = item
+        list.leftEdge = item
     }
     list.len++
     return item
 }
 
-// PushToRightEnd(any interface{}) - добавить значение в правый край двусвязного списка.
-func (list *List) PushToRightEnd(value interface{}) *ListItem {
+// PushToRightEdge(value interface{}) - добавить значение в правый край двусвязного списка.
+func (list *List) PushToRightEdge(value interface{}) *ListItem {
     item := &ListItem{
-        value: value,
-        left:  nil,
-        right: nil,
+        value:          value,
+        leftNeighbour:  nil,
+        rightNeighbour: nil,
     }
     if list.len == 0 {
-        list.leftEnd = item
-        list.rightEnd = item
+        list.leftEdge = item
+        list.rightEdge = item
     } else {
-        item.left = list.rightEnd
-        list.rightEnd.right = item
-        list.rightEnd = item
+        item.leftNeighbour = list.RightEdge()
+        list.RightEdge().rightNeighbour = item
+        list.rightEdge = item
     }
     list.len++
     return item
@@ -111,9 +121,10 @@ func (list *List) PushToRightEnd(value interface{}) *ListItem {
 
 // Contains(item *ListItem) - проверить, есть ли элемент в списке.
 func (list *List) Contains(item *ListItem) bool {
-    if (list.leftEnd == item) || // Это левый элемент
-        (list.rightEnd == item) || // Это правый элемент
-        (item.left != nil && item.left.right == item && item.right != nil && item.right.left == item) { // Соседи ссылаются на него
+    if (list.LeftEdge() == item) || // Это левый элемент
+        (list.RightEdge() == item) || // Это правый элемент
+        (item.LeftNeighbour() != nil && item.LeftNeighbour().RightNeighbour() == item &&
+            item.RightNeighbour() != nil && item.RightNeighbour().LeftNeighbour() == item) { // Соседи ссылаются на него
         return true
     }
     return false
@@ -124,24 +135,25 @@ func (list *List) Remove(item *ListItem) (*ListItem, error) {
     if !list.Contains(item) {
         return nil, fmt.Errorf("it seems that item %s is not in the list", item)
     }
-    if list.leftEnd == item && list.rightEnd == item {
-        list.leftEnd = nil
-        list.rightEnd = nil
-    } else if list.leftEnd == item {
-        item.right.left = nil
-        list.leftEnd = item.right
-    } else if list.rightEnd == item {
-        item.left.right = nil
-        list.rightEnd = item.left
+    if list.LeftEdge() == item && list.RightEdge() == item {
+        list.leftEdge = nil
+        list.rightEdge = nil
+    } else if list.LeftEdge() == item {
+        item.RightNeighbour().leftNeighbour = nil
+        list.leftEdge = item.RightNeighbour()
+    } else if list.RightEdge() == item {
+        item.LeftNeighbour().rightNeighbour = nil
+        list.rightEdge = item.LeftNeighbour()
     } else {
-        item.left.right = item.right
-        item.right.left = item.left
+        item.LeftNeighbour().rightNeighbour = item.RightNeighbour()
+        item.RightNeighbour().leftNeighbour = item.LeftNeighbour()
     }
     list.len--
     return item, nil
 }
 
-func (list *List) Swap(x, y *ListItem) error {
+// SwapItems(x, y *ListItem) - поменять элементы двусвязного списка местами.
+func (list *List) SwapItems(x, y *ListItem) error {
     if !list.Contains(x) {
         return fmt.Errorf("it seems that item %s is not in the list", x)
     }
@@ -151,128 +163,98 @@ func (list *List) Swap(x, y *ListItem) error {
     if x == y {
         return nil
     }
-    xLeft := x.left
-    xRight := x.right
-    yLeft := y.left
-    yRight := y.right
+    xLeft := x.LeftNeighbour()
+    xRight := x.RightNeighbour()
+    yLeft := y.LeftNeighbour()
+    yRight := y.RightNeighbour()
 
     if xLeft != y && xRight != y {
         //
-        y.right = xRight
-        y.left = xLeft
-        x.right = yRight
-        x.left = yLeft
+        y.rightNeighbour = xRight
+        y.leftNeighbour = xLeft
+        x.rightNeighbour = yRight
+        x.leftNeighbour = yLeft
         //
         if yRight != nil {
-            yRight.left = x
+            yRight.leftNeighbour = x
         } else {
-            list.rightEnd = x
+            list.rightEdge = x
         }
         if yLeft != nil {
-            yLeft.right = x
+            yLeft.rightNeighbour = x
         } else {
-            list.leftEnd = x
+            list.leftEdge = x
         }
         if xRight != nil {
-            xRight.left = y
+            xRight.leftNeighbour = y
         } else {
-            list.rightEnd = y
+            list.rightEdge = y
         }
         if xLeft != nil {
-            xLeft.right = y
+            xLeft.rightNeighbour = y
         } else {
-            list.leftEnd = y
+            list.leftEdge = y
         }
         //
     } else if xRight == y {
-        y.left = xLeft
-        x.right = yRight
-        y.right = x
-        x.left = y
+        y.leftNeighbour = xLeft
+        x.rightNeighbour = yRight
+        y.rightNeighbour = x
+        x.leftNeighbour = y
         if yRight != nil {
-            yRight.left = x
+            yRight.leftNeighbour = x
         } else {
-            list.rightEnd = x
+            list.rightEdge = x
         }
         if xLeft != nil {
-            xLeft.right = y
+            xLeft.rightNeighbour = y
         } else {
-            list.leftEnd = y
+            list.leftEdge = y
         }
     } else if yRight == x {
-        x.left = yLeft
-        y.right = xRight
-        x.right = y
-        y.left = x
+        x.leftNeighbour = yLeft
+        y.rightNeighbour = xRight
+        x.rightNeighbour = y
+        y.leftNeighbour = x
         if xRight != nil {
-            xRight.left = y
+            xRight.leftNeighbour = y
         } else {
-            list.rightEnd = y
+            list.rightEdge = y
         }
         if yLeft != nil {
-            yLeft.right = x
+            yLeft.rightNeighbour = x
         } else {
-            list.leftEnd = x
+            list.leftEdge = x
         }
     }
+    return nil
+}
 
-    // y.right = xRight.right.left
-    // x.left = yLeft.left.right
+// MoveToFront(item *ListItem) - переместить элемент в начало двусвязного списка.
+func (list *List) MoveToLeftEdge(item *ListItem) error {
+    if !list.Contains(item) {
+        return fmt.Errorf("it seems that item %s is not in the list", item)
+    }
+    if item.LeftNeighbour() != nil {
+        item.LeftNeighbour().rightNeighbour = item.RightNeighbour()
+    } else {
+        list.leftEdge = item.RightNeighbour()
+    }
+    if item.RightNeighbour() != nil {
+        item.RightNeighbour().leftNeighbour = item.LeftNeighbour()
+    } else {
+        list.rightEdge = item.LeftNeighbour()
+    }
 
-    // if xRight.right != nil {
-    //     y.right = xRight.right.left
-    //     y.left = xLeft
-    // } else {
-    //     y.right = xRight
-    //     y.left = xLeft.left.right
-    // }
-
-    // if yLeft.left != nil {
-    //     x.left = yLeft.left.right
-    //     x.right = yRight
-    // } else {
-    //     x.left = yLeft
-    //     x.right = yRight.right.left
-    // }
-
-    // if yLeft.left != nil{
-    //     x.left = yLeft.left.right
-    // } else if yLeft.right != nil {
-    //     x.left = yLeft.right.left
-    // }
-
-    // xLeft.right = y
-    // yRight.left = x
-    // if x.left != nil {
-    //     x.left.right = y
-    // }
-    // x.right = y.right
-
-    // if y.right != nil {
-    //     y.right.left = x
-    // }
-    // yLeft := y.left
-    // y.left = x.left
-
-    // if xRight != nil {
-    //     xRight.left = y
-    // }
-
-    // if xLeft != nil {
-    //     xLeft.right = y
-    // }
-
-    // if yLeft != nil {
-    //     yLeft.right = x
-    // }
-    // y.right = xRight
-
-    // if x.left != nil {
-    //     x.left.right = y
-    // }
-    // x.right = y.right
-    // xLeft, xRight, yLeft, yRight := , x.right, y.left, y.right
-    // x.left, x.right, y.left, y.right = yLeft, yRight, xLeft, xRight
+    item.leftNeighbour = nil
+    item.rightNeighbour = list.LeftEdge()
+    if list.LeftEdge() != nil {
+        list.LeftEdge().leftNeighbour = item
+        list.leftEdge = item
+    } else {
+        list.leftEdge = item
+        list.rightEdge = item
+    }
     return nil
 }
 
@@ -291,30 +273,30 @@ import (
     "fmt"
 )
 
-// String - наглядное представление значения элемента двусвязного списка.
+// String() - представление элемента двусвязного списка.
 //
 // Например,
 //
 //    -------------------             -------------------
-//    Item:  0xc00002e400             Item: 0xc00002e400
+//     Item: 0xc00002e400              Item: 0xc00002e400
 //    -------------------             -------------------
 //    Value: 30                или    Value: 30
-//    Left:  0xc00002e3c0             Left:  0x0
+//     Left: 0xc00002e3c0              Left: 0x0
 //    Right: 0xc00002e440             Right: 0x0
 //    -------------------             -------------------
 func (listItem *ListItem) String() string {
     template := `
 -------------------
-Item:  %p
+ Item: %p
 -------------------
-Value: %v
-Left:  %p
-Right: %p
+value: %v
+ left: %p
+right: %p
 -------------------`
-    return fmt.Sprintf(template, listItem, listItem.Value(), listItem.Left(), listItem.Right())
+    return fmt.Sprintf(template, listItem, listItem.Value(), listItem.LeftNeighbour(), listItem.RightNeighbour())
 }
 
-// String - наглядное представление всего двусвязного списка.
+// String() - представление двусвязного списка.
 //
 // Например,
 //
@@ -333,20 +315,20 @@ Right: %p
 //        L|R
 //         |v
 //    -------------------
-//    Item:  0xc00002e3a0 <--------┐
+//     Item: 0xc00002e3a0 <--------┐
 //    -------------------          |
 //    Value: 2                     |
-//    Left:  0x0                   |
+//     Left: 0x0                   |
 //    Right: 0xc00002e380  >>>-----|---┐ Right 0xc00002e380
 //    -------------------          |   | ссылается на
 //        ^|                       |   | блок 0xc00002e380
 //        L|R                      |   |
 //         |v                      |   |
 //    -------------------          |   |
-//    Item:  0xc00002e380  <-----------┘
+//     Item: 0xc00002e380  <-----------┘
 //    -------------------          | Left 0xc00002e3a0
 //    Value: 1                     | ссылается на
-//    Left:  0xc00002e3a0  >>>-----┘ блок 0xc00002e3a0
+//     Left: 0xc00002e3a0  >>>-----┘ блок 0xc00002e3a0
 //    Right: 0x0
 //    -------------------
 //        ^|
@@ -363,7 +345,7 @@ func (list *List) String() string {
      |v`
     result += Nill
     result += delimiter
-    for i := list.LeftEnd(); i != nil; i = i.Right() {
+    for i := list.LeftEdge(); i != nil; i = i.RightNeighbour() {
         result += i.String()
         result += delimiter
     }
@@ -387,10 +369,18 @@ import (
 
 // go test -v list.go list_string.go list_test.go
 
-func Elements(list *List) []int {
-    elements := make([]int, 0, list.Len())
-    for i := list.LeftEnd(); i != nil; i = i.Right() {
+func ElementsLeftToRight(list *List) []int {
+    elements := make([]int, 0, list.Length())
+    for i := list.LeftEdge(); i != nil; i = i.RightNeighbour() {
         elements = append(elements, i.Value().(int))
+    }
+    return elements
+}
+
+func ElementsRightToLeft(list *List) []int {
+    elements := make([]int, 0, list.Length())
+    for i := list.RightEdge(); i != nil; i = i.LeftNeighbour() {
+        elements = append([]int{i.Value().(int)}, elements...)
     }
     return elements
 }
@@ -398,9 +388,9 @@ func Elements(list *List) []int {
 func TestList(t *testing.T) {
     t.Run("Zero-value ListItem test.", func(t *testing.T) {
         zeroValueItem := ListItem{}
-        require.Nil(t, zeroValueItem.value)
-        require.Nil(t, zeroValueItem.left)
-        require.Nil(t, zeroValueItem.right)
+        require.Nil(t, zeroValueItem.Value())
+        require.Nil(t, zeroValueItem.LeftNeighbour())
+        require.Nil(t, zeroValueItem.RightNeighbour())
         fmt.Println("\n[zero-value] is:", &zeroValueItem)
         fmt.Println()
     })
@@ -408,48 +398,49 @@ func TestList(t *testing.T) {
     t.Run("ListItem direct and vice versa referencies test.", func(t *testing.T) {
         fmt.Println("\n[1] <--> [2] <--> [3]")
         first := &ListItem{
-            value: 1,
-            left:  nil,
-            right: nil,
+            value:          1,
+            leftNeighbour:  nil,
+            rightNeighbour: nil,
         }
         fmt.Println("\n[1] is:", first)
 
         second := &ListItem{
-            value: 2,
-            left:  first,
-            right: nil,
+            value:          2,
+            leftNeighbour:  first,
+            rightNeighbour: nil,
         }
-        first.right = second
+
+        first.SetRightNeighbour(second)
         fmt.Println("\nadd [2]:", second)
         fmt.Println("\n[1] become:", first)
 
         third := ListItem{
-            value: 3,
-            left:  second,
-            right: nil,
+            value:          3,
+            leftNeighbour:  second,
+            rightNeighbour: nil,
         }
 
-        second.right = &third
+        second.SetRightNeighbour(&third)
         fmt.Println("\nadd [3]:", &third)
         fmt.Println("\n[2] become:", second)
         fmt.Println()
 
-        fmt.Println("first.Right().Right().Right() is nil. OK.")
-        require.Nil(t, first.Right().Right().Right())
-        fmt.Println("first.Right().Right() is third. OK.")
-        require.Equal(t, &third, first.Right().Right())
-        fmt.Println("third.Left().Left().Left() is nil. OK.")
-        require.Nil(t, third.Left().Left().Left())
-        fmt.Println("third.Left().Left() is first. OK.")
-        require.Equal(t, first, third.Left().Left())
+        fmt.Println("first.RightNeighbour().RightNeighbour().RightNeighbour() is nil. OK.")
+        require.Nil(t, first.RightNeighbour().RightNeighbour().RightNeighbour())
+        fmt.Println("first.RightNeighbour().RightNeighbour() is third. OK.")
+        require.Equal(t, &third, first.RightNeighbour().RightNeighbour())
+        fmt.Println("third.LeftNeighbour().LeftNeighbour().LeftNeighbour() is nil. OK.")
+        require.Nil(t, third.LeftNeighbour().LeftNeighbour().LeftNeighbour())
+        fmt.Println("third.LeftNeighbour().LeftNeighbour() is first. OK.")
+        require.Equal(t, first, third.LeftNeighbour().LeftNeighbour())
         fmt.Println()
     })
 
     t.Run("Empty List test.", func(t *testing.T) {
         list := NewList()
-        require.Equal(t, 0, list.Len())
-        require.Nil(t, list.LeftEnd())
-        require.Nil(t, list.RightEnd())
+        require.Equal(t, 0, list.Length())
+        require.Nil(t, list.LeftEdge())
+        require.Nil(t, list.RightEdge())
         fmt.Println("\nList is:\n", list)
         fmt.Println()
     })
@@ -459,12 +450,12 @@ func TestList(t *testing.T) {
 
         fmt.Println("\nList was:\n", list)
 
-        item := list.PushToLeftEnd(1)
+        item := list.PushToLeftEdge(1)
         fmt.Println("\nItem was:", item)
-        require.Equal(t, item, list.LeftEnd())
-        require.Equal(t, item, list.RightEnd())
+        require.Equal(t, item, list.LeftEdge())
+        require.Equal(t, item, list.RightEdge())
         fmt.Println()
-        fmt.Println("list.LeftEnd() and list.RightEnd() is item. OK.")
+        fmt.Println("list.LeftEdge() and list.RightEdge() is item. OK.")
         fmt.Println("\nList become:\n", list)
         fmt.Println()
     })
@@ -473,97 +464,100 @@ func TestList(t *testing.T) {
         list := NewList()
         fmt.Println("\nList was:\n", list)
 
-        itemFirst := list.PushToLeftEnd(1) // [1]
+        itemFirst := list.PushToLeftEdge(1) // [1]
         fmt.Println("\nItem [1] become:\n", itemFirst)
 
-        leftEnd := list.LeftEnd()
-        fmt.Println("\nlist.LeftEnd() become:\n", leftEnd)
-        rightEnd := list.RightEnd()
-        fmt.Println("\nlist.RightEnd() become:\n", rightEnd)
+        leftEnd := list.LeftEdge()
+        fmt.Println("\nlist.LeftEdge() become:\n", leftEnd)
+        rightEnd := list.RightEdge()
+        fmt.Println("\nlist.RightEdge() become:\n", rightEnd)
 
-        itemSecond := list.PushToLeftEnd(2) // [2]
+        itemSecond := list.PushToLeftEdge(2) // [2]
         fmt.Println("\nItem [2] become:\n", itemSecond)
 
-        leftEnd = list.LeftEnd()
-        fmt.Println("\nlist.LeftEnd() become:\n", leftEnd)
-        rightEnd = list.RightEnd()
-        fmt.Println("\nlist.RightEnd() become:\n", rightEnd)
+        leftEnd = list.LeftEdge()
+        fmt.Println("\nlist.LeftEdge() become:\n", leftEnd)
+        rightEnd = list.RightEdge()
+        fmt.Println("\nlist.RightEdge() become:\n", rightEnd)
         fmt.Println("\nList become:\n", list)
-        require.Equal(t, itemSecond, list.LeftEnd())
-        require.Equal(t, itemFirst, list.RightEnd())
+        require.Equal(t, itemSecond, list.LeftEdge())
+        require.Equal(t, itemFirst, list.RightEdge())
 
-        someItem, _ := list.Remove(list.LeftEnd())
+        someItem, _ := list.Remove(list.LeftEdge())
         fmt.Println("\nWas removed:\n", someItem)
         require.Equal(t, itemSecond, someItem)
 
         fmt.Println("\nList become:\n", list)
 
-        require.Equal(t, list.LeftEnd(), list.RightEnd())
-        require.Nil(t, list.LeftEnd().Left())
-        require.Nil(t, list.LeftEnd().Right())
+        require.Equal(t, list.LeftEdge(), list.RightEdge())
+        require.Nil(t, list.LeftEdge().LeftNeighbour())
+        require.Nil(t, list.LeftEdge().RightNeighbour())
 
-        someItem, _ = list.Remove(list.LeftEnd())
+        someItem, _ = list.Remove(list.LeftEdge())
         fmt.Println("\nWas removed:\n", someItem)
         require.Equal(t, itemFirst, someItem)
 
         fmt.Println("\nList become:\n", list)
 
-        require.Equal(t, list.LeftEnd(), list.RightEnd())
-        require.Nil(t, list.LeftEnd())
-        require.Nil(t, list.RightEnd())
+        require.Equal(t, list.LeftEdge(), list.RightEdge())
+        require.Nil(t, list.LeftEdge())
+        require.Nil(t, list.RightEdge())
     })
 }
 
 func TestListComplex(t *testing.T) {
     t.Run("Сomplex List processing test.", func(t *testing.T) {
         list := NewList()
-        list.PushToRightEnd(10) // [10]
-        list.PushToRightEnd(20) // [10, 20]
-        list.PushToRightEnd(30) // [10, 20, 30]
-        require.Equal(t, []int{10, 20, 30}, Elements(list.(*List)))
+        list.PushToRightEdge(10) // [10]
+        list.PushToRightEdge(20) // [10, 20]
+        list.PushToRightEdge(30) // [10, 20, 30]
+        require.Equal(t, []int{10, 20, 30}, ElementsLeftToRight(list.(*List)))
+        require.Equal(t, []int{10, 20, 30}, ElementsRightToLeft(list.(*List)))
         fmt.Println("Forward stroke check for [10, 20, 30]. OK.")
-        require.Equal(t, 3, list.Len())
-        middle := list.LeftEnd().Right()
+        require.Equal(t, 3, list.Length())
+        middle := list.LeftEdge().RightNeighbour()
         require.Equal(t, middle.Value(), 20)
         fmt.Printf("middle.Value() is %v. OK.\n", middle.Value())
         list.Remove(middle)
         fmt.Printf("middle was removed. OK.\n")
-        require.Equal(t, 2, list.Len())
-        require.Equal(t, []int{10, 30}, Elements(list.(*List)))
+        require.Equal(t, 2, list.Length())
+        require.Equal(t, []int{10, 30}, ElementsLeftToRight(list.(*List)))
+        require.Equal(t, []int{10, 30}, ElementsRightToLeft(list.(*List)))
         fmt.Println("Forward stroke check for [10, 30]. OK.")
         for i, v := range [...]int{40, 50, 60, 70, 80} {
             if i%2 == 0 {
-                list.PushToLeftEnd(v)
+                list.PushToLeftEdge(v)
             } else {
-                list.PushToRightEnd(v)
+                list.PushToRightEdge(v)
             }
         } // [80, 60, 40, 10, 30, 50, 70]
         fmt.Println("List [10, 30] mixing values {40, 50, 60, 70, 80} with mod(2, index).")
 
-        require.Equal(t, 7, list.Len())
-        fmt.Printf("list.Len() is %v. OK.\n", list.Len())
-        require.Equal(t, 80, list.LeftEnd().Value())
-        fmt.Printf("list.LeftEnd().Value() is %v. OK.\n", list.LeftEnd().Value())
-        require.Equal(t, 70, list.RightEnd().Value())
-        fmt.Printf("list.RightEnd().Value() is %v. OK.\n", list.RightEnd().Value())
+        require.Equal(t, 7, list.Length())
+        fmt.Printf("list.Length() is %v. OK.\n", list.Length())
+        require.Equal(t, 80, list.LeftEdge().Value())
+        fmt.Printf("list.LeftEdge().Value() is %v. OK.\n", list.LeftEdge().Value())
+        require.Equal(t, 70, list.RightEdge().Value())
+        fmt.Printf("list.RightEdge().Value() is %v. OK.\n", list.RightEdge().Value())
 
-        require.Equal(t, []int{80, 60, 40, 10, 30, 50, 70}, Elements(list.(*List)))
+        require.Equal(t, []int{80, 60, 40, 10, 30, 50, 70}, ElementsLeftToRight(list.(*List)))
+        require.Equal(t, []int{80, 60, 40, 10, 30, 50, 70}, ElementsRightToLeft(list.(*List)))
         fmt.Println("Forward stroke check for [80, 60, 40, 10, 30, 50, 70]. OK.")
 
-        rightEnd := list.RightEnd()
+        rightEnd := list.RightEdge()
         list.Remove(rightEnd)
-        list.PushToRightEnd(rightEnd.Value())
+        list.PushToRightEdge(rightEnd.Value())
         fmt.Println("Remove right and push back to right - check for [80, 60, 40, 10, 30, 50, 70]. OK.")
-        leftEnd, _ := list.Remove(list.LeftEnd())
-        list.PushToLeftEnd(leftEnd.Value())
+        leftEnd, _ := list.Remove(list.LeftEdge())
+        list.PushToLeftEdge(leftEnd.Value())
         fmt.Println("Remove left and push back to left - check for [80, 60, 40, 10, 30, 50, 70]. OK.")
         // - check for nil-refs of first and last
-        require.Equal(t, list.LeftEnd().Value(), 80)
-        require.Equal(t, list.RightEnd().Value(), 70)
-        fmt.Println("Check for list.LeftEnd() is 80 and list.RightEnd() is 70. OK.")
-        require.Nil(t, list.LeftEnd().Left())
-        require.Nil(t, list.RightEnd().Right())
-        fmt.Println("Check for list.LeftEnd().Left() and list.RightEnd().Right() is nils. OK.")
+        require.Equal(t, list.LeftEdge().Value(), 80)
+        require.Equal(t, list.RightEdge().Value(), 70)
+        fmt.Println("Check for list.LeftEdge() is 80 and list.RightEdge() is 70. OK.")
+        require.Nil(t, list.LeftEdge().LeftNeighbour())
+        require.Nil(t, list.RightEdge().RightNeighbour())
+        fmt.Println("Check for list.LeftEdge().Left() and list.RightEdge().Right() is nils. OK.")
 
     })
 }
@@ -571,61 +565,78 @@ func TestListComplex(t *testing.T) {
 func TestListSwap(t *testing.T) {
     t.Run("List swap test.", func(t *testing.T) {
         list := NewList()
-        one := list.PushToRightEnd(10)   // [10]
-        two := list.PushToRightEnd(20)   // [10, 20]
-        three := list.PushToRightEnd(30) // [10, 20, 30]
-        four := list.PushToRightEnd(40)  // [10, 20, 30, 40]
-        five := list.PushToRightEnd(50)  // [10, 20, 30, 40, 50]
-        require.Equal(t, []int{10, 20, 30, 40, 50}, Elements(list.(*List)))
+        one := list.PushToRightEdge(10)   // [10]
+        two := list.PushToRightEdge(20)   // [10, 20]
+        three := list.PushToRightEdge(30) // [10, 20, 30]
+        four := list.PushToRightEdge(40)  // [10, 20, 30, 40]
+        five := list.PushToRightEdge(50)  // [10, 20, 30, 40, 50]
+        require.Equal(t, []int{10, 20, 30, 40, 50}, ElementsLeftToRight(list.(*List)))
+        require.Equal(t, []int{10, 20, 30, 40, 50}, ElementsRightToLeft(list.(*List)))
         fmt.Println("[10, 20, 30, 40, 50]. OK.")
-        list.Swap(two, four)
+        list.SwapItems(two, four)
         fmt.Println("swap different element-pairs")
-        require.Equal(t, []int{10, 40, 30, 20, 50}, Elements(list.(*List)))
+        require.Equal(t, []int{10, 40, 30, 20, 50}, ElementsLeftToRight(list.(*List)))
+        require.Equal(t, []int{10, 40, 30, 20, 50}, ElementsRightToLeft(list.(*List)))
         fmt.Println("[10, 40, 30, 20, 50]. OK.")
-        list.Swap(two, four)
-        require.Equal(t, []int{10, 20, 30, 40, 50}, Elements(list.(*List)))
+        list.SwapItems(two, four)
+        require.Equal(t, []int{10, 20, 30, 40, 50}, ElementsLeftToRight(list.(*List)))
+        require.Equal(t, []int{10, 20, 30, 40, 50}, ElementsRightToLeft(list.(*List)))
         fmt.Println("[10, 20, 30, 40, 50]. OK.")
-        list.Swap(one, five)
-        require.Equal(t, []int{50, 20, 30, 40, 10}, Elements(list.(*List)))
+        list.SwapItems(one, five)
+        require.Equal(t, []int{50, 20, 30, 40, 10}, ElementsLeftToRight(list.(*List)))
+        require.Equal(t, []int{50, 20, 30, 40, 10}, ElementsRightToLeft(list.(*List)))
         fmt.Println("[50, 20, 30, 40, 10]. OK.")
-        list.Swap(one, five)
-        require.Equal(t, []int{10, 20, 30, 40, 50}, Elements(list.(*List)))
+        list.SwapItems(one, five)
+        require.Equal(t, []int{10, 20, 30, 40, 50}, ElementsLeftToRight(list.(*List)))
+        require.Equal(t, []int{10, 20, 30, 40, 50}, ElementsRightToLeft(list.(*List)))
         fmt.Println("[10, 20, 30, 40, 50]. OK.")
-        list.Swap(one, three)
-        require.Equal(t, []int{30, 20, 10, 40, 50}, Elements(list.(*List)))
+        list.SwapItems(one, three)
+        require.Equal(t, []int{30, 20, 10, 40, 50}, ElementsLeftToRight(list.(*List)))
+        require.Equal(t, []int{30, 20, 10, 40, 50}, ElementsRightToLeft(list.(*List)))
         fmt.Println("[30, 20, 10, 40, 50]. OK.")
-        list.Swap(one, three)
-        require.Equal(t, []int{10, 20, 30, 40, 50}, Elements(list.(*List)))
+        list.SwapItems(one, three)
+        require.Equal(t, []int{10, 20, 30, 40, 50}, ElementsLeftToRight(list.(*List)))
+        require.Equal(t, []int{10, 20, 30, 40, 50}, ElementsRightToLeft(list.(*List)))
         fmt.Println("[10, 20, 30, 40, 50]. OK.")
-        list.Swap(five, two)
-        require.Equal(t, []int{10, 50, 30, 40, 20}, Elements(list.(*List)))
+        list.SwapItems(five, two)
+        require.Equal(t, []int{10, 50, 30, 40, 20}, ElementsLeftToRight(list.(*List)))
+        require.Equal(t, []int{10, 50, 30, 40, 20}, ElementsRightToLeft(list.(*List)))
         fmt.Println("[10, 50, 30, 40, 20]. OK.")
-        list.Swap(two, five)
-        require.Equal(t, []int{10, 20, 30, 40, 50}, Elements(list.(*List)))
+        list.SwapItems(two, five)
+        require.Equal(t, []int{10, 20, 30, 40, 50}, ElementsLeftToRight(list.(*List)))
+        require.Equal(t, []int{10, 20, 30, 40, 50}, ElementsRightToLeft(list.(*List)))
         fmt.Println("[10, 20, 30, 40, 50]. OK.")
-        list.Swap(two, three)
-        require.Equal(t, []int{10, 30, 20, 40, 50}, Elements(list.(*List)))
+        list.SwapItems(two, three)
+        require.Equal(t, []int{10, 30, 20, 40, 50}, ElementsLeftToRight(list.(*List)))
+        require.Equal(t, []int{10, 30, 20, 40, 50}, ElementsRightToLeft(list.(*List)))
         fmt.Println("[10, 30, 20, 40, 50]. OK.")
-        list.Swap(two, three)
-        require.Equal(t, []int{10, 20, 30, 40, 50}, Elements(list.(*List)))
+        list.SwapItems(two, three)
+        require.Equal(t, []int{10, 20, 30, 40, 50}, ElementsLeftToRight(list.(*List)))
+        require.Equal(t, []int{10, 20, 30, 40, 50}, ElementsRightToLeft(list.(*List)))
         fmt.Println("[10, 20, 30, 40, 50]. OK.")
-        list.Swap(four, three)
-        require.Equal(t, []int{10, 20, 40, 30, 50}, Elements(list.(*List)))
+        list.SwapItems(four, three)
+        require.Equal(t, []int{10, 20, 40, 30, 50}, ElementsLeftToRight(list.(*List)))
+        require.Equal(t, []int{10, 20, 40, 30, 50}, ElementsRightToLeft(list.(*List)))
         fmt.Println("[10, 20, 40, 30, 50]. OK.")
-        list.Swap(five, three)
-        require.Equal(t, []int{10, 20, 40, 50, 30}, Elements(list.(*List)))
+        list.SwapItems(five, three)
+        require.Equal(t, []int{10, 20, 40, 50, 30}, ElementsLeftToRight(list.(*List)))
+        require.Equal(t, []int{10, 20, 40, 50, 30}, ElementsRightToLeft(list.(*List)))
         fmt.Println("[10, 20, 40, 50, 30]. OK.")
-        list.Swap(one, two)
-        require.Equal(t, []int{20, 10, 40, 50, 30}, Elements(list.(*List)))
+        list.SwapItems(one, two)
+        require.Equal(t, []int{20, 10, 40, 50, 30}, ElementsLeftToRight(list.(*List)))
+        require.Equal(t, []int{20, 10, 40, 50, 30}, ElementsRightToLeft(list.(*List)))
         fmt.Println("[20, 10, 40, 50, 30]. OK.")
-        list.Swap(one, two)
-        require.Equal(t, []int{10, 20, 40, 50, 30}, Elements(list.(*List)))
+        list.SwapItems(one, two)
+        require.Equal(t, []int{10, 20, 40, 50, 30}, ElementsLeftToRight(list.(*List)))
+        require.Equal(t, []int{10, 20, 40, 50, 30}, ElementsRightToLeft(list.(*List)))
         fmt.Println("[10, 20, 40, 50, 30]. OK.")
-        list.Swap(three, five)
-        require.Equal(t, []int{10, 20, 40, 30, 50}, Elements(list.(*List)))
+        list.SwapItems(three, five)
+        require.Equal(t, []int{10, 20, 40, 30, 50}, ElementsLeftToRight(list.(*List)))
+        require.Equal(t, []int{10, 20, 40, 30, 50}, ElementsRightToLeft(list.(*List)))
         fmt.Println("[10, 20, 40, 30, 50]. OK.")
-        list.Swap(three, four)
-        require.Equal(t, []int{10, 20, 30, 40, 50}, Elements(list.(*List)))
+        list.SwapItems(three, four)
+        require.Equal(t, []int{10, 20, 30, 40, 50}, ElementsLeftToRight(list.(*List)))
+        require.Equal(t, []int{10, 20, 30, 40, 50}, ElementsRightToLeft(list.(*List)))
         fmt.Println("[10, 20, 30, 40, 50]. OK.")
     })
 }
@@ -644,11 +655,11 @@ go test -v ./list.go ./list_stringer.go ./list_test.go  > list_test.go.txt
 
 [zero-value] is: 
 -------------------
-Item:  0xc00015c2a0
+ Item: 0xc00002e2e0
 -------------------
-Value: <nil>
-Left:  0x0
-Right: 0x0
+value: <nil>
+ left: 0x0
+right: 0x0
 -------------------
 
 === RUN   TestList/ListItem_direct_and_vice_versa_referencies_test.
@@ -657,53 +668,53 @@ Right: 0x0
 
 [1] is: 
 -------------------
-Item:  0xc00015c2c0
+ Item: 0xc00002e300
 -------------------
-Value: 1
-Left:  0x0
-Right: 0x0
+value: 1
+ left: 0x0
+right: 0x0
 -------------------
 
 add [2]: 
 -------------------
-Item:  0xc00015c2e0
+ Item: 0xc00002e320
 -------------------
-Value: 2
-Left:  0xc00015c2c0
-Right: 0x0
+value: 2
+ left: 0xc00002e300
+right: 0x0
 -------------------
 
 [1] become: 
 -------------------
-Item:  0xc00015c2c0
+ Item: 0xc00002e300
 -------------------
-Value: 1
-Left:  0x0
-Right: 0xc00015c2e0
+value: 1
+ left: 0x0
+right: 0xc00002e320
 -------------------
 
 add [3]: 
 -------------------
-Item:  0xc00015c300
+ Item: 0xc00002e340
 -------------------
-Value: 3
-Left:  0xc00015c2e0
-Right: 0x0
+value: 3
+ left: 0xc00002e320
+right: 0x0
 -------------------
 
 [2] become: 
 -------------------
-Item:  0xc00015c2e0
+ Item: 0xc00002e320
 -------------------
-Value: 2
-Left:  0xc00015c2c0
-Right: 0xc00015c300
+value: 2
+ left: 0xc00002e300
+right: 0xc00002e340
 -------------------
 
-first.Right().Right().Right() is nil. OK.
-first.Right().Right() is third. OK.
-third.Left().Left().Left() is nil. OK.
-third.Left().Left() is first. OK.
+first.RightNeighbour().RightNeighbour().RightNeighbour() is nil. OK.
+first.RightNeighbour().RightNeighbour() is third. OK.
+third.LeftNeighbour().LeftNeighbour().LeftNeighbour() is nil. OK.
+third.LeftNeighbour().LeftNeighbour() is first. OK.
 
 === RUN   TestList/Empty_List_test.
 
@@ -727,14 +738,14 @@ List was:
 
 Item was: 
 -------------------
-Item:  0xc00015c320
+ Item: 0xc00002e360
 -------------------
-Value: 1
-Left:  0x0
-Right: 0x0
+value: 1
+ left: 0x0
+right: 0x0
 -------------------
 
-list.LeftEnd() and list.RightEnd() is item. OK.
+list.LeftEdge() and list.RightEdge() is item. OK.
 
 List become:
  
@@ -743,11 +754,11 @@ List become:
     L|R
      |v
 -------------------
-Item:  0xc00015c320
+ Item: 0xc00002e360
 -------------------
-Value: 1
-Left:  0x0
-Right: 0x0
+value: 1
+ left: 0x0
+right: 0x0
 -------------------
     ^|
     L|R
@@ -767,99 +778,61 @@ List was:
 Item [1] become:
  
 -------------------
-Item:  0xc00015c340
+ Item: 0xc00002e380
 -------------------
-Value: 1
-Left:  0x0
-Right: 0x0
--------------------
-
-list.LeftEnd() become:
- 
--------------------
-Item:  0xc00015c340
--------------------
-Value: 1
-Left:  0x0
-Right: 0x0
+value: 1
+ left: 0x0
+right: 0x0
 -------------------
 
-list.RightEnd() become:
+list.LeftEdge() become:
  
 -------------------
-Item:  0xc00015c340
+ Item: 0xc00002e380
 -------------------
-Value: 1
-Left:  0x0
-Right: 0x0
+value: 1
+ left: 0x0
+right: 0x0
+-------------------
+
+list.RightEdge() become:
+ 
+-------------------
+ Item: 0xc00002e380
+-------------------
+value: 1
+ left: 0x0
+right: 0x0
 -------------------
 
 Item [2] become:
  
 -------------------
-Item:  0xc00015c360
+ Item: 0xc00002e3a0
 -------------------
-Value: 2
-Left:  0x0
-Right: 0xc00015c340
--------------------
-
-list.LeftEnd() become:
- 
--------------------
-Item:  0xc00015c360
--------------------
-Value: 2
-Left:  0x0
-Right: 0xc00015c340
+value: 2
+ left: 0x0
+right: 0xc00002e380
 -------------------
 
-list.RightEnd() become:
+list.LeftEdge() become:
  
 -------------------
-Item:  0xc00015c340
+ Item: 0xc00002e3a0
 -------------------
-Value: 1
-Left:  0xc00015c360
-Right: 0x0
+value: 2
+ left: 0x0
+right: 0xc00002e380
 -------------------
 
-List become:
- 
- (nil:0x0)
-    ^|
-    L|R
-     |v
--------------------
-Item:  0xc00015c360
--------------------
-Value: 2
-Left:  0x0
-Right: 0xc00015c340
--------------------
-    ^|
-    L|R
-     |v
--------------------
-Item:  0xc00015c340
--------------------
-Value: 1
-Left:  0xc00015c360
-Right: 0x0
--------------------
-    ^|
-    L|R
-     |v
- (nil:0x0)
-
-Was removed:
+list.RightEdge() become:
  
 -------------------
-Item:  0xc00015c360
+ Item: 0xc00002e380
 -------------------
-Value: 2
-Left:  0x0
-Right: 0xc00015c340
+value: 1
+ left: 0xc00002e3a0
+right: 0x0
 -------------------
 
 List become:
@@ -869,11 +842,21 @@ List become:
     L|R
      |v
 -------------------
-Item:  0xc00015c340
+ Item: 0xc00002e3a0
 -------------------
-Value: 1
-Left:  0x0
-Right: 0x0
+value: 2
+ left: 0x0
+right: 0xc00002e380
+-------------------
+    ^|
+    L|R
+     |v
+-------------------
+ Item: 0xc00002e380
+-------------------
+value: 1
+ left: 0xc00002e3a0
+right: 0x0
 -------------------
     ^|
     L|R
@@ -883,11 +866,39 @@ Right: 0x0
 Was removed:
  
 -------------------
-Item:  0xc00015c340
+ Item: 0xc00002e3a0
 -------------------
-Value: 1
-Left:  0x0
-Right: 0x0
+value: 2
+ left: 0x0
+right: 0xc00002e380
+-------------------
+
+List become:
+ 
+ (nil:0x0)
+    ^|
+    L|R
+     |v
+-------------------
+ Item: 0xc00002e380
+-------------------
+value: 1
+ left: 0x0
+right: 0x0
+-------------------
+    ^|
+    L|R
+     |v
+ (nil:0x0)
+
+Was removed:
+ 
+-------------------
+ Item: 0xc00002e380
+-------------------
+value: 1
+ left: 0x0
+right: 0x0
 -------------------
 
 List become:
@@ -910,14 +921,14 @@ middle.Value() is 20. OK.
 middle was removed. OK.
 Forward stroke check for [10, 30]. OK.
 List [10, 30] mixing values {40, 50, 60, 70, 80} with mod(2, index).
-list.Len() is 7. OK.
-list.LeftEnd().Value() is 80. OK.
-list.RightEnd().Value() is 70. OK.
+list.Length() is 7. OK.
+list.LeftEdge().Value() is 80. OK.
+list.RightEdge().Value() is 70. OK.
 Forward stroke check for [80, 60, 40, 10, 30, 50, 70]. OK.
 Remove right and push back to right - check for [80, 60, 40, 10, 30, 50, 70]. OK.
 Remove left and push back to left - check for [80, 60, 40, 10, 30, 50, 70]. OK.
-Check for list.LeftEnd() is 80 and list.RightEnd() is 70. OK.
-Check for list.LeftEnd().Left() and list.RightEnd().Right() is nils. OK.
+Check for list.LeftEdge() is 80 and list.RightEdge() is 70. OK.
+Check for list.LeftEdge().Left() and list.RightEdge().Right() is nils. OK.
 --- PASS: TestListComplex (0.00s)
     --- PASS: TestListComplex/Сomplex_List_processing_test. (0.00s)
 === RUN   TestListSwap
@@ -943,15 +954,15 @@ swap different element-pairs
 --- PASS: TestListSwap (0.00s)
     --- PASS: TestListSwap/List_swap_test. (0.00s)
 PASS
-ok  	command-line-arguments	0.008s
+ok  	command-line-arguments	0.006s
 
 ```
+
+Документация:
 
 ```shell
 go doc -all ./ > list.doc.txt
 ```
-
-Документация:
 
 ```text
 
@@ -959,8 +970,8 @@ go doc -all ./ > list.doc.txt
 FUNCTIONS
 
 func Eq(x, y ListItem) bool
-    Eq(x, y ListItem) - элементs равны тогда и только тогда, когда это один и
-    тот же элемент.
+    Eq(x, y ListItem) - элементы равны тогда и только тогда, когда это один и
+    тот же элемент по памяти.
 
 
 TYPES
@@ -973,27 +984,32 @@ type List struct {
 func (list *List) Contains(item *ListItem) bool
     Contains(item *ListItem) - проверить, есть ли элемент в списке.
 
-func (list *List) LeftEnd() *ListItem
-    LeftEnd() - получить элемент из левого края двусвязного списка.
+func (list *List) LeftEdge() *ListItem
+    LeftEdge() - получить элемент из левого края двусвязного списка.
 
-func (list *List) Len() int
-    Len() - получить длину двусвязного списка.
+func (list *List) Length() int
+    Length() - получить длину двусвязного списка.
 
-func (list *List) PushToLeftEnd(value interface{}) *ListItem
-    PushToLeftEnd() - добавить значение в левый край двусвязного списка.
+func (list *List) MoveToLeftEdge(item *ListItem) error
+    MoveToFront(item *ListItem) - переместить элемент в начало двусвязного
+    списка.
 
-func (list *List) PushToRightEnd(value interface{}) *ListItem
-    PushToRightEnd(any interface{}) - добавить значение в правый край
+func (list *List) PushToLeftEdge(value interface{}) *ListItem
+    PushToLeftEdge(value interface{}) - добавить значение в левый край
+    двусвязного списка.
+
+func (list *List) PushToRightEdge(value interface{}) *ListItem
+    PushToRightEdge(value interface{}) - добавить значение в правый край
     двусвязного списка.
 
 func (list *List) Remove(item *ListItem) (*ListItem, error)
     Remove(item *ListItem) - удалить элемент из двусвязного списка.
 
-func (list *List) RightEnd() *ListItem
-    RightEnd() - получить элемент из правого края двусвязного списка.
+func (list *List) RightEdge() *ListItem
+    RightEdge() - получить элемент из правого края двусвязного списка.
 
 func (list *List) String() string
-    String - наглядное представление всего двусвязного списка.
+    String() - представление двусвязного списка.
 
     Например,
 
@@ -1012,20 +1028,20 @@ func (list *List) String() string
             L|R
              |v
         -------------------
-        Item:  0xc00002e3a0 <--------┐
+         Item: 0xc00002e3a0 <--------┐
         -------------------          |
         Value: 2                     |
-        Left:  0x0                   |
+         Left: 0x0                   |
         Right: 0xc00002e380  >>>-----|---┐ Right 0xc00002e380
         -------------------          |   | ссылается на
             ^|                       |   | блок 0xc00002e380
             L|R                      |   |
              |v                      |   |
         -------------------          |   |
-        Item:  0xc00002e380  <-----------┘
+         Item: 0xc00002e380  <-----------┘
         -------------------          | Left 0xc00002e3a0
         Value: 1                     | ссылается на
-        Left:  0xc00002e3a0  >>>-----┘ блок 0xc00002e3a0
+         Left: 0xc00002e3a0  >>>-----┘ блок 0xc00002e3a0
         Right: 0x0
         -------------------
             ^|
@@ -1033,29 +1049,36 @@ func (list *List) String() string
              |v
          (nil:0x0)
 
-func (list *List) Swap(x, y *ListItem) error
+func (list *List) SwapItems(x, y *ListItem) error
+    SwapItems(x, y *ListItem) - поменять элементы двусвязного списка местами.
 
 type ListItem struct {
 	// Has unexported fields.
 }
     ListItem - структура элемента двусвязного списка.
 
-func (listItem *ListItem) Left() *ListItem
-    Left() - получить стоящий слева элемент.
+func (listItem *ListItem) LeftNeighbour() *ListItem
+    LeftNeighbour() - получить стоящий слева элемент.
 
-func (listItem *ListItem) Right() *ListItem
-    Right() - получить стоящий справа элемент.
+func (listItem *ListItem) RightNeighbour() *ListItem
+    RightNeighbour() - получить стоящий справа элемент.
+
+func (listItem *ListItem) SetLeftNeighbour(item *ListItem)
+    SetLeftNeighbour(item *ListItem) - установить стоящий слева элемент.
+
+func (listItem *ListItem) SetRightNeighbour(item *ListItem)
+    SetRightNeighbour(item *ListItem) - установить стоящий слева элемент.
 
 func (listItem *ListItem) String() string
-    String - наглядное представление значения элемента двусвязного списка.
+    String() - представление элемента двусвязного списка.
 
     Например,
 
         -------------------             -------------------
-        Item:  0xc00002e400             Item: 0xc00002e400
+         Item: 0xc00002e400              Item: 0xc00002e400
         -------------------             -------------------
         Value: 30                или    Value: 30
-        Left:  0xc00002e3c0             Left:  0x0
+         Left: 0xc00002e3c0              Left: 0x0
         Right: 0xc00002e440             Right: 0x0
         -------------------             -------------------
 
@@ -1063,22 +1086,625 @@ func (listItem *ListItem) Value() interface{}
     Value() - получить значение из элемента.
 
 type Lister interface {
-	Len() int
-	LeftEnd() *ListItem
-	RightEnd() *ListItem
-	PushToLeftEnd(value interface{}) *ListItem
-	PushToRightEnd(value interface{}) *ListItem
+	Length() int
+	LeftEdge() *ListItem
+	RightEdge() *ListItem
+	PushToLeftEdge(value interface{}) *ListItem
+	PushToRightEdge(value interface{}) *ListItem
 	Remove(item *ListItem) (*ListItem, error)
-	Swap(x, y *ListItem) error
+	SwapItems(x, y *ListItem) error
 }
     Lister - интерфейс двусвязного списка.
 
 func NewList() Lister
 
-type Template struct {
-	// Has unexported fields.
+
+```
+
+## Сортировка
+
+Пример сортировки в соответствии с интерфейсом sort.Sort() - в случае, когда сортируем не слайсы и sort.Slice() не подходит.
+
+Тестирование:
+
+```go
+package main
+
+import (
+    "fmt"
+    "testing"
+
+    "github.com/stretchr/testify/require"
+)
+
+// go test -v list.go list_string.go list_test.go
+
+func ElementsLeftToRight(list *List) []int {
+    elements := make([]int, 0, list.Length())
+    for i := list.LeftEdge(); i != nil; i = i.RightNeighbour() {
+        elements = append(elements, i.Value().(int))
+    }
+    return elements
 }
 
+func ElementsRightToLeft(list *List) []int {
+    elements := make([]int, 0, list.Length())
+    for i := list.RightEdge(); i != nil; i = i.LeftNeighbour() {
+        elements = append([]int{i.Value().(int)}, elements...)
+    }
+    return elements
+}
+
+func TestList(t *testing.T) {
+    t.Run("Zero-value ListItem test.", func(t *testing.T) {
+        zeroValueItem := ListItem{}
+        require.Nil(t, zeroValueItem.Value())
+        require.Nil(t, zeroValueItem.LeftNeighbour())
+        require.Nil(t, zeroValueItem.RightNeighbour())
+        fmt.Println("\n[zero-value] is:", &zeroValueItem)
+        fmt.Println()
+    })
+
+    t.Run("ListItem direct and vice versa referencies test.", func(t *testing.T) {
+        fmt.Println("\n[1] <--> [2] <--> [3]")
+        first := &ListItem{
+            value:          1,
+            leftNeighbour:  nil,
+            rightNeighbour: nil,
+        }
+        fmt.Println("\n[1] is:", first)
+
+        second := &ListItem{
+            value:          2,
+            leftNeighbour:  first,
+            rightNeighbour: nil,
+        }
+
+        first.SetRightNeighbour(second)
+        fmt.Println("\nadd [2]:", second)
+        fmt.Println("\n[1] become:", first)
+
+        third := ListItem{
+            value:          3,
+            leftNeighbour:  second,
+            rightNeighbour: nil,
+        }
+
+        second.SetRightNeighbour(&third)
+        fmt.Println("\nadd [3]:", &third)
+        fmt.Println("\n[2] become:", second)
+        fmt.Println()
+
+        fmt.Println("first.RightNeighbour().RightNeighbour().RightNeighbour() is nil. OK.")
+        require.Nil(t, first.RightNeighbour().RightNeighbour().RightNeighbour())
+        fmt.Println("first.RightNeighbour().RightNeighbour() is third. OK.")
+        require.Equal(t, &third, first.RightNeighbour().RightNeighbour())
+        fmt.Println("third.LeftNeighbour().LeftNeighbour().LeftNeighbour() is nil. OK.")
+        require.Nil(t, third.LeftNeighbour().LeftNeighbour().LeftNeighbour())
+        fmt.Println("third.LeftNeighbour().LeftNeighbour() is first. OK.")
+        require.Equal(t, first, third.LeftNeighbour().LeftNeighbour())
+        fmt.Println()
+    })
+
+    t.Run("Empty List test.", func(t *testing.T) {
+        list := NewList()
+        require.Equal(t, 0, list.Length())
+        require.Nil(t, list.LeftEdge())
+        require.Nil(t, list.RightEdge())
+        fmt.Println("\nList is:\n", list)
+        fmt.Println()
+    })
+
+    t.Run("List init test.", func(t *testing.T) {
+        list := NewList()
+
+        fmt.Println("\nList was:\n", list)
+
+        item := list.PushToLeftEdge(1)
+        fmt.Println("\nItem was:", item)
+        require.Equal(t, item, list.LeftEdge())
+        require.Equal(t, item, list.RightEdge())
+        fmt.Println()
+        fmt.Println("list.LeftEdge() and list.RightEdge() is item. OK.")
+        fmt.Println("\nList become:\n", list)
+        fmt.Println()
+    })
+
+    t.Run("Little List test.", func(t *testing.T) {
+        list := NewList()
+        fmt.Println("\nList was:\n", list)
+
+        itemFirst := list.PushToLeftEdge(1) // [1]
+        fmt.Println("\nItem [1] become:\n", itemFirst)
+
+        leftEnd := list.LeftEdge()
+        fmt.Println("\nlist.LeftEdge() become:\n", leftEnd)
+        rightEnd := list.RightEdge()
+        fmt.Println("\nlist.RightEdge() become:\n", rightEnd)
+
+        itemSecond := list.PushToLeftEdge(2) // [2]
+        fmt.Println("\nItem [2] become:\n", itemSecond)
+
+        leftEnd = list.LeftEdge()
+        fmt.Println("\nlist.LeftEdge() become:\n", leftEnd)
+        rightEnd = list.RightEdge()
+        fmt.Println("\nlist.RightEdge() become:\n", rightEnd)
+        fmt.Println("\nList become:\n", list)
+        require.Equal(t, itemSecond, list.LeftEdge())
+        require.Equal(t, itemFirst, list.RightEdge())
+
+        someItem, _ := list.Remove(list.LeftEdge())
+        fmt.Println("\nWas removed:\n", someItem)
+        require.Equal(t, itemSecond, someItem)
+
+        fmt.Println("\nList become:\n", list)
+
+        require.Equal(t, list.LeftEdge(), list.RightEdge())
+        require.Nil(t, list.LeftEdge().LeftNeighbour())
+        require.Nil(t, list.LeftEdge().RightNeighbour())
+
+        someItem, _ = list.Remove(list.LeftEdge())
+        fmt.Println("\nWas removed:\n", someItem)
+        require.Equal(t, itemFirst, someItem)
+
+        fmt.Println("\nList become:\n", list)
+
+        require.Equal(t, list.LeftEdge(), list.RightEdge())
+        require.Nil(t, list.LeftEdge())
+        require.Nil(t, list.RightEdge())
+    })
+}
+
+func TestListComplex(t *testing.T) {
+    t.Run("Сomplex List processing test.", func(t *testing.T) {
+        list := NewList()
+        list.PushToRightEdge(10) // [10]
+        list.PushToRightEdge(20) // [10, 20]
+        list.PushToRightEdge(30) // [10, 20, 30]
+        require.Equal(t, []int{10, 20, 30}, ElementsLeftToRight(list.(*List)))
+        require.Equal(t, []int{10, 20, 30}, ElementsRightToLeft(list.(*List)))
+        fmt.Println("Forward stroke check for [10, 20, 30]. OK.")
+        require.Equal(t, 3, list.Length())
+        middle := list.LeftEdge().RightNeighbour()
+        require.Equal(t, middle.Value(), 20)
+        fmt.Printf("middle.Value() is %v. OK.\n", middle.Value())
+        list.Remove(middle)
+        fmt.Printf("middle was removed. OK.\n")
+        require.Equal(t, 2, list.Length())
+        require.Equal(t, []int{10, 30}, ElementsLeftToRight(list.(*List)))
+        require.Equal(t, []int{10, 30}, ElementsRightToLeft(list.(*List)))
+        fmt.Println("Forward stroke check for [10, 30]. OK.")
+        for i, v := range [...]int{40, 50, 60, 70, 80} {
+            if i%2 == 0 {
+                list.PushToLeftEdge(v)
+            } else {
+                list.PushToRightEdge(v)
+            }
+        } // [80, 60, 40, 10, 30, 50, 70]
+        fmt.Println("List [10, 30] mixing values {40, 50, 60, 70, 80} with mod(2, index).")
+
+        require.Equal(t, 7, list.Length())
+        fmt.Printf("list.Length() is %v. OK.\n", list.Length())
+        require.Equal(t, 80, list.LeftEdge().Value())
+        fmt.Printf("list.LeftEdge().Value() is %v. OK.\n", list.LeftEdge().Value())
+        require.Equal(t, 70, list.RightEdge().Value())
+        fmt.Printf("list.RightEdge().Value() is %v. OK.\n", list.RightEdge().Value())
+
+        require.Equal(t, []int{80, 60, 40, 10, 30, 50, 70}, ElementsLeftToRight(list.(*List)))
+        require.Equal(t, []int{80, 60, 40, 10, 30, 50, 70}, ElementsRightToLeft(list.(*List)))
+        fmt.Println("Forward stroke check for [80, 60, 40, 10, 30, 50, 70]. OK.")
+
+        rightEnd := list.RightEdge()
+        list.Remove(rightEnd)
+        list.PushToRightEdge(rightEnd.Value())
+        fmt.Println("Remove right and push back to right - check for [80, 60, 40, 10, 30, 50, 70]. OK.")
+        leftEnd, _ := list.Remove(list.LeftEdge())
+        list.PushToLeftEdge(leftEnd.Value())
+        fmt.Println("Remove left and push back to left - check for [80, 60, 40, 10, 30, 50, 70]. OK.")
+        // - check for nil-refs of first and last
+        require.Equal(t, list.LeftEdge().Value(), 80)
+        require.Equal(t, list.RightEdge().Value(), 70)
+        fmt.Println("Check for list.LeftEdge() is 80 and list.RightEdge() is 70. OK.")
+        require.Nil(t, list.LeftEdge().LeftNeighbour())
+        require.Nil(t, list.RightEdge().RightNeighbour())
+        fmt.Println("Check for list.LeftEdge().Left() and list.RightEdge().Right() is nils. OK.")
+
+    })
+}
+
+func TestListSwap(t *testing.T) {
+    t.Run("List swap test.", func(t *testing.T) {
+        list := NewList()
+        one := list.PushToRightEdge(10)   // [10]
+        two := list.PushToRightEdge(20)   // [10, 20]
+        three := list.PushToRightEdge(30) // [10, 20, 30]
+        four := list.PushToRightEdge(40)  // [10, 20, 30, 40]
+        five := list.PushToRightEdge(50)  // [10, 20, 30, 40, 50]
+        require.Equal(t, []int{10, 20, 30, 40, 50}, ElementsLeftToRight(list.(*List)))
+        require.Equal(t, []int{10, 20, 30, 40, 50}, ElementsRightToLeft(list.(*List)))
+        fmt.Println("[10, 20, 30, 40, 50]. OK.")
+        list.SwapItems(two, four)
+        fmt.Println("swap different element-pairs")
+        require.Equal(t, []int{10, 40, 30, 20, 50}, ElementsLeftToRight(list.(*List)))
+        require.Equal(t, []int{10, 40, 30, 20, 50}, ElementsRightToLeft(list.(*List)))
+        fmt.Println("[10, 40, 30, 20, 50]. OK.")
+        list.SwapItems(two, four)
+        require.Equal(t, []int{10, 20, 30, 40, 50}, ElementsLeftToRight(list.(*List)))
+        require.Equal(t, []int{10, 20, 30, 40, 50}, ElementsRightToLeft(list.(*List)))
+        fmt.Println("[10, 20, 30, 40, 50]. OK.")
+        list.SwapItems(one, five)
+        require.Equal(t, []int{50, 20, 30, 40, 10}, ElementsLeftToRight(list.(*List)))
+        require.Equal(t, []int{50, 20, 30, 40, 10}, ElementsRightToLeft(list.(*List)))
+        fmt.Println("[50, 20, 30, 40, 10]. OK.")
+        list.SwapItems(one, five)
+        require.Equal(t, []int{10, 20, 30, 40, 50}, ElementsLeftToRight(list.(*List)))
+        require.Equal(t, []int{10, 20, 30, 40, 50}, ElementsRightToLeft(list.(*List)))
+        fmt.Println("[10, 20, 30, 40, 50]. OK.")
+        list.SwapItems(one, three)
+        require.Equal(t, []int{30, 20, 10, 40, 50}, ElementsLeftToRight(list.(*List)))
+        require.Equal(t, []int{30, 20, 10, 40, 50}, ElementsRightToLeft(list.(*List)))
+        fmt.Println("[30, 20, 10, 40, 50]. OK.")
+        list.SwapItems(one, three)
+        require.Equal(t, []int{10, 20, 30, 40, 50}, ElementsLeftToRight(list.(*List)))
+        require.Equal(t, []int{10, 20, 30, 40, 50}, ElementsRightToLeft(list.(*List)))
+        fmt.Println("[10, 20, 30, 40, 50]. OK.")
+        list.SwapItems(five, two)
+        require.Equal(t, []int{10, 50, 30, 40, 20}, ElementsLeftToRight(list.(*List)))
+        require.Equal(t, []int{10, 50, 30, 40, 20}, ElementsRightToLeft(list.(*List)))
+        fmt.Println("[10, 50, 30, 40, 20]. OK.")
+        list.SwapItems(two, five)
+        require.Equal(t, []int{10, 20, 30, 40, 50}, ElementsLeftToRight(list.(*List)))
+        require.Equal(t, []int{10, 20, 30, 40, 50}, ElementsRightToLeft(list.(*List)))
+        fmt.Println("[10, 20, 30, 40, 50]. OK.")
+        list.SwapItems(two, three)
+        require.Equal(t, []int{10, 30, 20, 40, 50}, ElementsLeftToRight(list.(*List)))
+        require.Equal(t, []int{10, 30, 20, 40, 50}, ElementsRightToLeft(list.(*List)))
+        fmt.Println("[10, 30, 20, 40, 50]. OK.")
+        list.SwapItems(two, three)
+        require.Equal(t, []int{10, 20, 30, 40, 50}, ElementsLeftToRight(list.(*List)))
+        require.Equal(t, []int{10, 20, 30, 40, 50}, ElementsRightToLeft(list.(*List)))
+        fmt.Println("[10, 20, 30, 40, 50]. OK.")
+        list.SwapItems(four, three)
+        require.Equal(t, []int{10, 20, 40, 30, 50}, ElementsLeftToRight(list.(*List)))
+        require.Equal(t, []int{10, 20, 40, 30, 50}, ElementsRightToLeft(list.(*List)))
+        fmt.Println("[10, 20, 40, 30, 50]. OK.")
+        list.SwapItems(five, three)
+        require.Equal(t, []int{10, 20, 40, 50, 30}, ElementsLeftToRight(list.(*List)))
+        require.Equal(t, []int{10, 20, 40, 50, 30}, ElementsRightToLeft(list.(*List)))
+        fmt.Println("[10, 20, 40, 50, 30]. OK.")
+        list.SwapItems(one, two)
+        require.Equal(t, []int{20, 10, 40, 50, 30}, ElementsLeftToRight(list.(*List)))
+        require.Equal(t, []int{20, 10, 40, 50, 30}, ElementsRightToLeft(list.(*List)))
+        fmt.Println("[20, 10, 40, 50, 30]. OK.")
+        list.SwapItems(one, two)
+        require.Equal(t, []int{10, 20, 40, 50, 30}, ElementsLeftToRight(list.(*List)))
+        require.Equal(t, []int{10, 20, 40, 50, 30}, ElementsRightToLeft(list.(*List)))
+        fmt.Println("[10, 20, 40, 50, 30]. OK.")
+        list.SwapItems(three, five)
+        require.Equal(t, []int{10, 20, 40, 30, 50}, ElementsLeftToRight(list.(*List)))
+        require.Equal(t, []int{10, 20, 40, 30, 50}, ElementsRightToLeft(list.(*List)))
+        fmt.Println("[10, 20, 40, 30, 50]. OK.")
+        list.SwapItems(three, four)
+        require.Equal(t, []int{10, 20, 30, 40, 50}, ElementsLeftToRight(list.(*List)))
+        require.Equal(t, []int{10, 20, 30, 40, 50}, ElementsRightToLeft(list.(*List)))
+        fmt.Println("[10, 20, 30, 40, 50]. OK.")
+    })
+}
+
+```
+
+```shell
+go test -v ./list.go ./list_stringer.go ./list_sort_test.go  > list_sort_test.go.txt
+```
+
+Лог (список упорядочился):
+
+```text
+=== RUN   TestList
+=== RUN   TestList/Zero-value_ListItem_test.
+
+[zero-value] is: 
+-------------------
+ Item: 0xc00002e2e0
+-------------------
+value: <nil>
+ left: 0x0
+right: 0x0
+-------------------
+
+=== RUN   TestList/ListItem_direct_and_vice_versa_referencies_test.
+
+[1] <--> [2] <--> [3]
+
+[1] is: 
+-------------------
+ Item: 0xc00002e300
+-------------------
+value: 1
+ left: 0x0
+right: 0x0
+-------------------
+
+add [2]: 
+-------------------
+ Item: 0xc00002e320
+-------------------
+value: 2
+ left: 0xc00002e300
+right: 0x0
+-------------------
+
+[1] become: 
+-------------------
+ Item: 0xc00002e300
+-------------------
+value: 1
+ left: 0x0
+right: 0xc00002e320
+-------------------
+
+add [3]: 
+-------------------
+ Item: 0xc00002e340
+-------------------
+value: 3
+ left: 0xc00002e320
+right: 0x0
+-------------------
+
+[2] become: 
+-------------------
+ Item: 0xc00002e320
+-------------------
+value: 2
+ left: 0xc00002e300
+right: 0xc00002e340
+-------------------
+
+first.RightNeighbour().RightNeighbour().RightNeighbour() is nil. OK.
+first.RightNeighbour().RightNeighbour() is third. OK.
+third.LeftNeighbour().LeftNeighbour().LeftNeighbour() is nil. OK.
+third.LeftNeighbour().LeftNeighbour() is first. OK.
+
+=== RUN   TestList/Empty_List_test.
+
+List is:
+ 
+ (nil:0x0)
+    ^|
+    L|R
+     |v
+ (nil:0x0)
+
+=== RUN   TestList/List_init_test.
+
+List was:
+ 
+ (nil:0x0)
+    ^|
+    L|R
+     |v
+ (nil:0x0)
+
+Item was: 
+-------------------
+ Item: 0xc00002e360
+-------------------
+value: 1
+ left: 0x0
+right: 0x0
+-------------------
+
+list.LeftEdge() and list.RightEdge() is item. OK.
+
+List become:
+ 
+ (nil:0x0)
+    ^|
+    L|R
+     |v
+-------------------
+ Item: 0xc00002e360
+-------------------
+value: 1
+ left: 0x0
+right: 0x0
+-------------------
+    ^|
+    L|R
+     |v
+ (nil:0x0)
+
+=== RUN   TestList/Little_List_test.
+
+List was:
+ 
+ (nil:0x0)
+    ^|
+    L|R
+     |v
+ (nil:0x0)
+
+Item [1] become:
+ 
+-------------------
+ Item: 0xc00002e380
+-------------------
+value: 1
+ left: 0x0
+right: 0x0
+-------------------
+
+list.LeftEdge() become:
+ 
+-------------------
+ Item: 0xc00002e380
+-------------------
+value: 1
+ left: 0x0
+right: 0x0
+-------------------
+
+list.RightEdge() become:
+ 
+-------------------
+ Item: 0xc00002e380
+-------------------
+value: 1
+ left: 0x0
+right: 0x0
+-------------------
+
+Item [2] become:
+ 
+-------------------
+ Item: 0xc00002e3a0
+-------------------
+value: 2
+ left: 0x0
+right: 0xc00002e380
+-------------------
+
+list.LeftEdge() become:
+ 
+-------------------
+ Item: 0xc00002e3a0
+-------------------
+value: 2
+ left: 0x0
+right: 0xc00002e380
+-------------------
+
+list.RightEdge() become:
+ 
+-------------------
+ Item: 0xc00002e380
+-------------------
+value: 1
+ left: 0xc00002e3a0
+right: 0x0
+-------------------
+
+List become:
+ 
+ (nil:0x0)
+    ^|
+    L|R
+     |v
+-------------------
+ Item: 0xc00002e3a0
+-------------------
+value: 2
+ left: 0x0
+right: 0xc00002e380
+-------------------
+    ^|
+    L|R
+     |v
+-------------------
+ Item: 0xc00002e380
+-------------------
+value: 1
+ left: 0xc00002e3a0
+right: 0x0
+-------------------
+    ^|
+    L|R
+     |v
+ (nil:0x0)
+
+Was removed:
+ 
+-------------------
+ Item: 0xc00002e3a0
+-------------------
+value: 2
+ left: 0x0
+right: 0xc00002e380
+-------------------
+
+List become:
+ 
+ (nil:0x0)
+    ^|
+    L|R
+     |v
+-------------------
+ Item: 0xc00002e380
+-------------------
+value: 1
+ left: 0x0
+right: 0x0
+-------------------
+    ^|
+    L|R
+     |v
+ (nil:0x0)
+
+Was removed:
+ 
+-------------------
+ Item: 0xc00002e380
+-------------------
+value: 1
+ left: 0x0
+right: 0x0
+-------------------
+
+List become:
+ 
+ (nil:0x0)
+    ^|
+    L|R
+     |v
+ (nil:0x0)
+--- PASS: TestList (0.00s)
+    --- PASS: TestList/Zero-value_ListItem_test. (0.00s)
+    --- PASS: TestList/ListItem_direct_and_vice_versa_referencies_test. (0.00s)
+    --- PASS: TestList/Empty_List_test. (0.00s)
+    --- PASS: TestList/List_init_test. (0.00s)
+    --- PASS: TestList/Little_List_test. (0.00s)
+=== RUN   TestListComplex
+=== RUN   TestListComplex/Сomplex_List_processing_test.
+Forward stroke check for [10, 20, 30]. OK.
+middle.Value() is 20. OK.
+middle was removed. OK.
+Forward stroke check for [10, 30]. OK.
+List [10, 30] mixing values {40, 50, 60, 70, 80} with mod(2, index).
+list.Length() is 7. OK.
+list.LeftEdge().Value() is 80. OK.
+list.RightEdge().Value() is 70. OK.
+Forward stroke check for [80, 60, 40, 10, 30, 50, 70]. OK.
+Remove right and push back to right - check for [80, 60, 40, 10, 30, 50, 70]. OK.
+Remove left and push back to left - check for [80, 60, 40, 10, 30, 50, 70]. OK.
+Check for list.LeftEdge() is 80 and list.RightEdge() is 70. OK.
+Check for list.LeftEdge().Left() and list.RightEdge().Right() is nils. OK.
+--- PASS: TestListComplex (0.00s)
+    --- PASS: TestListComplex/Сomplex_List_processing_test. (0.00s)
+=== RUN   TestListSwap
+=== RUN   TestListSwap/List_swap_test.
+[10, 20, 30, 40, 50]. OK.
+swap different element-pairs
+[10, 40, 30, 20, 50]. OK.
+[10, 20, 30, 40, 50]. OK.
+[50, 20, 30, 40, 10]. OK.
+[10, 20, 30, 40, 50]. OK.
+[30, 20, 10, 40, 50]. OK.
+[10, 20, 30, 40, 50]. OK.
+[10, 50, 30, 40, 20]. OK.
+[10, 20, 30, 40, 50]. OK.
+[10, 30, 20, 40, 50]. OK.
+[10, 20, 30, 40, 50]. OK.
+[10, 20, 40, 30, 50]. OK.
+[10, 20, 40, 50, 30]. OK.
+[20, 10, 40, 50, 30]. OK.
+[10, 20, 40, 50, 30]. OK.
+[10, 20, 40, 30, 50]. OK.
+[10, 20, 30, 40, 50]. OK.
+--- PASS: TestListSwap (0.00s)
+    --- PASS: TestListSwap/List_swap_test. (0.00s)
+PASS
+ok  	command-line-arguments	0.006s
 
 ```
 

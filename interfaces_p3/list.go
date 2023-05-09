@@ -6,19 +6,29 @@ import (
 
 // ListItem - структура элемента двусвязного списка.
 type ListItem struct {
-	value interface{}
-	left  *ListItem
-	right *ListItem
+	value          interface{}
+	leftNeighbour  *ListItem
+	rightNeighbour *ListItem
 }
 
-// Left() - получить стоящий слева элемент.
-func (listItem *ListItem) Left() *ListItem {
-	return listItem.left
+// LeftNeighbour() - получить стоящий слева элемент.
+func (listItem *ListItem) LeftNeighbour() *ListItem {
+	return listItem.leftNeighbour
 }
 
-// Right() - получить стоящий справа элемент.
-func (listItem *ListItem) Right() *ListItem {
-	return listItem.right
+// SetLeftNeighbour(item *ListItem) - установить стоящий слева элемент.
+func (listItem *ListItem) SetLeftNeighbour(item *ListItem) {
+	listItem.leftNeighbour = item
+}
+
+// RightNeighbour() - получить стоящий справа элемент.
+func (listItem *ListItem) RightNeighbour() *ListItem {
+	return listItem.rightNeighbour
+}
+
+// SetRightNeighbour(item *ListItem) - установить стоящий слева элемент.
+func (listItem *ListItem) SetRightNeighbour(item *ListItem) {
+	listItem.rightNeighbour = item
 }
 
 // Value() - получить значение из элемента.
@@ -26,77 +36,77 @@ func (listItem *ListItem) Value() interface{} {
 	return listItem.value
 }
 
-// Eq(x, y ListItem) - элементs равны тогда и только тогда, когда это один и тот же элемент.
+// Eq(x, y ListItem) - элементы равны тогда и только тогда, когда это один и тот же элемент по памяти.
 func Eq(x, y ListItem) bool {
 	return &x == &y
 }
 
 // Lister - интерфейс двусвязного списка.
 type Lister interface {
-	Len() int
-	LeftEnd() *ListItem
-	RightEnd() *ListItem
-	PushToLeftEnd(value interface{}) *ListItem
-	PushToRightEnd(value interface{}) *ListItem
+	Length() int
+	LeftEdge() *ListItem
+	RightEdge() *ListItem
+	PushToLeftEdge(value interface{}) *ListItem
+	PushToRightEdge(value interface{}) *ListItem
 	Remove(item *ListItem) (*ListItem, error)
-	Swap(x, y *ListItem) error
+	SwapItems(x, y *ListItem) error
 }
 
 // List - структура двусвязного списка.
 type List struct {
-	len      int
-	leftEnd  *ListItem
-	rightEnd *ListItem
+	len       int
+	leftEdge  *ListItem
+	rightEdge *ListItem
 }
 
-// Len() - получить длину двусвязного списка.
-func (list *List) Len() int {
+// Length() - получить длину двусвязного списка.
+func (list *List) Length() int {
 	return list.len
 }
 
-// LeftEnd() - получить элемент из левого края двусвязного списка.
-func (list *List) LeftEnd() *ListItem {
-	return list.leftEnd
+// LeftEdge() - получить элемент из левого края двусвязного списка.
+func (list *List) LeftEdge() *ListItem {
+	return list.leftEdge
 }
 
-// RightEnd() - получить элемент из правого края двусвязного списка.
-func (list *List) RightEnd() *ListItem {
-	return list.rightEnd
+// RightEdge() - получить элемент из правого края двусвязного списка.
+func (list *List) RightEdge() *ListItem {
+	return list.rightEdge
 }
 
-// PushToLeftEnd() - добавить значение в левый край двусвязного списка.
-func (list *List) PushToLeftEnd(value interface{}) *ListItem {
+// PushToLeftEdge(value interface{}) - добавить значение в левый край двусвязного списка.
+func (list *List) PushToLeftEdge(value interface{}) *ListItem {
 	item := &ListItem{
-		value: value,
-		left:  nil,
-		right: nil,
+		value:          value,
+		leftNeighbour:  nil,
+		rightNeighbour: nil,
 	}
 	if list.len == 0 {
-		list.leftEnd = item
-		list.rightEnd = item
+		list.leftEdge = item
+		list.rightEdge = item
 	} else {
-		item.right = list.leftEnd
-		list.leftEnd.left = item
-		list.leftEnd = item
+		item.rightNeighbour = list.LeftEdge()
+		list.LeftEdge().leftNeighbour = item
+		list.leftEdge = item
 	}
 	list.len++
 	return item
 }
 
-// PushToRightEnd(any interface{}) - добавить значение в правый край двусвязного списка.
-func (list *List) PushToRightEnd(value interface{}) *ListItem {
+// PushToRightEdge(value interface{}) - добавить значение в правый край двусвязного списка.
+func (list *List) PushToRightEdge(value interface{}) *ListItem {
 	item := &ListItem{
-		value: value,
-		left:  nil,
-		right: nil,
+		value:          value,
+		leftNeighbour:  nil,
+		rightNeighbour: nil,
 	}
 	if list.len == 0 {
-		list.leftEnd = item
-		list.rightEnd = item
+		list.leftEdge = item
+		list.rightEdge = item
 	} else {
-		item.left = list.rightEnd
-		list.rightEnd.right = item
-		list.rightEnd = item
+		item.leftNeighbour = list.RightEdge()
+		list.RightEdge().rightNeighbour = item
+		list.rightEdge = item
 	}
 	list.len++
 	return item
@@ -104,9 +114,10 @@ func (list *List) PushToRightEnd(value interface{}) *ListItem {
 
 // Contains(item *ListItem) - проверить, есть ли элемент в списке.
 func (list *List) Contains(item *ListItem) bool {
-	if (list.leftEnd == item) || // Это левый элемент
-		(list.rightEnd == item) || // Это правый элемент
-		(item.left != nil && item.left.right == item && item.right != nil && item.right.left == item) { // Соседи ссылаются на него
+	if (list.LeftEdge() == item) || // Это левый элемент
+		(list.RightEdge() == item) || // Это правый элемент
+		(item.LeftNeighbour() != nil && item.LeftNeighbour().RightNeighbour() == item &&
+			item.RightNeighbour() != nil && item.RightNeighbour().LeftNeighbour() == item) { // Соседи ссылаются на него
 		return true
 	}
 	return false
@@ -117,24 +128,25 @@ func (list *List) Remove(item *ListItem) (*ListItem, error) {
 	if !list.Contains(item) {
 		return nil, fmt.Errorf("it seems that item %s is not in the list", item)
 	}
-	if list.leftEnd == item && list.rightEnd == item {
-		list.leftEnd = nil
-		list.rightEnd = nil
-	} else if list.leftEnd == item {
-		item.right.left = nil
-		list.leftEnd = item.right
-	} else if list.rightEnd == item {
-		item.left.right = nil
-		list.rightEnd = item.left
+	if list.LeftEdge() == item && list.RightEdge() == item {
+		list.leftEdge = nil
+		list.rightEdge = nil
+	} else if list.LeftEdge() == item {
+		item.RightNeighbour().leftNeighbour = nil
+		list.leftEdge = item.RightNeighbour()
+	} else if list.RightEdge() == item {
+		item.LeftNeighbour().rightNeighbour = nil
+		list.rightEdge = item.LeftNeighbour()
 	} else {
-		item.left.right = item.right
-		item.right.left = item.left
+		item.LeftNeighbour().rightNeighbour = item.RightNeighbour()
+		item.RightNeighbour().leftNeighbour = item.LeftNeighbour()
 	}
 	list.len--
 	return item, nil
 }
 
-func (list *List) Swap(x, y *ListItem) error {
+// SwapItems(x, y *ListItem) - поменять элементы двусвязного списка местами.
+func (list *List) SwapItems(x, y *ListItem) error {
 	if !list.Contains(x) {
 		return fmt.Errorf("it seems that item %s is not in the list", x)
 	}
@@ -144,128 +156,98 @@ func (list *List) Swap(x, y *ListItem) error {
 	if x == y {
 		return nil
 	}
-	xLeft := x.left
-	xRight := x.right
-	yLeft := y.left
-	yRight := y.right
+	xLeft := x.LeftNeighbour()
+	xRight := x.RightNeighbour()
+	yLeft := y.LeftNeighbour()
+	yRight := y.RightNeighbour()
 
 	if xLeft != y && xRight != y {
 		//
-		y.right = xRight
-		y.left = xLeft
-		x.right = yRight
-		x.left = yLeft
+		y.rightNeighbour = xRight
+		y.leftNeighbour = xLeft
+		x.rightNeighbour = yRight
+		x.leftNeighbour = yLeft
 		//
 		if yRight != nil {
-			yRight.left = x
+			yRight.leftNeighbour = x
 		} else {
-			list.rightEnd = x
+			list.rightEdge = x
 		}
 		if yLeft != nil {
-			yLeft.right = x
+			yLeft.rightNeighbour = x
 		} else {
-			list.leftEnd = x
+			list.leftEdge = x
 		}
 		if xRight != nil {
-			xRight.left = y
+			xRight.leftNeighbour = y
 		} else {
-			list.rightEnd = y
+			list.rightEdge = y
 		}
 		if xLeft != nil {
-			xLeft.right = y
+			xLeft.rightNeighbour = y
 		} else {
-			list.leftEnd = y
+			list.leftEdge = y
 		}
 		//
 	} else if xRight == y {
-		y.left = xLeft
-		x.right = yRight
-		y.right = x
-		x.left = y
+		y.leftNeighbour = xLeft
+		x.rightNeighbour = yRight
+		y.rightNeighbour = x
+		x.leftNeighbour = y
 		if yRight != nil {
-			yRight.left = x
+			yRight.leftNeighbour = x
 		} else {
-			list.rightEnd = x
+			list.rightEdge = x
 		}
 		if xLeft != nil {
-			xLeft.right = y
+			xLeft.rightNeighbour = y
 		} else {
-			list.leftEnd = y
+			list.leftEdge = y
 		}
 	} else if yRight == x {
-		x.left = yLeft
-		y.right = xRight
-		x.right = y
-		y.left = x
+		x.leftNeighbour = yLeft
+		y.rightNeighbour = xRight
+		x.rightNeighbour = y
+		y.leftNeighbour = x
 		if xRight != nil {
-			xRight.left = y
+			xRight.leftNeighbour = y
 		} else {
-			list.rightEnd = y
+			list.rightEdge = y
 		}
 		if yLeft != nil {
-			yLeft.right = x
+			yLeft.rightNeighbour = x
 		} else {
-			list.leftEnd = x
+			list.leftEdge = x
 		}
 	}
+	return nil
+}
 
-	// y.right = xRight.right.left
-	// x.left = yLeft.left.right
+// MoveToFront(item *ListItem) - переместить элемент в начало двусвязного списка.
+func (list *List) MoveToLeftEdge(item *ListItem) error {
+	if !list.Contains(item) {
+		return fmt.Errorf("it seems that item %s is not in the list", item)
+	}
+	if item.LeftNeighbour() != nil {
+		item.LeftNeighbour().rightNeighbour = item.RightNeighbour()
+	} else {
+		list.leftEdge = item.RightNeighbour()
+	}
+	if item.RightNeighbour() != nil {
+		item.RightNeighbour().leftNeighbour = item.LeftNeighbour()
+	} else {
+		list.rightEdge = item.LeftNeighbour()
+	}
 
-	// if xRight.right != nil {
-	// 	y.right = xRight.right.left
-	// 	y.left = xLeft
-	// } else {
-	// 	y.right = xRight
-	// 	y.left = xLeft.left.right
-	// }
-
-	// if yLeft.left != nil {
-	// 	x.left = yLeft.left.right
-	// 	x.right = yRight
-	// } else {
-	// 	x.left = yLeft
-	// 	x.right = yRight.right.left
-	// }
-
-	// if yLeft.left != nil{
-	// 	x.left = yLeft.left.right
-	// } else if yLeft.right != nil {
-	// 	x.left = yLeft.right.left
-	// }
-
-	// xLeft.right = y
-	// yRight.left = x
-	// if x.left != nil {
-	// 	x.left.right = y
-	// }
-	// x.right = y.right
-
-	// if y.right != nil {
-	// 	y.right.left = x
-	// }
-	// yLeft := y.left
-	// y.left = x.left
-
-	// if xRight != nil {
-	// 	xRight.left = y
-	// }
-
-	// if xLeft != nil {
-	// 	xLeft.right = y
-	// }
-
-	// if yLeft != nil {
-	// 	yLeft.right = x
-	// }
-	// y.right = xRight
-
-	// if x.left != nil {
-	// 	x.left.right = y
-	// }
-	// x.right = y.right
-	// xLeft, xRight, yLeft, yRight := , x.right, y.left, y.right
-	// x.left, x.right, y.left, y.right = yLeft, yRight, xLeft, xRight
+	item.leftNeighbour = nil
+	item.rightNeighbour = list.LeftEdge()
+	if list.LeftEdge() != nil {
+		list.LeftEdge().leftNeighbour = item
+		list.leftEdge = item
+	} else {
+		list.leftEdge = item
+		list.rightEdge = item
+	}
 	return nil
 }
 
