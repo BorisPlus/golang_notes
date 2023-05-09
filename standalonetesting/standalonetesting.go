@@ -1,11 +1,12 @@
-package main
-
-import "fmt"
+package standalonetesting
 
 func Pow2(x int) int {
 	return x * x
 }
 
-func main() {
-	fmt.Println(Pow2(2))
-}
+// only if
+// package main
+// import "fmt"
+// func main() {
+// 	fmt.Println(Pow2(2))
+// }
