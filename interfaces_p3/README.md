@@ -719,10 +719,276 @@ go test -v -run TestListSimple ./list.go ./list_stringer.go ./list_test.go  > li
 ```
 
 <details>
-<summary>см. лог:</summary>
+<summary>см. лог "TestListSimple":</summary>
 
 ```text
-{{ list_test.go.txt }}
+=== RUN   TestListSimple
+=== RUN   TestListSimple/Zero-value_ListItem_test.
+
+[zero-value] is: 
+-------------------
+ Item: 0xc0000e42c0
+-------------------
+value: <nil>
+ left: 0x0
+right: 0x0
+-------------------
+
+=== RUN   TestListSimple/ListItem_direct_and_vice_versa_referencies_test.
+
+[1] <--> [2] <--> [3]
+
+[1] is: 
+-------------------
+ Item: 0xc0000e4300
+-------------------
+value: 1
+ left: 0x0
+right: 0x0
+-------------------
+
+add [2]: 
+-------------------
+ Item: 0xc0000e4320
+-------------------
+value: 2
+ left: 0xc0000e4300
+right: 0x0
+-------------------
+
+[1] become: 
+-------------------
+ Item: 0xc0000e4300
+-------------------
+value: 1
+ left: 0x0
+right: 0xc0000e4320
+-------------------
+
+add [3]: 
+-------------------
+ Item: 0xc0000e4340
+-------------------
+value: 3
+ left: 0xc0000e4320
+right: 0x0
+-------------------
+
+[2] become: 
+-------------------
+ Item: 0xc0000e4320
+-------------------
+value: 2
+ left: 0xc0000e4300
+right: 0xc0000e4340
+-------------------
+
+first.RightNeighbour().RightNeighbour().RightNeighbour() is nil. OK.
+first.RightNeighbour().RightNeighbour() is third. OK.
+third.LeftNeighbour().LeftNeighbour().LeftNeighbour() is nil. OK.
+third.LeftNeighbour().LeftNeighbour() is first. OK.
+
+=== RUN   TestListSimple/Empty_List_test.
+
+List is:
+ 
+ (nil:0x0)
+    ^|
+    L|R
+     |v
+ (nil:0x0)
+
+=== RUN   TestListSimple/List_init_test.
+
+List was:
+ 
+ (nil:0x0)
+    ^|
+    L|R
+     |v
+ (nil:0x0)
+
+Item was: 
+-------------------
+ Item: 0xc0000e43a0
+-------------------
+value: 1
+ left: 0x0
+right: 0x0
+-------------------
+
+list.LeftEdge() and list.RightEdge() is item. OK.
+
+List become:
+ 
+ (nil:0x0)
+    ^|
+    L|R
+     |v
+-------------------
+ Item: 0xc0000e43a0
+-------------------
+value: 1
+ left: 0x0
+right: 0x0
+-------------------
+    ^|
+    L|R
+     |v
+ (nil:0x0)
+
+=== RUN   TestListSimple/Little_List_test.
+
+List was:
+ 
+ (nil:0x0)
+    ^|
+    L|R
+     |v
+ (nil:0x0)
+
+Item [1] become:
+ 
+-------------------
+ Item: 0xc0000e43e0
+-------------------
+value: 1
+ left: 0x0
+right: 0x0
+-------------------
+
+list.LeftEdge() become:
+ 
+-------------------
+ Item: 0xc0000e43e0
+-------------------
+value: 1
+ left: 0x0
+right: 0x0
+-------------------
+
+list.RightEdge() become:
+ 
+-------------------
+ Item: 0xc0000e43e0
+-------------------
+value: 1
+ left: 0x0
+right: 0x0
+-------------------
+
+Item [2] become:
+ 
+-------------------
+ Item: 0xc0000e4400
+-------------------
+value: 2
+ left: 0x0
+right: 0xc0000e43e0
+-------------------
+
+list.LeftEdge() become:
+ 
+-------------------
+ Item: 0xc0000e4400
+-------------------
+value: 2
+ left: 0x0
+right: 0xc0000e43e0
+-------------------
+
+list.RightEdge() become:
+ 
+-------------------
+ Item: 0xc0000e43e0
+-------------------
+value: 1
+ left: 0xc0000e4400
+right: 0x0
+-------------------
+
+List become:
+ 
+ (nil:0x0)
+    ^|
+    L|R
+     |v
+-------------------
+ Item: 0xc0000e4400
+-------------------
+value: 2
+ left: 0x0
+right: 0xc0000e43e0
+-------------------
+    ^|
+    L|R
+     |v
+-------------------
+ Item: 0xc0000e43e0
+-------------------
+value: 1
+ left: 0xc0000e4400
+right: 0x0
+-------------------
+    ^|
+    L|R
+     |v
+ (nil:0x0)
+
+Was removed:
+ 
+-------------------
+ Item: 0xc0000e4400
+-------------------
+value: 2
+ left: 0x0
+right: 0xc0000e43e0
+-------------------
+
+List become:
+ 
+ (nil:0x0)
+    ^|
+    L|R
+     |v
+-------------------
+ Item: 0xc0000e43e0
+-------------------
+value: 1
+ left: 0x0
+right: 0x0
+-------------------
+    ^|
+    L|R
+     |v
+ (nil:0x0)
+
+Was removed:
+ 
+-------------------
+ Item: 0xc0000e43e0
+-------------------
+value: 1
+ left: 0x0
+right: 0x0
+-------------------
+
+List become:
+ 
+ (nil:0x0)
+    ^|
+    L|R
+     |v
+ (nil:0x0)
+--- PASS: TestListSimple (0.00s)
+    --- PASS: TestListSimple/Zero-value_ListItem_test. (0.00s)
+    --- PASS: TestListSimple/ListItem_direct_and_vice_versa_referencies_test. (0.00s)
+    --- PASS: TestListSimple/Empty_List_test. (0.00s)
+    --- PASS: TestListSimple/List_init_test. (0.00s)
+    --- PASS: TestListSimple/Little_List_test. (0.00s)
+PASS
+ok  	command-line-arguments	0.008s
+
 ```
 
 </details>
@@ -734,7 +1000,7 @@ go test -v -run TestListComplex ./list.go ./list_stringer.go ./list_test.go  > l
 ```
 
 <details>
-<summary>см. лог:</summary>
+<summary>см. лог "TestListComplex":</summary>
 
 ```text
 === RUN   TestListComplex
@@ -768,10 +1034,34 @@ go test -v -run TestListSwap ./list.go ./list_stringer.go ./list_test.go  > list
 ```
 
 <details>
-<summary>см. лог:</summary>
+<summary>см. лог "TestListSwap":</summary>
 
 ```text
-{{ list_test.go.txt }}
+=== RUN   TestListSwap
+=== RUN   TestListSwap/List_swap_test.
+[10, 20, 30, 40, 50]. OK.
+swap different element-pairs
+[10, 40, 30, 20, 50]. OK.
+[10, 20, 30, 40, 50]. OK.
+[50, 20, 30, 40, 10]. OK.
+[10, 20, 30, 40, 50]. OK.
+[30, 20, 10, 40, 50]. OK.
+[10, 20, 30, 40, 50]. OK.
+[10, 50, 30, 40, 20]. OK.
+[10, 20, 30, 40, 50]. OK.
+[10, 30, 20, 40, 50]. OK.
+[10, 20, 30, 40, 50]. OK.
+[10, 20, 40, 30, 50]. OK.
+[10, 20, 40, 50, 30]. OK.
+[20, 10, 40, 50, 30]. OK.
+[10, 20, 40, 50, 30]. OK.
+[10, 20, 40, 30, 50]. OK.
+[10, 20, 30, 40, 50]. OK.
+--- PASS: TestListSwap (0.00s)
+    --- PASS: TestListSwap/List_swap_test. (0.00s)
+PASS
+ok  	command-line-arguments	0.008s
+
 ```
 
 </details>
@@ -965,7 +1255,7 @@ go test -v -run TestListSortInterface ./list.go ./list_stringer.go ./list_test.g
 ```
 
 <details>
-<summary>см. лог (список упорядочился):</summary>
+<summary>см. лог "TestListSortInterface" (список упорядочился):</summary>
 
 ```text
 === RUN   TestListSortInterface

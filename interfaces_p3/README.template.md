@@ -42,10 +42,10 @@ go test -v -run TestListSimple ./list.go ./list_stringer.go ./list_test.go  > li
 ```
 
 <details>
-<summary>см. лог:</summary>
+<summary>см. лог "TestListSimple":</summary>
 
 ```text
-{{ list_test.go.txt }}
+{{ list_test.go.simple.txt }}
 ```
 
 </details>
@@ -57,7 +57,7 @@ go test -v -run TestListComplex ./list.go ./list_stringer.go ./list_test.go  > l
 ```
 
 <details>
-<summary>см. лог:</summary>
+<summary>см. лог "TestListComplex":</summary>
 
 ```text
 {{ list_test.go.complex.txt }}
@@ -72,10 +72,10 @@ go test -v -run TestListSwap ./list.go ./list_stringer.go ./list_test.go  > list
 ```
 
 <details>
-<summary>см. лог:</summary>
+<summary>см. лог "TestListSwap":</summary>
 
 ```text
-{{ list_test.go.txt }}
+{{ list_test.go.swap.txt }}
 ```
 
 </details>
@@ -113,7 +113,7 @@ go test -v -run TestListSortInterface ./list.go ./list_stringer.go ./list_test.g
 ```
 
 <details>
-<summary>см. лог (список упорядочился):</summary>
+<summary>см. лог "TestListSortInterface" (список упорядочился):</summary>
 
 ```text
 {{ list_test.go.sort.txt }}
