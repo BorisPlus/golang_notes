@@ -1,9 +1,13 @@
-package main
+package classificator_test
 
 import (
 	"fmt"
 	"math"
 	"testing"
+
+	pnt "github.com/BorisPlus/golang_notes/interfaces/pointer"
+	cls "github.com/BorisPlus/golang_notes/interfaces/classificator"
+
 )
 
 // ДВУМЕРНОЕ ПРОСТРАНСТВО ===========================
@@ -22,7 +26,7 @@ func (p XYPoint) Coordinates() interface{} {
 }
 
 // EuclidianXYPow2 - пусть расстояние между точками это Евклидова-метрика без ее корня
-func EuclidianXYPow2(p1, p2 Pointer) float64 {
+func EuclidianXYPow2(p1, p2 pnt.Pointer) float64 {
 	return ((p1.(XYPoint).x-p2.(XYPoint).x)*(p1.(XYPoint).x-p2.(XYPoint).x) +
 		(p1.(XYPoint).y-p2.(XYPoint).y)*(p1.(XYPoint).y-p2.(XYPoint).y))
 }
@@ -39,24 +43,25 @@ func TestXY(t *testing.T) {
 	// └------┚-----→
 	// (0;0)   (10;0)
 	//
-	awaitedCentroid := Pointer(XYPoint{x: 0, y: 0})
+	awaitedCentroid := pnt.Pointer(XYPoint{x: 0, y: 0})
 	fmt.Println("AwaitedCentroid", awaitedCentroid)
-	centroids := []Pointer{
+	centroids := []pnt.Pointer{
 		XYPoint{x: 10, y: 0},
 		XYPoint{x: 0, y: 10},
 		XYPoint{x: 10, y: 10}}
 	//
 	centroids = append(centroids, awaitedCentroid)
 	fmt.Println("Centroids", centroids)
-	classificator := Classificator{centroids}
+	classificator := cls.Classificator{}
+	classificator.SetCentroids(centroids)
 	fmt.Println("Classificator", classificator)
 	// Берем точку с координатами
-	point := Pointer(XYPoint{x: 1, y: 1})
+	point := pnt.Pointer(XYPoint{x: 1, y: 1})
 	fmt.Println("Point", point)
 	// Выясняем какой центройд ей ближе по Евклиду
-	classifiedTo := classificator.getNearestCentroid(point, EuclidianXYPow2)
+	classifiedTo := classificator.Classify(point, EuclidianXYPow2)
 	fmt.Println("ClassifiedTo", classifiedTo)
-	if !Eq(classifiedTo, awaitedCentroid) {
+	if !pnt.Eq(classifiedTo, awaitedCentroid) {
 		t.Errorf("Point %v must be classified to %v, but was %v. Error.", point, awaitedCentroid, classifiedTo)
 	} else {
 		fmt.Printf("Point %v classified to  %v (%v). OK.\n", point, classifiedTo, awaitedCentroid)
@@ -78,14 +83,8 @@ func (p XYZPoint) Coordinates() interface{} {
 	return [3]float64{p.x, p.y, p.z}
 }
 
-// func (p XYZPoint) Add(additional Pointer) Pointer {
-// 	return XYZPoint{p.x + additional.(XYZPoint).x,
-// 		p.y + additional.(XYZPoint).y,
-// 		p.z + additional.(XYZPoint).z}
-// }
-
 // Minkovski - пусть расстояние между точками - это манхэттоновское
-func Minkovski(p1, p2 Pointer) float64 {
+func Minkovski(p1, p2 pnt.Pointer) float64 {
 	dXdYdZ := math.Abs(p1.(XYZPoint).x-p2.(XYZPoint).x) +
 		math.Abs(p1.(XYZPoint).y-p2.(XYZPoint).y) +
 		math.Abs(p1.(XYZPoint).z-p2.(XYZPoint).z)
@@ -93,22 +92,22 @@ func Minkovski(p1, p2 Pointer) float64 {
 }
 
 func TestXYZ(t *testing.T) {
-	awaitedCentroid := Pointer(XYZPoint{x: 0, y: 0, z: 0})
-	centroids := []Pointer{
+	awaitedCentroid := pnt.Pointer(XYZPoint{x: 0, y: 0, z: 0})
+	centroids := []pnt.Pointer{
 		XYZPoint{x: 10, y: 0, z: 10},
 		XYZPoint{x: 0, y: 10, z: 5},
 		XYZPoint{x: 10, y: 10, z: 10}}
 	centroids = append(centroids, awaitedCentroid)
 	fmt.Println("Centroids", centroids)
 	//
-	classificator := Classificator{centroids}
+	classificator := cls.Classificator{}
+	classificator.SetCentroids(centroids)
 	fmt.Println("Classificator", classificator)
-	point := Pointer(XYZPoint{x: 0, y: 0, z: 0})
+	point := pnt.Pointer(XYZPoint{x: 0, y: 0, z: 0})
 	fmt.Println("Point", point)
-	classifiedTo := classificator.getNearestCentroid(point, Minkovski)
+	classifiedTo := classificator.Classify(point, Minkovski)
 	fmt.Println("ClassifiedTo", classifiedTo)
-	// if classifiedTo != awaitedCentroid {
-	if !Eq(classifiedTo, awaitedCentroid) {
+	if !pnt.Eq(classifiedTo, awaitedCentroid) {
 		t.Errorf("Point %v must be classified to  %v, but was %v. ERROR.", point, awaitedCentroid, classifiedTo)
 	} else {
 		fmt.Printf("Point %v classified to  %v (%v). OK.\n", point, classifiedTo, awaitedCentroid)
