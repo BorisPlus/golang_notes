@@ -65,62 +65,62 @@ type DList struct {
 }
 
 // Len() - метод получения длины двусвязного списка.
-func (dlist *DList) Len() int {
-	return dlist.len
+func (dList *DList) Len() int {
+	return dList.len
 }
 
 // LeftEdge() - метод получения элемента из левого края двусвязного списка.
-func (dlist *DList) LeftEdge() *DListItem {
-	return dlist.leftEdge
+func (dList *DList) LeftEdge() *DListItem {
+	return dList.leftEdge
 }
 
 // RightEdge() - метод получения элемента из правого края двусвязного списка.
-func (dlist *DList) RightEdge() *DListItem {
-	return dlist.rightEdge
+func (dList *DList) RightEdge() *DListItem {
+	return dList.rightEdge
 }
 
 // PushToLeftEdge(value interface{}) - метод добавления значения в левый край двусвязного списка.
-func (dlist *DList) PushToLeftEdge(value interface{}) *DListItem {
+func (dList *DList) PushToLeftEdge(value interface{}) *DListItem {
 	item := &DListItem{
 		value:          value,
 		leftNeighbour:  nil,
 		rightNeighbour: nil,
 	}
-	if dlist.len == 0 {
-		dlist.leftEdge = item
-		dlist.rightEdge = item
+	if dList.len == 0 {
+		dList.leftEdge = item
+		dList.rightEdge = item
 	} else {
-		item.rightNeighbour = dlist.LeftEdge()
-		dlist.LeftEdge().leftNeighbour = item
-		dlist.leftEdge = item
+		item.rightNeighbour = dList.LeftEdge()
+		dList.LeftEdge().leftNeighbour = item
+		dList.leftEdge = item
 	}
-	dlist.len++
+	dList.len++
 	return item
 }
 
 // PushToRightEdge(value interface{}) - метод добавления значения в правый край двусвязного списка.
-func (dlist *DList) PushToRightEdge(value interface{}) *DListItem {
+func (dList *DList) PushToRightEdge(value interface{}) *DListItem {
 	item := &DListItem{
 		value:          value,
 		leftNeighbour:  nil,
 		rightNeighbour: nil,
 	}
-	if dlist.len == 0 {
-		dlist.leftEdge = item
-		dlist.rightEdge = item
+	if dList.len == 0 {
+		dList.leftEdge = item
+		dList.rightEdge = item
 	} else {
-		item.leftNeighbour = dlist.RightEdge()
-		dlist.RightEdge().rightNeighbour = item
-		dlist.rightEdge = item
+		item.leftNeighbour = dList.RightEdge()
+		dList.RightEdge().rightNeighbour = item
+		dList.rightEdge = item
 	}
-	dlist.len++
+	dList.len++
 	return item
 }
 
 // Contains(item *DListItem) - метод проверки наличия элемента в списке.
-func (dlist *DList) Contains(item *DListItem) bool {
-	if (dlist.LeftEdge() == item) || // Это левый элемент
-		(dlist.RightEdge() == item) || // Это правый элемент
+func (dList *DList) Contains(item *DListItem) bool {
+	if (dList.LeftEdge() == item) || // Это левый элемент
+		(dList.RightEdge() == item) || // Это правый элемент
 		(item.LeftNeighbour() != nil && item.LeftNeighbour().RightNeighbour() == item &&
 			item.RightNeighbour() != nil && item.RightNeighbour().LeftNeighbour() == item) { // Соседи ссылаются на него
 		return true
@@ -129,34 +129,34 @@ func (dlist *DList) Contains(item *DListItem) bool {
 }
 
 // Remove(item *DListItem) - метод удаления элемента из двусвязного списка.
-func (dlist *DList) Remove(item *DListItem) (*DListItem, error) {
-	if !dlist.Contains(item) {
-		return nil, fmt.Errorf("it seems that item %s is not in the dlist", item)
+func (dList *DList) Remove(item *DListItem) (*DListItem, error) {
+	if !dList.Contains(item) {
+		return nil, fmt.Errorf("it seems that item %s is not in the dList", item)
 	}
-	if dlist.LeftEdge() == item && dlist.RightEdge() == item {
-		dlist.leftEdge = nil
-		dlist.rightEdge = nil
-	} else if dlist.LeftEdge() == item {
+	if dList.LeftEdge() == item && dList.RightEdge() == item {
+		dList.leftEdge = nil
+		dList.rightEdge = nil
+	} else if dList.LeftEdge() == item {
 		item.RightNeighbour().leftNeighbour = nil
-		dlist.leftEdge = item.RightNeighbour()
-	} else if dlist.RightEdge() == item {
+		dList.leftEdge = item.RightNeighbour()
+	} else if dList.RightEdge() == item {
 		item.LeftNeighbour().rightNeighbour = nil
-		dlist.rightEdge = item.LeftNeighbour()
+		dList.rightEdge = item.LeftNeighbour()
 	} else {
 		item.LeftNeighbour().rightNeighbour = item.RightNeighbour()
 		item.RightNeighbour().leftNeighbour = item.LeftNeighbour()
 	}
-	dlist.len--
+	dList.len--
 	return item, nil
 }
 
 // SwapItems(x, y *DListItem) - метод перестановки местами элементов двусвязного списка.
-func (dlist *DList) SwapItems(x, y *DListItem) error {
-	if !dlist.Contains(x) {
-		return fmt.Errorf("it seems that item %s is not in the dlist", x)
+func (dList *DList) SwapItems(x, y *DListItem) error {
+	if !dList.Contains(x) {
+		return fmt.Errorf("it seems that item %s is not in the dList", x)
 	}
-	if !dlist.Contains(y) {
-		return fmt.Errorf("it seems that item %s is not in the dlist", y)
+	if !dList.Contains(y) {
+		return fmt.Errorf("it seems that item %s is not in the dList", y)
 	}
 	if x == y {
 		return nil
@@ -176,22 +176,22 @@ func (dlist *DList) SwapItems(x, y *DListItem) error {
 		if yRight != nil {
 			yRight.leftNeighbour = x
 		} else {
-			dlist.rightEdge = x
+			dList.rightEdge = x
 		}
 		if yLeft != nil {
 			yLeft.rightNeighbour = x
 		} else {
-			dlist.leftEdge = x
+			dList.leftEdge = x
 		}
 		if xRight != nil {
 			xRight.leftNeighbour = y
 		} else {
-			dlist.rightEdge = y
+			dList.rightEdge = y
 		}
 		if xLeft != nil {
 			xLeft.rightNeighbour = y
 		} else {
-			dlist.leftEdge = y
+			dList.leftEdge = y
 		}
 		//
 	} else if xRight == y {
@@ -202,12 +202,12 @@ func (dlist *DList) SwapItems(x, y *DListItem) error {
 		if yRight != nil {
 			yRight.leftNeighbour = x
 		} else {
-			dlist.rightEdge = x
+			dList.rightEdge = x
 		}
 		if xLeft != nil {
 			xLeft.rightNeighbour = y
 		} else {
-			dlist.leftEdge = y
+			dList.leftEdge = y
 		}
 	} else if yRight == x {
 		x.leftNeighbour = yLeft
@@ -217,52 +217,52 @@ func (dlist *DList) SwapItems(x, y *DListItem) error {
 		if xRight != nil {
 			xRight.leftNeighbour = y
 		} else {
-			dlist.rightEdge = y
+			dList.rightEdge = y
 		}
 		if yLeft != nil {
 			yLeft.rightNeighbour = x
 		} else {
-			dlist.leftEdge = x
+			dList.leftEdge = x
 		}
 	}
 	return nil
 }
 
 // MoveToFront(item *DListItem) - метод перемещения элемента в начало двусвязного списка.
-func (dlist *DList) MoveToLeftEdge(item *DListItem) error {
-	if !dlist.Contains(item) {
-		return fmt.Errorf("it seems that item %s is not in the dlist", item)
+func (dList *DList) MoveToLeftEdge(item *DListItem) error {
+	if !dList.Contains(item) {
+		return fmt.Errorf("it seems that item %s is not in the dList", item)
 	}
 	if item.LeftNeighbour() != nil {
 		item.LeftNeighbour().rightNeighbour = item.RightNeighbour()
 	} else {
-		dlist.leftEdge = item.RightNeighbour()
+		dList.leftEdge = item.RightNeighbour()
 	}
 	if item.RightNeighbour() != nil {
 		item.RightNeighbour().leftNeighbour = item.LeftNeighbour()
 	} else {
-		dlist.rightEdge = item.LeftNeighbour()
+		dList.rightEdge = item.LeftNeighbour()
 	}
 
 	item.leftNeighbour = nil
-	item.rightNeighbour = dlist.LeftEdge()
-	if dlist.LeftEdge() != nil {
-		dlist.LeftEdge().leftNeighbour = item
-		dlist.leftEdge = item
+	item.rightNeighbour = dList.LeftEdge()
+	if dList.LeftEdge() != nil {
+		dList.LeftEdge().leftNeighbour = item
+		dList.leftEdge = item
 	} else {
-		dlist.leftEdge = item
-		dlist.rightEdge = item
+		dList.leftEdge = item
+		dList.rightEdge = item
 	}
 	return nil
 }
 
 // GetByIndex(i int) - метод получения i-того слева элемента двусвязного списка.
 // Реализовано ИСКЛЮЧИТЕЛЬНО для демонстрации использования интерфейсных методов sort.Sort().
-func (dlist *DList) GetByIndex(i int) (*DListItem, error) {
-	if i >= dlist.Len() {
+func (dList *DList) GetByIndex(i int) (*DListItem, error) {
+	if i >= dList.Len() {
 		return nil, fmt.Errorf("index is out of range")
 	}
-	item := dlist.LeftEdge()
+	item := dList.LeftEdge()
 	for j := 0; j < i; j++ {
 		item = item.RightNeighbour()
 	}
@@ -271,18 +271,18 @@ func (dlist *DList) GetByIndex(i int) (*DListItem, error) {
 
 // Swap(i, j int) - метод перестановки i-того и j-того слева элементов двусвязного списка.
 // Реализовано ИСКЛЮЧИТЕЛЬНО для демонстрации использования интерфейсных методов sort.Sort().
-func (dlist *DList) Swap(i, j int) {
-	iItem, _ := dlist.GetByIndex(i)
-	jItem, _ := dlist.GetByIndex(j)
-	dlist.SwapItems(iItem, jItem)
+func (dList *DList) Swap(i, j int) {
+	iItem, _ := dList.GetByIndex(i)
+	jItem, _ := dList.GetByIndex(j)
+	dList.SwapItems(iItem, jItem)
 }
 
 // Less(i, j int) - метод сравнения убывания i-того и j-того слева элементов двусвязного списка.
 // Реализовано ИСКЛЮЧИТЕЛЬНО для демонстрации использования интерфейсных методов sort.Sort()
 // ПРИ УСЛОВИИ хранения INT-значений в поле value.
-func (dlist *DList) Less(i, j int) bool {
-	iItem, _ := dlist.GetByIndex(i)
-	jItem, _ := dlist.GetByIndex(j)
+func (dList *DList) Less(i, j int) bool {
+	iItem, _ := dList.GetByIndex(i)
+	jItem, _ := dList.GetByIndex(j)
 	return iItem.Value().(int) < jItem.Value().(int)
 }
 

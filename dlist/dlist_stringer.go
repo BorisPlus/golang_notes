@@ -15,7 +15,7 @@ import (
 //	 Left: 0xc00002e3c0              Left: 0x0
 //	Right: 0xc00002e440             Right: 0x0
 //	-------------------             -------------------
-func (listItem *DListItem) String() string {
+func (dlistItem *DListItem) String() string {
 	template := `
 -------------------
  Item: %p
@@ -24,7 +24,7 @@ value: %v
  left: %p
 right: %p
 -------------------`
-	return fmt.Sprintf(template, listItem, listItem.Value(), listItem.LeftNeighbour(), listItem.RightNeighbour())
+	return fmt.Sprintf(template, dlistItem, dlistItem.Value(), dlistItem.LeftNeighbour(), dlistItem.RightNeighbour())
 }
 
 // String() - представление двусвязного списка.
@@ -66,7 +66,7 @@ right: %p
 //	    L|R
 //	     |v
 //	 (nil:0x0)
-func (list *DList) String() string {
+func (dlist *DList) String() string {
 	result := ""
 	Nill := `
  (nil:0x0)`
@@ -76,7 +76,7 @@ func (list *DList) String() string {
      |v`
 	result += Nill
 	result += delimiter
-	for i := list.LeftEdge(); i != nil; i = i.RightNeighbour() {
+	for i := dlist.LeftEdge(); i != nil; i = i.RightNeighbour() {
 		result += i.String()
 		result += delimiter
 	}
