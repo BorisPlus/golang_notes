@@ -1,9 +1,7 @@
 go 1.19
 
-use ./standalonetesting/
-use ./standalonetesting_part2/
-use ./interfaces_p3/
+use ./dlist/
 use ./templator/
-use ./interfaces/classificator
-use ./interfaces/clusterizator
-use ./interfaces/pointer
+use ./mathan/classificator
+use ./mathan/clusterizator
+use ./mathan/pointer

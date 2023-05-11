@@ -1,4 +1,4 @@
-package interfaces_p3
+package dlist
 
 import (
 	"fmt"
@@ -15,7 +15,7 @@ import (
 //	 Left: 0xc00002e3c0              Left: 0x0
 //	Right: 0xc00002e440             Right: 0x0
 //	-------------------             -------------------
-func (listItem *ListItem) String() string {
+func (listItem *DListItem) String() string {
 	template := `
 -------------------
  Item: %p
@@ -66,7 +66,7 @@ right: %p
 //	    L|R
 //	     |v
 //	 (nil:0x0)
-func (list *List) String() string {
+func (list *DList) String() string {
 	result := ""
 	Nill := `
  (nil:0x0)`
