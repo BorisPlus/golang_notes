@@ -1,4 +1,4 @@
-module github.com/BorisPlus/golang_notes/interfaces_p3
+module github.com/BorisPlus/golang_notes/dlist
 
 go 1.19
 
