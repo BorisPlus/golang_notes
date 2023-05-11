@@ -1,3 +1,3 @@
-module github.com/BorisPlus/golang_notes/interfaces/pointer
+module github.com/BorisPlus/golang_notes/mathan/pointer
 
 go 1.19

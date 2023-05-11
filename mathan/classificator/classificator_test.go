@@ -5,8 +5,8 @@ import (
 	"math"
 	"testing"
 
-	pnt "github.com/BorisPlus/golang_notes/interfaces/pointer"
-	cls "github.com/BorisPlus/golang_notes/interfaces/classificator"
+	pnt "github.com/BorisPlus/golang_notes/mathan/pointer"
+	cls "github.com/BorisPlus/golang_notes/mathan/classificator"
 
 )
 

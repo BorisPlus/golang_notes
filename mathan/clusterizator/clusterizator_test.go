@@ -4,8 +4,8 @@ import (
 	"fmt"
 	"testing"
 
-	ztr "github.com/BorisPlus/golang_notes/interfaces/clusterizator"
-	pnt "github.com/BorisPlus/golang_notes/interfaces/pointer"
+	ztr "github.com/BorisPlus/golang_notes/mathan/clusterizator"
+	pnt "github.com/BorisPlus/golang_notes/mathan/pointer"
 )
 
 // ДВУМЕРНОЕ ПРОСТРАНСТВО ===========================

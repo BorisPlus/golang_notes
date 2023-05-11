@@ -36,7 +36,7 @@ func Eq(p1, p2 Pointer) bool {
 package classificator
 
 import (
-    pnt "github.com/BorisPlus/golang_notes/interfaces/pointer"
+    pnt "github.com/BorisPlus/golang_notes/mathan/pointer"
 )
 
 // Решение задач классификации посредством интерфейса без привязки к метрике
@@ -87,8 +87,8 @@ import (
     "math"
     "testing"
 
-    pnt "github.com/BorisPlus/golang_notes/interfaces/pointer"
-    cls "github.com/BorisPlus/golang_notes/interfaces/classificator"
+    pnt "github.com/BorisPlus/golang_notes/mathan/pointer"
+    cls "github.com/BorisPlus/golang_notes/mathan/classificator"
 
 )
 
@@ -225,7 +225,7 @@ ClassifiedTo (0;0;0)
 Point (0;0;0) classified to  (0;0;0) ((0;0;0)). OK.
 --- PASS: TestXYZ (0.00s)
 PASS
-ok  	github.com/BorisPlus/golang_notes/interfaces/classificator	0.005s
+ok  	github.com/BorisPlus/golang_notes/mathan/classificator	(cached)
 
 ```
 
@@ -246,7 +246,7 @@ import (
     "sort"
     "strings"
 
-    pnt "github.com/BorisPlus/golang_notes/interfaces/pointer"
+    pnt "github.com/BorisPlus/golang_notes/mathan/pointer"
 )
 
 // Cluster - иерархический кластер.
@@ -539,8 +539,8 @@ import (
     "fmt"
     "testing"
 
-    ztr "github.com/BorisPlus/golang_notes/interfaces/clusterizator"
-    pnt "github.com/BorisPlus/golang_notes/interfaces/pointer"
+    ztr "github.com/BorisPlus/golang_notes/mathan/clusterizator"
+    pnt "github.com/BorisPlus/golang_notes/mathan/pointer"
 )
 
 // ДВУМЕРНОЕ ПРОСТРАНСТВО ===========================
@@ -756,28 +756,28 @@ go test -v ./ > ./clusterizator.go.txt
 ========================================================================
 Исходные Кластеры:
 ╒=====================╕
-|Cluster: 0xc0000724e0|
+|Cluster: 0xc00010e4e0|
 ├---------------------┤
 |centroid:(0;0)
 |branchA: <nil>
 |branchB: <nil>
 ╘=====================
 ╒=====================╕
-|Cluster: 0xc000072510|
+|Cluster: 0xc00010e510|
 ├---------------------┤
 |centroid:(0;1)
 |branchA: <nil>
 |branchB: <nil>
 ╘=====================
 ╒=====================╕
-|Cluster: 0xc000072540|
+|Cluster: 0xc00010e540|
 ├---------------------┤
 |centroid:(10;0)
 |branchA: <nil>
 |branchB: <nil>
 ╘=====================
 ╒=====================╕
-|Cluster: 0xc000072570|
+|Cluster: 0xc00010e570|
 ├---------------------┤
 |centroid:(10;2)
 |branchA: <nil>
@@ -791,17 +791,17 @@ go test -v ./ > ./clusterizator.go.txt
 ========================================================================
 Итоговые кластеры:
 ╒=====================╕
-|Cluster: 0xc000072630|
+|Cluster: 0xc00010e630|
 ├---------------------┤
 |centroid:(5;0.75)
 |branchA: ⤵
 |    ╒=====================╕
-|    |Cluster: 0xc000072660|
+|    |Cluster: 0xc00010e660|
 |    ├---------------------┤
 |    |centroid:(0;0.5)
 |    |branchA: ⤵
 |    |    ╒=====================╕
-|    |    |Cluster: 0xc000072690|
+|    |    |Cluster: 0xc00010e690|
 |    |    ├---------------------┤
 |    |    |centroid:(0;0)
 |    |    |branchA: <nil>
@@ -809,7 +809,7 @@ go test -v ./ > ./clusterizator.go.txt
 |    |    ╘=====================
 |    |branchB: ⤵
 |    |    ╒=====================╕
-|    |    |Cluster: 0xc0000726c0|
+|    |    |Cluster: 0xc00010e6c0|
 |    |    ├---------------------┤
 |    |    |centroid:(0;1)
 |    |    |branchA: <nil>
@@ -818,12 +818,12 @@ go test -v ./ > ./clusterizator.go.txt
 |    ╘=====================
 |branchB: ⤵
 |    ╒=====================╕
-|    |Cluster: 0xc0000726f0|
+|    |Cluster: 0xc00010e6f0|
 |    ├---------------------┤
 |    |centroid:(10;1)
 |    |branchA: ⤵
 |    |    ╒=====================╕
-|    |    |Cluster: 0xc000072720|
+|    |    |Cluster: 0xc00010e720|
 |    |    ├---------------------┤
 |    |    |centroid:(10;0)
 |    |    |branchA: <nil>
@@ -831,7 +831,7 @@ go test -v ./ > ./clusterizator.go.txt
 |    |    ╘=====================
 |    |branchB: ⤵
 |    |    ╒=====================╕
-|    |    |Cluster: 0xc000072750|
+|    |    |Cluster: 0xc00010e750|
 |    |    ├---------------------┤
 |    |    |centroid:(10;2)
 |    |    |branchA: <nil>
@@ -841,7 +841,7 @@ go test -v ./ > ./clusterizator.go.txt
 ╘=====================
 --- PASS: TestClusterizatorLoop (0.00s)
 PASS
-ok      github.com/BorisPlus/golang_notes/interfaces/clusterizator    0.004s
+ok      github.com/BorisPlus/golang_notes/mathan/clusterizator    0.006s
 
 ```
 

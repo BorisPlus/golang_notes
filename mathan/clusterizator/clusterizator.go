@@ -5,7 +5,7 @@ import (
 	"sort"
 	"strings"
 
-	pnt "github.com/BorisPlus/golang_notes/interfaces/pointer"
+	pnt "github.com/BorisPlus/golang_notes/mathan/pointer"
 )
 
 // Cluster - иерархический кластер.

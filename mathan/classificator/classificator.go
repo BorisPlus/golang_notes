@@ -1,7 +1,7 @@
 package classificator
 
 import (
-	pnt "github.com/BorisPlus/golang_notes/interfaces/pointer"
+	pnt "github.com/BorisPlus/golang_notes/mathan/pointer"
 )
 
 // Решение задач классификации посредством интерфейса без привязки к метрике
