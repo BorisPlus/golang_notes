@@ -20,7 +20,7 @@ func (dlistItem *DListItem) String() string {
 -------------------
  Item: %p
 -------------------
-value: %v
+value: %s
  left: %p
 right: %p
 -------------------`

@@ -4,7 +4,7 @@ func CountLimit(clz *Clusterizator, count int) bool {
 	if count < 1 {
 		count = 1
 	}
-	return len(clz.Clusters()) <= count
+	return clz.Clusters().Len() <= count
 }
 
 func Limit10(clz *Clusterizator) bool {

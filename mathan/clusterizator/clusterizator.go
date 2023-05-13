@@ -5,69 +5,53 @@ import (
 	"sort"
 	"strings"
 
+	dlist "github.com/BorisPlus/golang_notes/dlist"
 	pnt "github.com/BorisPlus/golang_notes/mathan/pointer"
 )
 
 // Cluster - иерархический кластер.
 type Cluster struct {
-	centroid           pnt.Pointer
-	branchA            *Cluster
-	branchB            *Cluster
-	centroidCalculator *func(x, y *Cluster) (pnt.Pointer, error)
+	centroid   pnt.Pointer
+	branchA    *Cluster
+	branchB    *Cluster
+	distanceAB float64
 }
 
-func (clt *Cluster) SetCentroid(centroid pnt.Pointer) {
+// Init(centroid pnt.Pointer, branchA *Cluster, branchB *Cluster, distanceAB float64) -
+// инициализация кластера всем сразу.
+func (clt *Cluster) Init(centroid pnt.Pointer, branchA *Cluster, branchB *Cluster, distanceAB float64) {
 	clt.centroid = centroid
+	clt.branchA = branchA
+	clt.branchB = branchB
+	clt.distanceAB = distanceAB
 }
 
-func (clt *Cluster) Centroid() (pnt.Pointer, error) {
-	if clt.centroid == nil {
-		err := clt.centroidCalculatorProxy()
-		if err != nil {
-			return nil, nil
-		}
-	}
-	return clt.centroid, nil
+// Centroid() - координата кластера, центроид.
+func (clt *Cluster) Centroid() pnt.Pointer {
+	return clt.centroid
 }
 
-func (clt *Cluster) CentroidCalculator() *func(x, y *Cluster) (pnt.Pointer, error) {
-	return clt.centroidCalculator
+// DistanceAB() - дистанция между дочерними подкластерами кластера.
+func (clt *Cluster) DistanceAB() float64 {
+	return clt.distanceAB
 }
 
-func (clt *Cluster) SetBranchA(cluster *Cluster) {
-	clt.branchA = cluster
-	clt.centroid = nil
-}
-
+// BranchA() - ветка дочернего подкластера условного-"A".
 func (clt *Cluster) BranchA() *Cluster {
 	return clt.branchA
 }
 
-func (clt *Cluster) SetBranchB(cluster *Cluster) {
-	clt.branchB = cluster
-	clt.centroid = nil
-}
-
+// BranchB() - ветка дочернего подкластера условного-"B".
 func (clt *Cluster) BranchB() *Cluster {
 	return clt.branchB
 }
 
-func (clt *Cluster) centroidCalculatorProxy() error {
-	if clt.branchA == nil {
-		return fmt.Errorf("clt.branchA is nil")
-	}
-	if clt.branchB == nil {
-		return fmt.Errorf("clt.branchA is nil")
-	}
-	centroid, err := (*clt.CentroidCalculator())(clt.branchA, clt.branchB)
-	clt.centroid = centroid
-	return err
-}
-
-var clusterStringTemplate = `╒=====================╕
+var clusterStringTemplate = `
+╒=====================╕
 |Cluster: %p|
 ├---------------------┤
 |centroid:%s
+|abDist:  %f
 |branchA: %s
 |branchB: %s
 ╘=====================`
@@ -79,55 +63,90 @@ func tabDecorate(clt *Cluster) string {
 	return "⤵\n|\t" + strings.Replace(clt.String(), string('\n'), "\n|\t", -1)
 }
 
+// String() - реализация интерфейса Stringer().
 func (clt Cluster) String() string {
-	centroid, _ := clt.Centroid()
 	return fmt.Sprintf(
 		clusterStringTemplate,
-		&clt, centroid,
+		&clt,
+		clt.Centroid(),
+		clt.DistanceAB(),
 		tabDecorate(clt.BranchA()),
 		tabDecorate(clt.BranchB()),
 	)
 }
 
-// SimilarCluster - структура, описывающая максимально близкий\похожий по метрике целевой кластер к исходному.
-type SimilarCluster struct {
-	example  *Cluster
-	similar  *Cluster
-	distance float64
+// SimilarClustersPair - очень сложная структура ИСКЛЮЧИТЕЛЬНО для внутреннего использования.
+// Содержит пары кластеров и их объединение.
+// Задействуется в хранении максимально близких пар кластеров.
+// Необходима для реализации big-O(1) при:
+//   - вставке нового кластера
+//   - пересчера новых расстояний
+//   - удаления обработанных кластеров из всех списков
+type SimilarClustersPairItem struct {
+	thisItem    *dlist.DListItem
+	itemA       *dlist.DListItem
+	itemB       *dlist.DListItem
+	abPairUnion *Cluster
 }
 
-var similarClusterStringTemplate = `
-=====================
-Similar:  %p
----------------------
-example:  %p %p
-similar:  %p %p
-distance: %f
-=====================`
-
-func (smlr SimilarCluster) String() string {
-	return fmt.Sprintf(
-		similarClusterStringTemplate,
-		&smlr,
-		smlr.example,
-		*smlr.example,
-		smlr.similar,
-		*smlr.similar,
-		smlr.distance,
-	)
+// ABPairUnion() - вид кластера, который будет получен в результате объединения пары кластеров.
+func (scp *SimilarClustersPairItem) ABPairUnion() *Cluster {
+	return scp.abPairUnion
 }
+
+// Distance() - растояние между центрами кластеров, образующих объединения.
+func (scp *SimilarClustersPairItem) Distance() float64 {
+	return scp.abPairUnion.DistanceAB()
+}
+
+// // SimilarCluster - структура, описывающая максимально близкий\похожий по метрике целевой кластер к исходному.
+// type privateSimilarCluster struct {
+// 	example  *dlist.DListItem
+// 	similar  *dlist.DListItem
+// 	distance float64
+// }
+
+// var similarClusterStringTemplate = `
+// =====================
+// Similar:  %p
+// ---------------------
+// example:  %p %p
+// similar:  %p %p
+// distance: %f
+// =====================`
+
+// func (smlr privateSimilarCluster) String() string {
+// 	return fmt.Sprintf(
+// 		similarClusterStringTemplate,
+// 		&smlr,
+// 		smlr.example,
+// 		*smlr.example,
+// 		smlr.similar,
+// 		*smlr.similar,
+// 		smlr.distance,
+// 	)
+// }
 
 // SimilarClusterVector - используется для сортировки пар максимально близких кластеров,
 // в целях нахождения пары для следующей итерации слияния
-type SimilarClusterVector []*SimilarCluster
+// type SimilarClusterVector []*SimilarCluster
 
-func (v SimilarClusterVector) Len() int           { return len(v) }
-func (v SimilarClusterVector) Swap(i, j int)      { v[i], v[j] = v[j], v[i] }
-func (v SimilarClusterVector) Less(i, j int) bool { return v[i].distance < v[j].distance }
+// func (v SimilarClusterVector) Len() int           { return len(v) }
+// func (v SimilarClusterVector) Swap(i, j int)      { v[i], v[j] = v[j], v[i] }
+// func (v SimilarClusterVector) Less(i, j int) bool { return v[i].distance < v[j].distance }
 
-// Clusterizator - кластеризатор.
+// type sortingDlist *dlist.DList
+// func (dList dlist.DList) Len() int      { return dList.Len() }
+// func (dList dlist.DList) Swap(i, j int) { dList.Swap(i, j) }
+// func (dList dlist.DList) Less(i, j int) bool {
+// 	a, _ := dList.GetByIndex(i)
+// 	b, _ := dList.GetByIndex(j).distance
+// 	return a.distance < b
+// }
+
+// Clusterizator - кластеризатор, реализующий процесс Иерархической кластеризации.
 //
-//	metrica - функция расстояния в пространстве.
+//	Metrica - функция расстояния в пространстве.
 //	Breakpoint - критерий останова, например, по числу итоговых кластеров:
 //	   	func (c *Clusterizator) Breakpoint() bool {
 //	   		if len(c.clusters) == 10 {
@@ -138,146 +157,164 @@ func (v SimilarClusterVector) Less(i, j int) bool { return v[i].distance < v[j].
 //
 // В пакете имеются типовые критерии останова.
 type Clusterizator struct {
-	Metrica            func(a, b pnt.Pointer) float64
-	BreakpointChecker  func(c *Clusterizator) bool
-	CentroidCalculator func(x, y *Cluster) (pnt.Pointer, error)
-	clusters           []*Cluster
-	SimilarestAsMap    map[*Cluster]*SimilarCluster
-	Similarest         []*SimilarCluster
+	Metrica          func(a, b pnt.Pointer) float64
+	Breakpoint       func(c *Clusterizator) bool
+	Centroid         func(x, y pnt.Pointer) pnt.Pointer
+	clusters         *dlist.DList
+	mappedSimilarest map[*dlist.DListItem]*SimilarClustersPairItem
+	similarest       *dlist.DList
+}
+
+func similarestValueFoater(v interface{}) float64 {
+	return v.(*SimilarClustersPairItem).Distance()
 }
 
 // Clusters() - кластеры.
-func (clz *Clusterizator) Clusters() []*Cluster {
+func (clz *Clusterizator) Clusters() *dlist.DList {
 	return clz.clusters
 }
 
-// Init(points []pnt.Pointer) - инициализация кластеризатора.
-func (clz *Clusterizator) Init(points []pnt.Pointer) {
-	clz.clusters = make([]*Cluster, len(points))
-	for index, point := range points {
-		clz.clusters[index] = &Cluster{centroidCalculator: &clz.CentroidCalculator}
-		clz.clusters[index].SetCentroid(point)
-	}
-	clz.calculateSimilarest()
+// Similarest() - пары максимально подобных кластеров.
+func (clz *Clusterizator) InitSimilarest(similarest *dlist.DList) {
+	clz.similarest = similarest
+	similarest.SetValuer(similarestValueFoater)
 }
 
-// CalculateDistinctMatrix - вычисление матрицы расстояний между кластерами.
-func (clz *Clusterizator) calculateSimilarest() error {
-	clz.SimilarestAsMap = make(map[*Cluster]*SimilarCluster)
-	//
-	for srcIndx, exampleCluster := range clz.clusters[:len(clz.clusters)-1] {
-		// нижеследующее вычисление можно загорутинить
-		for _, similarCluster := range clz.clusters[srcIndx+1:] {
-			exampleOrigin, err := exampleCluster.Centroid()
-			if err != nil {
-				return err
-			}
-			similarOrigin, err := similarCluster.Centroid()
-			if err != nil {
-				return err
-			}
-			distance := clz.Metrica(exampleOrigin, similarOrigin)
-			if (clz.SimilarestAsMap[exampleCluster] == nil) ||
-				(clz.SimilarestAsMap[exampleCluster] != nil && distance < clz.SimilarestAsMap[exampleCluster].distance) {
-				clz.SimilarestAsMap[exampleCluster] = &SimilarCluster{
-					example:  exampleCluster,
-					similar:  similarCluster,
-					distance: distance,
+// Similarest() - пары максимально подобных кластеров.
+func (clz *Clusterizator) Similarest() *dlist.DList {
+	return clz.similarest
+}
+
+// Init(points []pnt.Pointer) - инициализация кластеризатора.
+func (clz *Clusterizator) Init(points []pnt.Pointer) *Clusterizator{
+	clz.clusters = &dlist.DList{}
+	for _, point := range points {
+		cluster := Cluster{}
+		cluster.Init(point, nil, nil, 0)
+		clz.clusters.PushToLeftEdge(&cluster)
+	}
+	clz.calculateSimilarest()
+	return clz
+}
+
+// calculateSimilarest() - вычисление матрицы расстояний между кластерами.
+func (clz *Clusterizator) calculateSimilarest() {
+	clz.InitSimilarest(&dlist.DList{})
+
+	clz.mappedSimilarest = make(map[*dlist.DListItem]*SimilarClustersPairItem, 0)
+	// Вот тут злосчастный big-O(n^2), точнее big-O(n*(n-1)))
+	for exampleItem := clz.clusters.LeftEdge(); exampleItem != clz.clusters.RightEdge(); exampleItem = exampleItem.RightNeighbour() {
+		//
+		exampleCluster := exampleItem.Value().(*Cluster)
+		//
+		for similarItem := exampleItem.RightNeighbour(); similarItem != nil; similarItem = similarItem.RightNeighbour() {
+			similarCluster := similarItem.Value().(*Cluster)
+			distance := clz.Metrica(exampleCluster.Centroid(), similarCluster.Centroid())
+			esCluster := Cluster{}
+
+			if (clz.mappedSimilarest[exampleItem] == nil) ||
+				(clz.mappedSimilarest[exampleItem] != nil && distance < clz.mappedSimilarest[exampleItem].ABPairUnion().DistanceAB()) {
+				esCluster.Init(
+					clz.Centroid(
+						exampleCluster.Centroid(),
+						similarCluster.Centroid(),
+					),
+					exampleCluster,
+					similarCluster,
+					distance,
+				)
+				clz.mappedSimilarest[exampleItem] = &SimilarClustersPairItem{
+					thisItem:    nil,
+					itemA:       exampleItem,
+					itemB:       similarItem,
+					abPairUnion: &esCluster,
 				}
 			}
 		}
 	}
-	//
-	clz.Similarest = make([]*SimilarCluster, len(clz.clusters)-1)
-	idx := 0
-	for _, similarCluster := range clz.SimilarestAsMap {
-		clz.Similarest[idx] = similarCluster
-		idx++
+	for _, similarest := range clz.mappedSimilarest {
+		similarestItem := clz.similarest.PushToLeftEdge(similarest)
+		similarest.thisItem = similarestItem
 	}
-	return nil
 }
 
-func (clz *Clusterizator) CandidatesOfMerging() *SimilarCluster {
-	sort.Sort(SimilarClusterVector(clz.Similarest))
-	// TODO: можно запараллелить для одинаковых расстоний разных пар кластеров
-	return clz.Similarest[0]
+func (clz *Clusterizator) CandidatesOfMerging() *dlist.DListItem {
+	// TODO: Valuer for Less()!!!
+	sort.Sort(clz.similarest)
+	// TODO: можно запараллелить для одинаковых расстояний разных пар кластеров
+	// return clz.similarest.LeftEdge().Value().(*privateSimilarCluster)
+	return clz.similarest.LeftEdge()
 }
 
 func (clz *Clusterizator) Iterate() (bool, error) {
+	if clz.Breakpoint(clz) {
+		return true, nil
+	}
 	// Выбранные кандидаты на слияние.
-	similarClusters := clz.CandidatesOfMerging()
-	// Новый кластер из выбранных кандидатов.
-	newCluster := Cluster{centroidCalculator: &clz.CentroidCalculator}
-	newCluster.SetBranchA(similarClusters.example)
-	newCluster.SetBranchB(similarClusters.similar)
+	similarClustersItem := clz.CandidatesOfMerging()
+	similarClustersItemA := similarClustersItem.Value().(*SimilarClustersPairItem)
+	// centroid := clz.CentroidCalculator(similarClustersItem.Value().(*Cluster).branchA.centroid, similarClustersItem.Value().(*Cluster).branchB.centroid)
+	itemA := similarClustersItemA.itemA
+	// eCluster := eClusterItem.Value().(*Cluster)
+	itemB := similarClustersItemA.itemB
+	// sCluster := sClusterItem.Value().(*Cluster)
+	newCluster := similarClustersItemA.ABPairUnion()
+	// newCluster() = ""
+	// newCluster.Init(centroid, aCluster, bCluster, distance)
 	// Вычисляем расстояния от кластеров (за исключением выбранных кандидатов) до нового кластера.
 	// В рамках словарей похожих.
-	for _, cluster := range clz.clusters {
-		if cluster == newCluster.branchA {
-			clz.SimilarestAsMap[cluster] = nil
-			continue
-		}
-		if cluster == newCluster.branchB {
-			clz.SimilarestAsMap[cluster] = nil
-			continue
-		}
+	clz.clusters.Remove(itemA)
+	clz.clusters.Remove(itemB)
+	newClusterItem := clz.clusters.PushToRightEdge(newCluster)
+	// fmt.Println("Максимально подобная пара")
+	// fmt.Println(newCluster)
+	clz.similarest.Remove(similarClustersItem)
 
-		clusterCentroid, err := cluster.Centroid()
+	for clusterItem := clz.clusters.LeftEdge(); clusterItem != clz.clusters.RightEdge(); clusterItem = clusterItem.RightNeighbour() {
 
-		if err != nil {
-			return false, err
-		}
+		distance := clz.Metrica(clusterItem.Value().(*Cluster).centroid, newCluster.Centroid())
+		esCluster := Cluster{}
+		if (clz.mappedSimilarest[clusterItem] == nil) ||
+			(clz.mappedSimilarest[clusterItem] != nil && distance < clz.mappedSimilarest[clusterItem].ABPairUnion().DistanceAB()) {
 
-		newClusterCentroid, err := newCluster.Centroid()
-
-		if err != nil {
-			return false, err
-		}
-
-		distance := clz.Metrica(clusterCentroid, newClusterCentroid)
-
-		if (clz.SimilarestAsMap[cluster] == nil) ||
-			(clz.SimilarestAsMap[cluster] != nil && distance < clz.SimilarestAsMap[cluster].distance) {
-			clz.SimilarestAsMap[cluster] = &SimilarCluster{
-				example:  cluster,
-				similar:  &newCluster,
-				distance: distance,
+			if clz.mappedSimilarest[clusterItem] != nil {
+				sm := clz.mappedSimilarest[clusterItem]
+				clz.similarest.Remove(sm.thisItem)
 			}
-		}
-	}
 
-	// В рамках слайсов похожих.
-	clz.Similarest = make([]*SimilarCluster, len(clz.clusters)-2)
-	idx := 0
-	for _, similarCluster := range clz.SimilarestAsMap {
-		if similarCluster != nil {
-			clz.Similarest[idx] = similarCluster
-			idx++
+			esCluster.Init(
+				clz.Centroid(
+					clusterItem.Value().(*Cluster).centroid,
+					newCluster.Centroid(),
+				),
+				clusterItem.Value().(*Cluster),
+				newCluster,
+				distance,
+			)
+			clz.mappedSimilarest[clusterItem] = &SimilarClustersPairItem{
+				thisItem:    nil,
+				itemA:       clusterItem,
+				itemB:       newClusterItem,
+				abPairUnion: &esCluster,
+			}
+			similarestItem := clz.similarest.PushToLeftEdge(clz.mappedSimilarest[clusterItem])
+			clz.mappedSimilarest[clusterItem].thisItem = similarestItem
 		}
 	}
-
-	// ---------------------
-	// TODO: this is big-O(n)!!!
-
-	for index, clusterToPop := range clz.clusters {
-		if clusterToPop == newCluster.BranchA() {
-			clz.clusters = append(clz.clusters[:index], clz.clusters[index+1:]...)
-			break
-		}
-	}
-	for index, clusterToPop := range clz.clusters {
-		if clusterToPop == newCluster.BranchB() {
-			clz.clusters = append(clz.clusters[:index], clz.clusters[index+1:]...)
-			break
-		}
-	}
-	clz.clusters = append(clz.clusters, &newCluster)
-	// ---------------------
-	return clz.BreakpointChecker(clz), nil
+	return clz.Breakpoint(clz), nil
 }
 
-// func (c *Clusterizator) clusterizeAndUpdate(p Pointer, DistanceBetween func(a, b Pointer) float64) (float64, Pointer) {
-// 	distance, cluster := c.clusterize(p, DistanceBetween)
-// 	cluster := Average(cluster, p)
-// 	return cluster
-// }
+// Clusterize() - метод запуска кластера.
+func (clz *Clusterizator) Clusterize() []*Cluster {
+
+	for stoped, _ := clz.Iterate(); !stoped; stoped, _ = clz.Iterate() {
+
+	}
+	clusters := make([]*Cluster, clz.clusters.Len())
+
+	for clusterItem := clz.clusters.LeftEdge(); clusterItem != nil; clusterItem = clusterItem.RightNeighbour() {
+		clusters[len(clusters)-1] = clusterItem.Value().(*Cluster)
+	}
+
+	return clusters
+}

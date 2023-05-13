@@ -55,13 +55,22 @@ type DLister interface {
 	PushToRightEdge(value interface{}) *DListItem
 	Remove(item *DListItem) (*DListItem, error)
 	SwapItems(x, y *DListItem) error
+	Valuer(v interface{}) float64
+	// SetValuer(ValuerFunc *func(v interface{}) float64)
+	SetValuer(ValuerFunc func(v interface{}) float64)
 }
 
 // DList - структура двусвязного списка.
 type DList struct {
-	len       int
-	leftEdge  *DListItem
-	rightEdge *DListItem
+	len        int
+	leftEdge   *DListItem
+	rightEdge  *DListItem
+	ValuerFunc func(v interface{}) float64
+}
+
+// SetValuer() - метод установки функции преобразования значений Value() в объект, сравнимый оператором "<".
+func (dList *DList) SetValuer(ValuerFunc func(v interface{}) float64) {
+	dList.ValuerFunc = ValuerFunc
 }
 
 // Len() - метод получения длины двусвязного списка.
@@ -277,13 +286,17 @@ func (dList *DList) Swap(i, j int) {
 	dList.SwapItems(iItem, jItem)
 }
 
+func (dList *DList) Valuer(v interface{}) float64{
+	return (dList.ValuerFunc)(v)
+}
+
 // Less(i, j int) - метод сравнения убывания i-того и j-того слева элементов двусвязного списка.
 // Реализовано ИСКЛЮЧИТЕЛЬНО для демонстрации использования интерфейсных методов sort.Sort()
 // ПРИ УСЛОВИИ хранения INT-значений в поле value.
 func (dList *DList) Less(i, j int) bool {
 	iItem, _ := dList.GetByIndex(i)
 	jItem, _ := dList.GetByIndex(j)
-	return iItem.Value().(int) < jItem.Value().(int)
+	return (dList.Valuer)(iItem.Value()) < (dList.Valuer)(jItem.Value())
 }
 
 // NewList() - функция инициализации нового двусвязного списка.

@@ -12,7 +12,15 @@ import (
 
 // go test -v dList.go list_string.go list_test.go
 
-func ElementsLeftToRight(dList *dlist.DList) []int {
+func ElementsLeftToRightValued(dList *dlist.DList) []float64 {
+	elements := make([]float64, 0, dList.Len())
+	for i := dList.LeftEdge(); i != nil; i = i.RightNeighbour() {
+		elements = append(elements, (dList.Valuer)(i.Value()))
+	}
+	return elements
+}
+
+func ElementsLeftToRightInt(dList *dlist.DList) []int {
 	elements := make([]int, 0, dList.Len())
 	for i := dList.LeftEdge(); i != nil; i = i.RightNeighbour() {
 		elements = append(elements, i.Value().(int))
@@ -20,10 +28,18 @@ func ElementsLeftToRight(dList *dlist.DList) []int {
 	return elements
 }
 
-func ElementsRightToLeft(dList *dlist.DList) []int {
+func ElementsRightToLeftInt(dList *dlist.DList) []int {
 	elements := make([]int, 0, dList.Len())
 	for i := dList.RightEdge(); i != nil; i = i.LeftNeighbour() {
 		elements = append([]int{i.Value().(int)}, elements...)
+	}
+	return elements
+}
+
+func ElementsLeftToRightRune(dList *dlist.DList) []rune {
+	elements := make([]rune, 0, dList.Len())
+	for i := dList.LeftEdge(); i != nil; i = i.RightNeighbour() {
+		elements = append(elements, i.Value().(rune))
 	}
 	return elements
 }
@@ -145,8 +161,8 @@ func TestDListComplex(t *testing.T) {
 		dList.PushToRightEdge(10) // [10]
 		dList.PushToRightEdge(20) // [10, 20]
 		dList.PushToRightEdge(30) // [10, 20, 30]
-		require.Equal(t, []int{10, 20, 30}, ElementsLeftToRight(dList.(*dlist.DList)))
-		require.Equal(t, []int{10, 20, 30}, ElementsRightToLeft(dList.(*dlist.DList)))
+		require.Equal(t, []int{10, 20, 30}, ElementsLeftToRightInt(dList.(*dlist.DList)))
+		require.Equal(t, []int{10, 20, 30}, ElementsRightToLeftInt(dList.(*dlist.DList)))
 		fmt.Println("Forward stroke check for [10, 20, 30]. OK.")
 		require.Equal(t, 3, dList.Len())
 		middle := dList.LeftEdge().RightNeighbour()
@@ -155,8 +171,8 @@ func TestDListComplex(t *testing.T) {
 		dList.Remove(middle)
 		fmt.Printf("middle was removed. OK.\n")
 		require.Equal(t, 2, dList.Len())
-		require.Equal(t, []int{10, 30}, ElementsLeftToRight(dList.(*dlist.DList)))
-		require.Equal(t, []int{10, 30}, ElementsRightToLeft(dList.(*dlist.DList)))
+		require.Equal(t, []int{10, 30}, ElementsLeftToRightInt(dList.(*dlist.DList)))
+		require.Equal(t, []int{10, 30}, ElementsRightToLeftInt(dList.(*dlist.DList)))
 		fmt.Println("Forward stroke check for [10, 30]. OK.")
 		for i, v := range [...]int{40, 50, 60, 70, 80} {
 			if i%2 == 0 {
@@ -174,8 +190,8 @@ func TestDListComplex(t *testing.T) {
 		require.Equal(t, 70, dList.RightEdge().Value())
 		fmt.Printf("dList.RightEdge().Value() is %v. OK.\n", dList.RightEdge().Value())
 
-		require.Equal(t, []int{80, 60, 40, 10, 30, 50, 70}, ElementsLeftToRight(dList.(*dlist.DList)))
-		require.Equal(t, []int{80, 60, 40, 10, 30, 50, 70}, ElementsRightToLeft(dList.(*dlist.DList)))
+		require.Equal(t, []int{80, 60, 40, 10, 30, 50, 70}, ElementsLeftToRightInt(dList.(*dlist.DList)))
+		require.Equal(t, []int{80, 60, 40, 10, 30, 50, 70}, ElementsRightToLeftInt(dList.(*dlist.DList)))
 		fmt.Println("Forward stroke check for [80, 60, 40, 10, 30, 50, 70]. OK.")
 
 		rightEnd := dList.RightEdge()
@@ -204,81 +220,80 @@ func TestDListSwap(t *testing.T) {
 		three := dList.PushToRightEdge(30) // [10, 20, 30]
 		four := dList.PushToRightEdge(40)  // [10, 20, 30, 40]
 		five := dList.PushToRightEdge(50)  // [10, 20, 30, 40, 50]
-		require.Equal(t, []int{10, 20, 30, 40, 50}, ElementsLeftToRight(dList.(*dlist.DList)))
-		require.Equal(t, []int{10, 20, 30, 40, 50}, ElementsRightToLeft(dList.(*dlist.DList)))
+		require.Equal(t, []int{10, 20, 30, 40, 50}, ElementsLeftToRightInt(dList.(*dlist.DList)))
+		require.Equal(t, []int{10, 20, 30, 40, 50}, ElementsRightToLeftInt(dList.(*dlist.DList)))
 		fmt.Println("[10, 20, 30, 40, 50]. OK.")
 		dList.SwapItems(two, four)
 		fmt.Println("swap different element-pairs")
-		require.Equal(t, []int{10, 40, 30, 20, 50}, ElementsLeftToRight(dList.(*dlist.DList)))
-		require.Equal(t, []int{10, 40, 30, 20, 50}, ElementsRightToLeft(dList.(*dlist.DList)))
+		require.Equal(t, []int{10, 40, 30, 20, 50}, ElementsLeftToRightInt(dList.(*dlist.DList)))
+		require.Equal(t, []int{10, 40, 30, 20, 50}, ElementsRightToLeftInt(dList.(*dlist.DList)))
 		fmt.Println("[10, 40, 30, 20, 50]. OK.")
 		dList.SwapItems(two, four)
-		require.Equal(t, []int{10, 20, 30, 40, 50}, ElementsLeftToRight(dList.(*dlist.DList)))
-		require.Equal(t, []int{10, 20, 30, 40, 50}, ElementsRightToLeft(dList.(*dlist.DList)))
+		require.Equal(t, []int{10, 20, 30, 40, 50}, ElementsLeftToRightInt(dList.(*dlist.DList)))
+		require.Equal(t, []int{10, 20, 30, 40, 50}, ElementsRightToLeftInt(dList.(*dlist.DList)))
 		fmt.Println("[10, 20, 30, 40, 50]. OK.")
 		dList.SwapItems(one, five)
-		require.Equal(t, []int{50, 20, 30, 40, 10}, ElementsLeftToRight(dList.(*dlist.DList)))
-		require.Equal(t, []int{50, 20, 30, 40, 10}, ElementsRightToLeft(dList.(*dlist.DList)))
+		require.Equal(t, []int{50, 20, 30, 40, 10}, ElementsLeftToRightInt(dList.(*dlist.DList)))
+		require.Equal(t, []int{50, 20, 30, 40, 10}, ElementsRightToLeftInt(dList.(*dlist.DList)))
 		fmt.Println("[50, 20, 30, 40, 10]. OK.")
 		dList.SwapItems(one, five)
-		require.Equal(t, []int{10, 20, 30, 40, 50}, ElementsLeftToRight(dList.(*dlist.DList)))
-		require.Equal(t, []int{10, 20, 30, 40, 50}, ElementsRightToLeft(dList.(*dlist.DList)))
+		require.Equal(t, []int{10, 20, 30, 40, 50}, ElementsLeftToRightInt(dList.(*dlist.DList)))
+		require.Equal(t, []int{10, 20, 30, 40, 50}, ElementsRightToLeftInt(dList.(*dlist.DList)))
 		fmt.Println("[10, 20, 30, 40, 50]. OK.")
 		dList.SwapItems(one, three)
-		require.Equal(t, []int{30, 20, 10, 40, 50}, ElementsLeftToRight(dList.(*dlist.DList)))
-		require.Equal(t, []int{30, 20, 10, 40, 50}, ElementsRightToLeft(dList.(*dlist.DList)))
+		require.Equal(t, []int{30, 20, 10, 40, 50}, ElementsLeftToRightInt(dList.(*dlist.DList)))
+		require.Equal(t, []int{30, 20, 10, 40, 50}, ElementsRightToLeftInt(dList.(*dlist.DList)))
 		fmt.Println("[30, 20, 10, 40, 50]. OK.")
 		dList.SwapItems(one, three)
-		require.Equal(t, []int{10, 20, 30, 40, 50}, ElementsLeftToRight(dList.(*dlist.DList)))
-		require.Equal(t, []int{10, 20, 30, 40, 50}, ElementsRightToLeft(dList.(*dlist.DList)))
+		require.Equal(t, []int{10, 20, 30, 40, 50}, ElementsLeftToRightInt(dList.(*dlist.DList)))
+		require.Equal(t, []int{10, 20, 30, 40, 50}, ElementsRightToLeftInt(dList.(*dlist.DList)))
 		fmt.Println("[10, 20, 30, 40, 50]. OK.")
 		dList.SwapItems(five, two)
-		require.Equal(t, []int{10, 50, 30, 40, 20}, ElementsLeftToRight(dList.(*dlist.DList)))
-		require.Equal(t, []int{10, 50, 30, 40, 20}, ElementsRightToLeft(dList.(*dlist.DList)))
+		require.Equal(t, []int{10, 50, 30, 40, 20}, ElementsLeftToRightInt(dList.(*dlist.DList)))
+		require.Equal(t, []int{10, 50, 30, 40, 20}, ElementsRightToLeftInt(dList.(*dlist.DList)))
 		fmt.Println("[10, 50, 30, 40, 20]. OK.")
 		dList.SwapItems(two, five)
-		require.Equal(t, []int{10, 20, 30, 40, 50}, ElementsLeftToRight(dList.(*dlist.DList)))
-		require.Equal(t, []int{10, 20, 30, 40, 50}, ElementsRightToLeft(dList.(*dlist.DList)))
+		require.Equal(t, []int{10, 20, 30, 40, 50}, ElementsLeftToRightInt(dList.(*dlist.DList)))
+		require.Equal(t, []int{10, 20, 30, 40, 50}, ElementsRightToLeftInt(dList.(*dlist.DList)))
 		fmt.Println("[10, 20, 30, 40, 50]. OK.")
 		dList.SwapItems(two, three)
-		require.Equal(t, []int{10, 30, 20, 40, 50}, ElementsLeftToRight(dList.(*dlist.DList)))
-		require.Equal(t, []int{10, 30, 20, 40, 50}, ElementsRightToLeft(dList.(*dlist.DList)))
+		require.Equal(t, []int{10, 30, 20, 40, 50}, ElementsLeftToRightInt(dList.(*dlist.DList)))
+		require.Equal(t, []int{10, 30, 20, 40, 50}, ElementsRightToLeftInt(dList.(*dlist.DList)))
 		fmt.Println("[10, 30, 20, 40, 50]. OK.")
 		dList.SwapItems(two, three)
-		require.Equal(t, []int{10, 20, 30, 40, 50}, ElementsLeftToRight(dList.(*dlist.DList)))
-		require.Equal(t, []int{10, 20, 30, 40, 50}, ElementsRightToLeft(dList.(*dlist.DList)))
+		require.Equal(t, []int{10, 20, 30, 40, 50}, ElementsLeftToRightInt(dList.(*dlist.DList)))
+		require.Equal(t, []int{10, 20, 30, 40, 50}, ElementsRightToLeftInt(dList.(*dlist.DList)))
 		fmt.Println("[10, 20, 30, 40, 50]. OK.")
 		dList.SwapItems(four, three)
-		require.Equal(t, []int{10, 20, 40, 30, 50}, ElementsLeftToRight(dList.(*dlist.DList)))
-		require.Equal(t, []int{10, 20, 40, 30, 50}, ElementsRightToLeft(dList.(*dlist.DList)))
+		require.Equal(t, []int{10, 20, 40, 30, 50}, ElementsLeftToRightInt(dList.(*dlist.DList)))
+		require.Equal(t, []int{10, 20, 40, 30, 50}, ElementsRightToLeftInt(dList.(*dlist.DList)))
 		fmt.Println("[10, 20, 40, 30, 50]. OK.")
 		dList.SwapItems(five, three)
-		require.Equal(t, []int{10, 20, 40, 50, 30}, ElementsLeftToRight(dList.(*dlist.DList)))
-		require.Equal(t, []int{10, 20, 40, 50, 30}, ElementsRightToLeft(dList.(*dlist.DList)))
+		require.Equal(t, []int{10, 20, 40, 50, 30}, ElementsLeftToRightInt(dList.(*dlist.DList)))
+		require.Equal(t, []int{10, 20, 40, 50, 30}, ElementsRightToLeftInt(dList.(*dlist.DList)))
 		fmt.Println("[10, 20, 40, 50, 30]. OK.")
 		dList.SwapItems(one, two)
-		require.Equal(t, []int{20, 10, 40, 50, 30}, ElementsLeftToRight(dList.(*dlist.DList)))
-		require.Equal(t, []int{20, 10, 40, 50, 30}, ElementsRightToLeft(dList.(*dlist.DList)))
+		require.Equal(t, []int{20, 10, 40, 50, 30}, ElementsLeftToRightInt(dList.(*dlist.DList)))
+		require.Equal(t, []int{20, 10, 40, 50, 30}, ElementsRightToLeftInt(dList.(*dlist.DList)))
 		fmt.Println("[20, 10, 40, 50, 30]. OK.")
 		dList.SwapItems(one, two)
-		require.Equal(t, []int{10, 20, 40, 50, 30}, ElementsLeftToRight(dList.(*dlist.DList)))
-		require.Equal(t, []int{10, 20, 40, 50, 30}, ElementsRightToLeft(dList.(*dlist.DList)))
+		require.Equal(t, []int{10, 20, 40, 50, 30}, ElementsLeftToRightInt(dList.(*dlist.DList)))
+		require.Equal(t, []int{10, 20, 40, 50, 30}, ElementsRightToLeftInt(dList.(*dlist.DList)))
 		fmt.Println("[10, 20, 40, 50, 30]. OK.")
 		dList.SwapItems(three, five)
-		require.Equal(t, []int{10, 20, 40, 30, 50}, ElementsLeftToRight(dList.(*dlist.DList)))
-		require.Equal(t, []int{10, 20, 40, 30, 50}, ElementsRightToLeft(dList.(*dlist.DList)))
+		require.Equal(t, []int{10, 20, 40, 30, 50}, ElementsLeftToRightInt(dList.(*dlist.DList)))
+		require.Equal(t, []int{10, 20, 40, 30, 50}, ElementsRightToLeftInt(dList.(*dlist.DList)))
 		fmt.Println("[10, 20, 40, 30, 50]. OK.")
 		dList.SwapItems(three, four)
-		require.Equal(t, []int{10, 20, 30, 40, 50}, ElementsLeftToRight(dList.(*dlist.DList)))
-		require.Equal(t, []int{10, 20, 30, 40, 50}, ElementsRightToLeft(dList.(*dlist.DList)))
+		require.Equal(t, []int{10, 20, 30, 40, 50}, ElementsLeftToRightInt(dList.(*dlist.DList)))
+		require.Equal(t, []int{10, 20, 30, 40, 50}, ElementsRightToLeftInt(dList.(*dlist.DList)))
 		fmt.Println("[10, 20, 30, 40, 50]. OK.")
 	})
 }
 
-
 func TestDListSortInterface(t *testing.T) {
 
-	t.Run("Let's sort Dlist.", func(t *testing.T) {
+	t.Run("Let's sort int-Dlist.", func(t *testing.T) {
 		dList := dlist.NewDList()
 		dList.PushToRightEdge(10) // [10]
 		dList.PushToRightEdge(30) // [10, 30]
@@ -286,14 +301,39 @@ func TestDListSortInterface(t *testing.T) {
 		dList.PushToRightEdge(50) // [10, 30, 20, 50]
 		dList.PushToRightEdge(40) // [10, 30, 20, 50, 40]
 		sample := []int{10, 30, 20, 50, 40}
-		require.Equal(t, sample, ElementsLeftToRight(dList.(*dlist.DList)))
-		require.Equal(t, sample, ElementsRightToLeft(dList.(*dlist.DList)))
+		require.Equal(t, sample, ElementsLeftToRightInt(dList.(*dlist.DList)))
+		require.Equal(t, sample, ElementsRightToLeftInt(dList.(*dlist.DList)))
 		fmt.Printf("\nTest dList before sort: %v. OK.\n", sample)
 		fmt.Printf("\nList before sort with Stringer() formatting:\n%s\n", dList)
+
+		dList.SetValuer(func(v interface{}) float64 {
+			return (float64(v.(int)))
+		})
 		sort.Sort(dList.(*dlist.DList))
 		expected := []int{10, 20, 30, 40, 50}
-		require.Equal(t, expected, ElementsLeftToRight(dList.(*dlist.DList)))
-		require.Equal(t, expected, ElementsRightToLeft(dList.(*dlist.DList)))
+		require.Equal(t, expected, ElementsLeftToRightInt(dList.(*dlist.DList)))
+		require.Equal(t, expected, ElementsRightToLeftInt(dList.(*dlist.DList)))
+		fmt.Printf("\nTest dList after sort: %v. OK.\n", expected)
+		fmt.Printf("\nList after sort with Stringer() formatting:\n%s\n", dList)
+	})
+	t.Run("Let's sort rune-Dlist.", func(t *testing.T) {
+		dList := dlist.NewDList()
+		dList.PushToRightEdge('a') // [a]
+		dList.PushToRightEdge('c') // [a, c]
+		dList.PushToRightEdge('b') // [a, c, b]
+		dList.PushToRightEdge('e') // [a, c, b, e]
+		dList.PushToRightEdge('d') // [a, c, b, e, d]
+		sample := []rune{'a', 'c', 'b', 'e', 'd'}
+		require.Equal(t, sample, ElementsLeftToRightRune(dList.(*dlist.DList)))
+		fmt.Printf("\nTest dList before sort: %v. OK.\n", sample)
+		fmt.Printf("\nList before sort with Stringer() formatting:\n%s\n", dList)
+
+		dList.SetValuer(func(v interface{}) float64 {
+			return (float64(v.(rune)))
+		})
+		sort.Sort(dList.(*dlist.DList))
+		expected := []int32{'a', 'b', 'c', 'd', 'e'}
+		require.Equal(t, expected, ElementsLeftToRightRune(dList.(*dlist.DList)))
 		fmt.Printf("\nTest dList after sort: %v. OK.\n", expected)
 		fmt.Printf("\nList after sort with Stringer() formatting:\n%s\n", dList)
 	})
