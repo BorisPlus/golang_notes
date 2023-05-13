@@ -55,23 +55,30 @@ type DLister interface {
 	PushToRightEdge(value interface{}) *DListItem
 	Remove(item *DListItem) (*DListItem, error)
 	SwapItems(x, y *DListItem) error
-	Valuer(v interface{}) float64
-	// SetValuer(ValuerFunc *func(v interface{}) float64)
-	SetValuer(ValuerFunc func(v interface{}) float64)
+	SetLessItems(less func(x, y *DListItem) bool)
+	// функция преобразования .Value во float
+	// valueToFloat(v interface{}) float64 // получение значения элемента двусвязного списка, необходимо для Less-сравнения
+	// SetValueToFloatConverter(converter func(v interface{}) float64) // функция преобразования .Value во float
 }
 
 // DList - структура двусвязного списка.
 type DList struct {
-	len        int
-	leftEdge   *DListItem
-	rightEdge  *DListItem
-	ValuerFunc func(v interface{}) float64
+	len       int
+	leftEdge  *DListItem
+	rightEdge *DListItem
+	less func(x, y *DListItem) bool
 }
 
-// SetValuer() - метод установки функции преобразования значений Value() в объект, сравнимый оператором "<".
-func (dList *DList) SetValuer(ValuerFunc func(v interface{}) float64) {
-	dList.ValuerFunc = ValuerFunc
+// SetLessItems(less func(v interface{}) bool) - метод присвоения
+// функции сравнения значений Value() (для сортировки).
+func (dList *DList) SetLessItems(less func(x, y *DListItem) bool) {
+	dList.less = less
 }
+
+// ValueToFloatConverter - функциz преобразования значений item.Value() в float64, сравнимый оператором "<".
+// func (dList *DList) LessItems() func(v interface{}) float64 {
+// 	return dList.valueToFloatConverter
+// }
 
 // Len() - метод получения длины двусвязного списка.
 func (dList *DList) Len() int {
@@ -286,17 +293,12 @@ func (dList *DList) Swap(i, j int) {
 	dList.SwapItems(iItem, jItem)
 }
 
-func (dList *DList) Valuer(v interface{}) float64{
-	return (dList.ValuerFunc)(v)
-}
-
 // Less(i, j int) - метод сравнения убывания i-того и j-того слева элементов двусвязного списка.
-// Реализовано ИСКЛЮЧИТЕЛЬНО для демонстрации использования интерфейсных методов sort.Sort()
-// ПРИ УСЛОВИИ хранения INT-значений в поле value.
+// Реализовано ИСКЛЮЧИТЕЛЬНО для демонстрации использования интерфейсных методов sort.Sort().
 func (dList *DList) Less(i, j int) bool {
 	iItem, _ := dList.GetByIndex(i)
 	jItem, _ := dList.GetByIndex(j)
-	return (dList.Valuer)(iItem.Value()) < (dList.Valuer)(jItem.Value())
+	return (dList.less)(iItem, jItem)
 }
 
 // NewList() - функция инициализации нового двусвязного списка.

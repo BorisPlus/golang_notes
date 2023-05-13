@@ -31,11 +31,6 @@ func (clt *Cluster) Centroid() pnt.Pointer {
 	return clt.centroid
 }
 
-// DistanceAB() - дистанция между дочерними подкластерами кластера.
-func (clt *Cluster) DistanceAB() float64 {
-	return clt.distanceAB
-}
-
 // BranchA() - ветка дочернего подкластера условного-"A".
 func (clt *Cluster) BranchA() *Cluster {
 	return clt.branchA
@@ -44,6 +39,11 @@ func (clt *Cluster) BranchA() *Cluster {
 // BranchB() - ветка дочернего подкластера условного-"B".
 func (clt *Cluster) BranchB() *Cluster {
 	return clt.branchB
+}
+
+// DistanceAB() - дистанция между дочерними подкластерами кластера.
+func (clt *Cluster) DistanceAB() float64 {
+	return clt.distanceAB
 }
 
 var clusterStringTemplate = `
@@ -99,51 +99,6 @@ func (scp *SimilarClustersPairItem) Distance() float64 {
 	return scp.abPairUnion.DistanceAB()
 }
 
-// // SimilarCluster - структура, описывающая максимально близкий\похожий по метрике целевой кластер к исходному.
-// type privateSimilarCluster struct {
-// 	example  *dlist.DListItem
-// 	similar  *dlist.DListItem
-// 	distance float64
-// }
-
-// var similarClusterStringTemplate = `
-// =====================
-// Similar:  %p
-// ---------------------
-// example:  %p %p
-// similar:  %p %p
-// distance: %f
-// =====================`
-
-// func (smlr privateSimilarCluster) String() string {
-// 	return fmt.Sprintf(
-// 		similarClusterStringTemplate,
-// 		&smlr,
-// 		smlr.example,
-// 		*smlr.example,
-// 		smlr.similar,
-// 		*smlr.similar,
-// 		smlr.distance,
-// 	)
-// }
-
-// SimilarClusterVector - используется для сортировки пар максимально близких кластеров,
-// в целях нахождения пары для следующей итерации слияния
-// type SimilarClusterVector []*SimilarCluster
-
-// func (v SimilarClusterVector) Len() int           { return len(v) }
-// func (v SimilarClusterVector) Swap(i, j int)      { v[i], v[j] = v[j], v[i] }
-// func (v SimilarClusterVector) Less(i, j int) bool { return v[i].distance < v[j].distance }
-
-// type sortingDlist *dlist.DList
-// func (dList dlist.DList) Len() int      { return dList.Len() }
-// func (dList dlist.DList) Swap(i, j int) { dList.Swap(i, j) }
-// func (dList dlist.DList) Less(i, j int) bool {
-// 	a, _ := dList.GetByIndex(i)
-// 	b, _ := dList.GetByIndex(j).distance
-// 	return a.distance < b
-// }
-
 // Clusterizator - кластеризатор, реализующий процесс Иерархической кластеризации.
 //
 //	Metrica - функция расстояния в пространстве.
@@ -165,28 +120,26 @@ type Clusterizator struct {
 	similarest       *dlist.DList
 }
 
-func similarestValueFoater(v interface{}) float64 {
-	return v.(*SimilarClustersPairItem).Distance()
-}
-
 // Clusters() - кластеры.
 func (clz *Clusterizator) Clusters() *dlist.DList {
 	return clz.clusters
 }
 
-// Similarest() - пары максимально подобных кластеров.
+// InitSimilarest(similarest *dlist.DList) - инициализация списка максимально подобных кластеров.
 func (clz *Clusterizator) InitSimilarest(similarest *dlist.DList) {
 	clz.similarest = similarest
-	similarest.SetValuer(similarestValueFoater)
+	clz.similarest.SetLessItems(func(x, y *dlist.DListItem) bool {
+		return x.Value().(*SimilarClustersPairItem).Distance() < y.Value().(*SimilarClustersPairItem).Distance()
+	})
 }
 
-// Similarest() - пары максимально подобных кластеров.
+// Similarest() - список пар максимально подобных кластеров.
 func (clz *Clusterizator) Similarest() *dlist.DList {
 	return clz.similarest
 }
 
 // Init(points []pnt.Pointer) - инициализация кластеризатора.
-func (clz *Clusterizator) Init(points []pnt.Pointer) *Clusterizator{
+func (clz *Clusterizator) Init(points []pnt.Pointer) *Clusterizator {
 	clz.clusters = &dlist.DList{}
 	for _, point := range points {
 		cluster := Cluster{}
@@ -304,11 +257,12 @@ func (clz *Clusterizator) Iterate() (bool, error) {
 	return clz.Breakpoint(clz), nil
 }
 
-// Clusterize() - метод запуска кластера.
+// Clusterize() - метод запуска кластеризации.
 func (clz *Clusterizator) Clusterize() []*Cluster {
 
-	for stoped, _ := clz.Iterate(); !stoped; stoped, _ = clz.Iterate() {
-
+	stoped := false
+	for !stoped  {
+		stoped, _ = clz.Iterate()
 	}
 	clusters := make([]*Cluster, clz.clusters.Len())
 

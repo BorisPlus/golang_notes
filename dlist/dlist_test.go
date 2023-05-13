@@ -7,18 +7,8 @@ import (
 
 	"github.com/stretchr/testify/require"
 
-	dlist "github.com/BorisPlus/golang_notes/dlist" 
+	dlist "github.com/BorisPlus/golang_notes/dlist"
 )
-
-// go test -v dList.go list_string.go list_test.go
-
-func ElementsLeftToRightValued(dList *dlist.DList) []float64 {
-	elements := make([]float64, 0, dList.Len())
-	for i := dList.LeftEdge(); i != nil; i = i.RightNeighbour() {
-		elements = append(elements, (dList.Valuer)(i.Value()))
-	}
-	return elements
-}
 
 func ElementsLeftToRightInt(dList *dlist.DList) []int {
 	elements := make([]int, 0, dList.Len())
@@ -305,9 +295,8 @@ func TestDListSortInterface(t *testing.T) {
 		require.Equal(t, sample, ElementsRightToLeftInt(dList.(*dlist.DList)))
 		fmt.Printf("\nTest dList before sort: %v. OK.\n", sample)
 		fmt.Printf("\nList before sort with Stringer() formatting:\n%s\n", dList)
-
-		dList.SetValuer(func(v interface{}) float64 {
-			return (float64(v.(int)))
+		dList.SetLessItems(func(x, y *dlist.DListItem) bool {
+			return x.Value().(int) < y.Value().(int)
 		})
 		sort.Sort(dList.(*dlist.DList))
 		expected := []int{10, 20, 30, 40, 50}
@@ -327,14 +316,31 @@ func TestDListSortInterface(t *testing.T) {
 		require.Equal(t, sample, ElementsLeftToRightRune(dList.(*dlist.DList)))
 		fmt.Printf("\nTest dList before sort: %v. OK.\n", sample)
 		fmt.Printf("\nList before sort with Stringer() formatting:\n%s\n", dList)
-
-		dList.SetValuer(func(v interface{}) float64 {
-			return (float64(v.(rune)))
+		dList.SetLessItems(func(x, y *dlist.DListItem) bool {
+			return x.Value().(rune) < y.Value().(rune)
 		})
 		sort.Sort(dList.(*dlist.DList))
 		expected := []int32{'a', 'b', 'c', 'd', 'e'}
 		require.Equal(t, expected, ElementsLeftToRightRune(dList.(*dlist.DList)))
 		fmt.Printf("\nTest dList after sort: %v. OK.\n", expected)
+		fmt.Printf("\nList after sort with Stringer() formatting:\n%s\n", dList)
+	})
+	t.Run("Let's sort struct-Dlist.", func(t *testing.T) {
+		
+		type KeyValue struct {
+			key int
+			value string
+		}
+		dList := dlist.NewDList()
+		dList.PushToRightEdge(KeyValue{key:1, value: "one"}) // [1:"one"]
+		dList.PushToRightEdge(KeyValue{key:2, value: "two"}) // [1:"one" 2:"two"]
+		dList.PushToRightEdge(KeyValue{key:3, value: "three"}) // [1:"one" 2:"two" 3:"three"]
+		dList.PushToRightEdge(KeyValue{key:4, value: "four"}) // [1:"one" 2:"two" 3:"three" 4:"four"]
+		fmt.Printf("\nList before sort with Stringer() formatting:\n%s\n", dList)
+		dList.SetLessItems(func(x, y *dlist.DListItem) bool {
+			return x.Value().(KeyValue).value < y.Value().(KeyValue).value
+		})
+		sort.Sort(dList.(*dlist.DList))
 		fmt.Printf("\nList after sort with Stringer() formatting:\n%s\n", dList)
 	})
 }

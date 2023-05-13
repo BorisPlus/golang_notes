@@ -38,7 +38,7 @@
 * TestDListSimple
 
 ```shell
-go test -v -run TestDListSimple ./dlist.go ./dlist_stringer.go ./dlist_test.go  > dlist_test.go.simple.txt
+go test -v -run TestDListSimple > dlist_test.go.simple.txt
 ```
 
 <details>
@@ -53,7 +53,7 @@ go test -v -run TestDListSimple ./dlist.go ./dlist_stringer.go ./dlist_test.go  
 * TestDListComplex
 
 ```shell
-go test -v -run TestDListComplex ./dlist.go ./dlist_stringer.go ./dlist_test.go  > dlist_test.go.complex.txt
+go test -v -run TestDListComplex > dlist_test.go.complex.txt
 ```
 
 <details>
@@ -68,7 +68,7 @@ go test -v -run TestDListComplex ./dlist.go ./dlist_stringer.go ./dlist_test.go 
 * TestDListComplex
 
 ```shell
-go test -v -run TestDListSwap ./dlist.go ./dlist_stringer.go ./dlist_test.go  > dlist_test.go.swap.txt
+go test -v -run TestDListSwap > dlist_test.go.swap.txt
 ```
 
 <details>
@@ -97,6 +97,8 @@ go doc -all ./ > dlist.doc.txt
 
 ## Сортировка
 
+* TestListSortInterface
+  
 Я, как мне кажется (😉), подобрал хороший пример для наглядной демонстрации интерфейса, требуемого sort.Sort (уже присутствуют в коде выше):
 
 * `func (list *DList) Len()`
@@ -108,16 +110,14 @@ go doc -all ./ > dlist.doc.txt
 Особенность реализации:
 
 * заранее зная, что будет реализован интерфейс sort.Sort, пришлось отказаться от именования Swap в самой структуре двусвязного списка, так как сигнатура должна быть `Swap (i, j int)`, а не как положено для двусвязного `Swap (i, j *DListItem)`. Это подводный камень для рефакторинга - стоит заранее избегать именований интерфейсных методов;
-* поскольку элементы могут хранить различные структуры, а для сортировки необходимо проводить сравнения Less(x, y), в структуру списка введена функция по получению сравнимого значения из интерфейса Value().
-
-* TestListSortInterface
+* поскольку элементы могут хранить различные структуры, а для сортировки необходимо проводить сравнения `Less(i, j int)`, в структуру списка введена функция по получению результата сравнения элементов списка `less func(x, y *DListItem) bool`. Так в тесте приведены варианты упорядочивания двусвязного списка со значениями с `int`, `rune` и `custom-stuct` без необходимости вмещательства в целевой пакет.
 
 ```shell
-go test -v -run TestDListSortInterface ./dlist.go ./dlist_stringer.go ./dlist_test.go  > dlist_test.go.sort.txt
+go test -v -run TestDListSortInterface > dlist_test.go.sort.txt
 ```
 
 <details>
-<summary>см. лог "TestDListSortInterface" (список упорядочился):</summary>
+<summary>см. лог "TestDListSortInterface" (списки упорядочились):</summary>
 
 ```text
 {{ dlist_test.go.sort.txt }}
