@@ -65,6 +65,10 @@ type DLister interface {
     PushToRightEdge(value interface{}) *DListItem
     Remove(item *DListItem) (*DListItem, error)
     SwapItems(x, y *DListItem) error
+    SetLessItems(less func(x, y *DListItem) bool)
+    // функция преобразования .Value во float
+    // valueToFloat(v interface{}) float64 // получение значения элемента двусвязного списка, необходимо для Less-сравнения
+    // SetValueToFloatConverter(converter func(v interface{}) float64) // функция преобразования .Value во float
 }
 
 // DList - структура двусвязного списка.
@@ -72,7 +76,19 @@ type DList struct {
     len       int
     leftEdge  *DListItem
     rightEdge *DListItem
+    less func(x, y *DListItem) bool
 }
+
+// SetLessItems(less func(v interface{}) bool) - метод присвоения
+// функции сравнения значений Value() (для сортировки).
+func (dList *DList) SetLessItems(less func(x, y *DListItem) bool) {
+    dList.less = less
+}
+
+// ValueToFloatConverter - функциz преобразования значений item.Value() в float64, сравнимый оператором "<".
+// func (dList *DList) LessItems() func(v interface{}) float64 {
+//     return dList.valueToFloatConverter
+// }
 
 // Len() - метод получения длины двусвязного списка.
 func (dList *DList) Len() int {
@@ -288,12 +304,11 @@ func (dList *DList) Swap(i, j int) {
 }
 
 // Less(i, j int) - метод сравнения убывания i-того и j-того слева элементов двусвязного списка.
-// Реализовано ИСКЛЮЧИТЕЛЬНО для демонстрации использования интерфейсных методов sort.Sort()
-// ПРИ УСЛОВИИ хранения INT-значений в поле value.
+// Реализовано ИСКЛЮЧИТЕЛЬНО для демонстрации использования интерфейсных методов sort.Sort().
 func (dList *DList) Less(i, j int) bool {
     iItem, _ := dList.GetByIndex(i)
     jItem, _ := dList.GetByIndex(j)
-    return iItem.Value().(int) < jItem.Value().(int)
+    return (dList.less)(iItem, jItem)
 }
 
 // NewList() - функция инициализации нового двусвязного списка.
@@ -333,7 +348,7 @@ func (dlistItem *DListItem) String() string {
 -------------------
  Item: %p
 -------------------
-value: %v
+value: %s
  left: %p
 right: %p
 -------------------`
@@ -416,12 +431,10 @@ import (
 
     "github.com/stretchr/testify/require"
 
-    dlist "github.com/BorisPlus/golang_notes/dlist" 
+    dlist "github.com/BorisPlus/golang_notes/dlist"
 )
 
-// go test -v dList.go list_string.go list_test.go
-
-func ElementsLeftToRight(dList *dlist.DList) []int {
+func ElementsLeftToRightInt(dList *dlist.DList) []int {
     elements := make([]int, 0, dList.Len())
     for i := dList.LeftEdge(); i != nil; i = i.RightNeighbour() {
         elements = append(elements, i.Value().(int))
@@ -429,10 +442,18 @@ func ElementsLeftToRight(dList *dlist.DList) []int {
     return elements
 }
 
-func ElementsRightToLeft(dList *dlist.DList) []int {
+func ElementsRightToLeftInt(dList *dlist.DList) []int {
     elements := make([]int, 0, dList.Len())
     for i := dList.RightEdge(); i != nil; i = i.LeftNeighbour() {
         elements = append([]int{i.Value().(int)}, elements...)
+    }
+    return elements
+}
+
+func ElementsLeftToRightRune(dList *dlist.DList) []rune {
+    elements := make([]rune, 0, dList.Len())
+    for i := dList.LeftEdge(); i != nil; i = i.RightNeighbour() {
+        elements = append(elements, i.Value().(rune))
     }
     return elements
 }
@@ -554,8 +575,8 @@ func TestDListComplex(t *testing.T) {
         dList.PushToRightEdge(10) // [10]
         dList.PushToRightEdge(20) // [10, 20]
         dList.PushToRightEdge(30) // [10, 20, 30]
-        require.Equal(t, []int{10, 20, 30}, ElementsLeftToRight(dList.(*dlist.DList)))
-        require.Equal(t, []int{10, 20, 30}, ElementsRightToLeft(dList.(*dlist.DList)))
+        require.Equal(t, []int{10, 20, 30}, ElementsLeftToRightInt(dList.(*dlist.DList)))
+        require.Equal(t, []int{10, 20, 30}, ElementsRightToLeftInt(dList.(*dlist.DList)))
         fmt.Println("Forward stroke check for [10, 20, 30]. OK.")
         require.Equal(t, 3, dList.Len())
         middle := dList.LeftEdge().RightNeighbour()
@@ -564,8 +585,8 @@ func TestDListComplex(t *testing.T) {
         dList.Remove(middle)
         fmt.Printf("middle was removed. OK.\n")
         require.Equal(t, 2, dList.Len())
-        require.Equal(t, []int{10, 30}, ElementsLeftToRight(dList.(*dlist.DList)))
-        require.Equal(t, []int{10, 30}, ElementsRightToLeft(dList.(*dlist.DList)))
+        require.Equal(t, []int{10, 30}, ElementsLeftToRightInt(dList.(*dlist.DList)))
+        require.Equal(t, []int{10, 30}, ElementsRightToLeftInt(dList.(*dlist.DList)))
         fmt.Println("Forward stroke check for [10, 30]. OK.")
         for i, v := range [...]int{40, 50, 60, 70, 80} {
             if i%2 == 0 {
@@ -583,8 +604,8 @@ func TestDListComplex(t *testing.T) {
         require.Equal(t, 70, dList.RightEdge().Value())
         fmt.Printf("dList.RightEdge().Value() is %v. OK.\n", dList.RightEdge().Value())
 
-        require.Equal(t, []int{80, 60, 40, 10, 30, 50, 70}, ElementsLeftToRight(dList.(*dlist.DList)))
-        require.Equal(t, []int{80, 60, 40, 10, 30, 50, 70}, ElementsRightToLeft(dList.(*dlist.DList)))
+        require.Equal(t, []int{80, 60, 40, 10, 30, 50, 70}, ElementsLeftToRightInt(dList.(*dlist.DList)))
+        require.Equal(t, []int{80, 60, 40, 10, 30, 50, 70}, ElementsRightToLeftInt(dList.(*dlist.DList)))
         fmt.Println("Forward stroke check for [80, 60, 40, 10, 30, 50, 70]. OK.")
 
         rightEnd := dList.RightEdge()
@@ -613,81 +634,80 @@ func TestDListSwap(t *testing.T) {
         three := dList.PushToRightEdge(30) // [10, 20, 30]
         four := dList.PushToRightEdge(40)  // [10, 20, 30, 40]
         five := dList.PushToRightEdge(50)  // [10, 20, 30, 40, 50]
-        require.Equal(t, []int{10, 20, 30, 40, 50}, ElementsLeftToRight(dList.(*dlist.DList)))
-        require.Equal(t, []int{10, 20, 30, 40, 50}, ElementsRightToLeft(dList.(*dlist.DList)))
+        require.Equal(t, []int{10, 20, 30, 40, 50}, ElementsLeftToRightInt(dList.(*dlist.DList)))
+        require.Equal(t, []int{10, 20, 30, 40, 50}, ElementsRightToLeftInt(dList.(*dlist.DList)))
         fmt.Println("[10, 20, 30, 40, 50]. OK.")
         dList.SwapItems(two, four)
         fmt.Println("swap different element-pairs")
-        require.Equal(t, []int{10, 40, 30, 20, 50}, ElementsLeftToRight(dList.(*dlist.DList)))
-        require.Equal(t, []int{10, 40, 30, 20, 50}, ElementsRightToLeft(dList.(*dlist.DList)))
+        require.Equal(t, []int{10, 40, 30, 20, 50}, ElementsLeftToRightInt(dList.(*dlist.DList)))
+        require.Equal(t, []int{10, 40, 30, 20, 50}, ElementsRightToLeftInt(dList.(*dlist.DList)))
         fmt.Println("[10, 40, 30, 20, 50]. OK.")
         dList.SwapItems(two, four)
-        require.Equal(t, []int{10, 20, 30, 40, 50}, ElementsLeftToRight(dList.(*dlist.DList)))
-        require.Equal(t, []int{10, 20, 30, 40, 50}, ElementsRightToLeft(dList.(*dlist.DList)))
+        require.Equal(t, []int{10, 20, 30, 40, 50}, ElementsLeftToRightInt(dList.(*dlist.DList)))
+        require.Equal(t, []int{10, 20, 30, 40, 50}, ElementsRightToLeftInt(dList.(*dlist.DList)))
         fmt.Println("[10, 20, 30, 40, 50]. OK.")
         dList.SwapItems(one, five)
-        require.Equal(t, []int{50, 20, 30, 40, 10}, ElementsLeftToRight(dList.(*dlist.DList)))
-        require.Equal(t, []int{50, 20, 30, 40, 10}, ElementsRightToLeft(dList.(*dlist.DList)))
+        require.Equal(t, []int{50, 20, 30, 40, 10}, ElementsLeftToRightInt(dList.(*dlist.DList)))
+        require.Equal(t, []int{50, 20, 30, 40, 10}, ElementsRightToLeftInt(dList.(*dlist.DList)))
         fmt.Println("[50, 20, 30, 40, 10]. OK.")
         dList.SwapItems(one, five)
-        require.Equal(t, []int{10, 20, 30, 40, 50}, ElementsLeftToRight(dList.(*dlist.DList)))
-        require.Equal(t, []int{10, 20, 30, 40, 50}, ElementsRightToLeft(dList.(*dlist.DList)))
+        require.Equal(t, []int{10, 20, 30, 40, 50}, ElementsLeftToRightInt(dList.(*dlist.DList)))
+        require.Equal(t, []int{10, 20, 30, 40, 50}, ElementsRightToLeftInt(dList.(*dlist.DList)))
         fmt.Println("[10, 20, 30, 40, 50]. OK.")
         dList.SwapItems(one, three)
-        require.Equal(t, []int{30, 20, 10, 40, 50}, ElementsLeftToRight(dList.(*dlist.DList)))
-        require.Equal(t, []int{30, 20, 10, 40, 50}, ElementsRightToLeft(dList.(*dlist.DList)))
+        require.Equal(t, []int{30, 20, 10, 40, 50}, ElementsLeftToRightInt(dList.(*dlist.DList)))
+        require.Equal(t, []int{30, 20, 10, 40, 50}, ElementsRightToLeftInt(dList.(*dlist.DList)))
         fmt.Println("[30, 20, 10, 40, 50]. OK.")
         dList.SwapItems(one, three)
-        require.Equal(t, []int{10, 20, 30, 40, 50}, ElementsLeftToRight(dList.(*dlist.DList)))
-        require.Equal(t, []int{10, 20, 30, 40, 50}, ElementsRightToLeft(dList.(*dlist.DList)))
+        require.Equal(t, []int{10, 20, 30, 40, 50}, ElementsLeftToRightInt(dList.(*dlist.DList)))
+        require.Equal(t, []int{10, 20, 30, 40, 50}, ElementsRightToLeftInt(dList.(*dlist.DList)))
         fmt.Println("[10, 20, 30, 40, 50]. OK.")
         dList.SwapItems(five, two)
-        require.Equal(t, []int{10, 50, 30, 40, 20}, ElementsLeftToRight(dList.(*dlist.DList)))
-        require.Equal(t, []int{10, 50, 30, 40, 20}, ElementsRightToLeft(dList.(*dlist.DList)))
+        require.Equal(t, []int{10, 50, 30, 40, 20}, ElementsLeftToRightInt(dList.(*dlist.DList)))
+        require.Equal(t, []int{10, 50, 30, 40, 20}, ElementsRightToLeftInt(dList.(*dlist.DList)))
         fmt.Println("[10, 50, 30, 40, 20]. OK.")
         dList.SwapItems(two, five)
-        require.Equal(t, []int{10, 20, 30, 40, 50}, ElementsLeftToRight(dList.(*dlist.DList)))
-        require.Equal(t, []int{10, 20, 30, 40, 50}, ElementsRightToLeft(dList.(*dlist.DList)))
+        require.Equal(t, []int{10, 20, 30, 40, 50}, ElementsLeftToRightInt(dList.(*dlist.DList)))
+        require.Equal(t, []int{10, 20, 30, 40, 50}, ElementsRightToLeftInt(dList.(*dlist.DList)))
         fmt.Println("[10, 20, 30, 40, 50]. OK.")
         dList.SwapItems(two, three)
-        require.Equal(t, []int{10, 30, 20, 40, 50}, ElementsLeftToRight(dList.(*dlist.DList)))
-        require.Equal(t, []int{10, 30, 20, 40, 50}, ElementsRightToLeft(dList.(*dlist.DList)))
+        require.Equal(t, []int{10, 30, 20, 40, 50}, ElementsLeftToRightInt(dList.(*dlist.DList)))
+        require.Equal(t, []int{10, 30, 20, 40, 50}, ElementsRightToLeftInt(dList.(*dlist.DList)))
         fmt.Println("[10, 30, 20, 40, 50]. OK.")
         dList.SwapItems(two, three)
-        require.Equal(t, []int{10, 20, 30, 40, 50}, ElementsLeftToRight(dList.(*dlist.DList)))
-        require.Equal(t, []int{10, 20, 30, 40, 50}, ElementsRightToLeft(dList.(*dlist.DList)))
+        require.Equal(t, []int{10, 20, 30, 40, 50}, ElementsLeftToRightInt(dList.(*dlist.DList)))
+        require.Equal(t, []int{10, 20, 30, 40, 50}, ElementsRightToLeftInt(dList.(*dlist.DList)))
         fmt.Println("[10, 20, 30, 40, 50]. OK.")
         dList.SwapItems(four, three)
-        require.Equal(t, []int{10, 20, 40, 30, 50}, ElementsLeftToRight(dList.(*dlist.DList)))
-        require.Equal(t, []int{10, 20, 40, 30, 50}, ElementsRightToLeft(dList.(*dlist.DList)))
+        require.Equal(t, []int{10, 20, 40, 30, 50}, ElementsLeftToRightInt(dList.(*dlist.DList)))
+        require.Equal(t, []int{10, 20, 40, 30, 50}, ElementsRightToLeftInt(dList.(*dlist.DList)))
         fmt.Println("[10, 20, 40, 30, 50]. OK.")
         dList.SwapItems(five, three)
-        require.Equal(t, []int{10, 20, 40, 50, 30}, ElementsLeftToRight(dList.(*dlist.DList)))
-        require.Equal(t, []int{10, 20, 40, 50, 30}, ElementsRightToLeft(dList.(*dlist.DList)))
+        require.Equal(t, []int{10, 20, 40, 50, 30}, ElementsLeftToRightInt(dList.(*dlist.DList)))
+        require.Equal(t, []int{10, 20, 40, 50, 30}, ElementsRightToLeftInt(dList.(*dlist.DList)))
         fmt.Println("[10, 20, 40, 50, 30]. OK.")
         dList.SwapItems(one, two)
-        require.Equal(t, []int{20, 10, 40, 50, 30}, ElementsLeftToRight(dList.(*dlist.DList)))
-        require.Equal(t, []int{20, 10, 40, 50, 30}, ElementsRightToLeft(dList.(*dlist.DList)))
+        require.Equal(t, []int{20, 10, 40, 50, 30}, ElementsLeftToRightInt(dList.(*dlist.DList)))
+        require.Equal(t, []int{20, 10, 40, 50, 30}, ElementsRightToLeftInt(dList.(*dlist.DList)))
         fmt.Println("[20, 10, 40, 50, 30]. OK.")
         dList.SwapItems(one, two)
-        require.Equal(t, []int{10, 20, 40, 50, 30}, ElementsLeftToRight(dList.(*dlist.DList)))
-        require.Equal(t, []int{10, 20, 40, 50, 30}, ElementsRightToLeft(dList.(*dlist.DList)))
+        require.Equal(t, []int{10, 20, 40, 50, 30}, ElementsLeftToRightInt(dList.(*dlist.DList)))
+        require.Equal(t, []int{10, 20, 40, 50, 30}, ElementsRightToLeftInt(dList.(*dlist.DList)))
         fmt.Println("[10, 20, 40, 50, 30]. OK.")
         dList.SwapItems(three, five)
-        require.Equal(t, []int{10, 20, 40, 30, 50}, ElementsLeftToRight(dList.(*dlist.DList)))
-        require.Equal(t, []int{10, 20, 40, 30, 50}, ElementsRightToLeft(dList.(*dlist.DList)))
+        require.Equal(t, []int{10, 20, 40, 30, 50}, ElementsLeftToRightInt(dList.(*dlist.DList)))
+        require.Equal(t, []int{10, 20, 40, 30, 50}, ElementsRightToLeftInt(dList.(*dlist.DList)))
         fmt.Println("[10, 20, 40, 30, 50]. OK.")
         dList.SwapItems(three, four)
-        require.Equal(t, []int{10, 20, 30, 40, 50}, ElementsLeftToRight(dList.(*dlist.DList)))
-        require.Equal(t, []int{10, 20, 30, 40, 50}, ElementsRightToLeft(dList.(*dlist.DList)))
+        require.Equal(t, []int{10, 20, 30, 40, 50}, ElementsLeftToRightInt(dList.(*dlist.DList)))
+        require.Equal(t, []int{10, 20, 30, 40, 50}, ElementsRightToLeftInt(dList.(*dlist.DList)))
         fmt.Println("[10, 20, 30, 40, 50]. OK.")
     })
 }
 
-
 func TestDListSortInterface(t *testing.T) {
 
-    t.Run("Let's sort Dlist.", func(t *testing.T) {
+    t.Run("Let's sort int-Dlist.", func(t *testing.T) {
         dList := dlist.NewDList()
         dList.PushToRightEdge(10) // [10]
         dList.PushToRightEdge(30) // [10, 30]
@@ -695,15 +715,56 @@ func TestDListSortInterface(t *testing.T) {
         dList.PushToRightEdge(50) // [10, 30, 20, 50]
         dList.PushToRightEdge(40) // [10, 30, 20, 50, 40]
         sample := []int{10, 30, 20, 50, 40}
-        require.Equal(t, sample, ElementsLeftToRight(dList.(*dlist.DList)))
-        require.Equal(t, sample, ElementsRightToLeft(dList.(*dlist.DList)))
+        require.Equal(t, sample, ElementsLeftToRightInt(dList.(*dlist.DList)))
+        require.Equal(t, sample, ElementsRightToLeftInt(dList.(*dlist.DList)))
         fmt.Printf("\nTest dList before sort: %v. OK.\n", sample)
         fmt.Printf("\nList before sort with Stringer() formatting:\n%s\n", dList)
+        dList.SetLessItems(func(x, y *dlist.DListItem) bool {
+            return x.Value().(int) < y.Value().(int)
+        })
         sort.Sort(dList.(*dlist.DList))
         expected := []int{10, 20, 30, 40, 50}
-        require.Equal(t, expected, ElementsLeftToRight(dList.(*dlist.DList)))
-        require.Equal(t, expected, ElementsRightToLeft(dList.(*dlist.DList)))
+        require.Equal(t, expected, ElementsLeftToRightInt(dList.(*dlist.DList)))
+        require.Equal(t, expected, ElementsRightToLeftInt(dList.(*dlist.DList)))
         fmt.Printf("\nTest dList after sort: %v. OK.\n", expected)
+        fmt.Printf("\nList after sort with Stringer() formatting:\n%s\n", dList)
+    })
+    t.Run("Let's sort rune-Dlist.", func(t *testing.T) {
+        dList := dlist.NewDList()
+        dList.PushToRightEdge('a') // [a]
+        dList.PushToRightEdge('c') // [a, c]
+        dList.PushToRightEdge('b') // [a, c, b]
+        dList.PushToRightEdge('e') // [a, c, b, e]
+        dList.PushToRightEdge('d') // [a, c, b, e, d]
+        sample := []rune{'a', 'c', 'b', 'e', 'd'}
+        require.Equal(t, sample, ElementsLeftToRightRune(dList.(*dlist.DList)))
+        fmt.Printf("\nTest dList before sort: %v. OK.\n", sample)
+        fmt.Printf("\nList before sort with Stringer() formatting:\n%s\n", dList)
+        dList.SetLessItems(func(x, y *dlist.DListItem) bool {
+            return x.Value().(rune) < y.Value().(rune)
+        })
+        sort.Sort(dList.(*dlist.DList))
+        expected := []int32{'a', 'b', 'c', 'd', 'e'}
+        require.Equal(t, expected, ElementsLeftToRightRune(dList.(*dlist.DList)))
+        fmt.Printf("\nTest dList after sort: %v. OK.\n", expected)
+        fmt.Printf("\nList after sort with Stringer() formatting:\n%s\n", dList)
+    })
+    t.Run("Let's sort struct-Dlist.", func(t *testing.T) {
+        
+        type KeyValue struct {
+            key int
+            value string
+        }
+        dList := dlist.NewDList()
+        dList.PushToRightEdge(KeyValue{key:1, value: "one"}) // [1:"one"]
+        dList.PushToRightEdge(KeyValue{key:2, value: "two"}) // [1:"one" 2:"two"]
+        dList.PushToRightEdge(KeyValue{key:3, value: "three"}) // [1:"one" 2:"two" 3:"three"]
+        dList.PushToRightEdge(KeyValue{key:4, value: "four"}) // [1:"one" 2:"two" 3:"three" 4:"four"]
+        fmt.Printf("\nList before sort with Stringer() formatting:\n%s\n", dList)
+        dList.SetLessItems(func(x, y *dlist.DListItem) bool {
+            return x.Value().(KeyValue).value < y.Value().(KeyValue).value
+        })
+        sort.Sort(dList.(*dlist.DList))
         fmt.Printf("\nList after sort with Stringer() formatting:\n%s\n", dList)
     })
 }
@@ -715,7 +776,7 @@ func TestDListSortInterface(t *testing.T) {
 * TestDListSimple
 
 ```shell
-go test -v -run TestDListSimple ./dlist.go ./dlist_stringer.go ./dlist_test.go  > dlist_test.go.simple.txt
+go test -v -run TestDListSimple > dlist_test.go.simple.txt
 ```
 
 <details>
@@ -727,9 +788,9 @@ go test -v -run TestDListSimple ./dlist.go ./dlist_stringer.go ./dlist_test.go  
 
 [zero-value] is: 
 -------------------
- Item: 0xc00002e300
+ Item: 0xc0000e22c0
 -------------------
-value: <nil>
+value: %!s(<nil>)
  left: 0x0
 right: 0x0
 -------------------
@@ -740,47 +801,47 @@ right: 0x0
 
 [1] is: 
 -------------------
- Item: 0xc00002e340
+ Item: 0xc0000e2300
 -------------------
-value: 1
+value: %!s(int=1)
  left: 0x0
 right: 0x0
 -------------------
 
 add [2]: 
 -------------------
- Item: 0xc00002e360
+ Item: 0xc0000e2320
 -------------------
-value: 2
- left: 0xc00002e340
+value: %!s(int=2)
+ left: 0xc0000e2300
 right: 0x0
 -------------------
 
 [1] become: 
 -------------------
- Item: 0xc00002e340
+ Item: 0xc0000e2300
 -------------------
-value: 1
+value: %!s(int=1)
  left: 0x0
-right: 0xc00002e360
+right: 0xc0000e2320
 -------------------
 
 add [3]: 
 -------------------
- Item: 0xc00002e380
+ Item: 0xc0000e2340
 -------------------
-value: 3
- left: 0xc00002e360
+value: %!s(int=3)
+ left: 0xc0000e2320
 right: 0x0
 -------------------
 
 [2] become: 
 -------------------
- Item: 0xc00002e360
+ Item: 0xc0000e2320
 -------------------
-value: 2
- left: 0xc00002e340
-right: 0xc00002e380
+value: %!s(int=2)
+ left: 0xc0000e2300
+right: 0xc0000e2340
 -------------------
 
 first.RightNeighbour().RightNeighbour().RightNeighbour() is nil. OK.
@@ -810,9 +871,9 @@ List was:
 
 Item was: 
 -------------------
- Item: 0xc00002e3e0
+ Item: 0xc0000e23e0
 -------------------
-value: 1
+value: %!s(int=1)
  left: 0x0
 right: 0x0
 -------------------
@@ -826,9 +887,9 @@ List become:
     L|R
      |v
 -------------------
- Item: 0xc00002e3e0
+ Item: 0xc0000e23e0
 -------------------
-value: 1
+value: %!s(int=1)
  left: 0x0
 right: 0x0
 -------------------
@@ -850,9 +911,9 @@ List was:
 Item [1] become:
  
 -------------------
- Item: 0xc00002e420
+ Item: 0xc0000e2440
 -------------------
-value: 1
+value: %!s(int=1)
  left: 0x0
 right: 0x0
 -------------------
@@ -860,9 +921,9 @@ right: 0x0
 list.LeftEdge() become:
  
 -------------------
- Item: 0xc00002e420
+ Item: 0xc0000e2440
 -------------------
-value: 1
+value: %!s(int=1)
  left: 0x0
 right: 0x0
 -------------------
@@ -870,9 +931,9 @@ right: 0x0
 list.RightEdge() become:
  
 -------------------
- Item: 0xc00002e420
+ Item: 0xc0000e2440
 -------------------
-value: 1
+value: %!s(int=1)
  left: 0x0
 right: 0x0
 -------------------
@@ -880,30 +941,30 @@ right: 0x0
 Item [2] become:
  
 -------------------
- Item: 0xc00002e440
+ Item: 0xc0000e2460
 -------------------
-value: 2
+value: %!s(int=2)
  left: 0x0
-right: 0xc00002e420
+right: 0xc0000e2440
 -------------------
 
 list.LeftEdge() become:
  
 -------------------
- Item: 0xc00002e440
+ Item: 0xc0000e2460
 -------------------
-value: 2
+value: %!s(int=2)
  left: 0x0
-right: 0xc00002e420
+right: 0xc0000e2440
 -------------------
 
 list.RightEdge() become:
  
 -------------------
- Item: 0xc00002e420
+ Item: 0xc0000e2440
 -------------------
-value: 1
- left: 0xc00002e440
+value: %!s(int=1)
+ left: 0xc0000e2460
 right: 0x0
 -------------------
 
@@ -914,20 +975,20 @@ List become:
     L|R
      |v
 -------------------
- Item: 0xc00002e440
+ Item: 0xc0000e2460
 -------------------
-value: 2
+value: %!s(int=2)
  left: 0x0
-right: 0xc00002e420
+right: 0xc0000e2440
 -------------------
     ^|
     L|R
      |v
 -------------------
- Item: 0xc00002e420
+ Item: 0xc0000e2440
 -------------------
-value: 1
- left: 0xc00002e440
+value: %!s(int=1)
+ left: 0xc0000e2460
 right: 0x0
 -------------------
     ^|
@@ -938,11 +999,11 @@ right: 0x0
 Was removed:
  
 -------------------
- Item: 0xc00002e440
+ Item: 0xc0000e2460
 -------------------
-value: 2
+value: %!s(int=2)
  left: 0x0
-right: 0xc00002e420
+right: 0xc0000e2440
 -------------------
 
 List become:
@@ -952,9 +1013,9 @@ List become:
     L|R
      |v
 -------------------
- Item: 0xc00002e420
+ Item: 0xc0000e2440
 -------------------
-value: 1
+value: %!s(int=1)
  left: 0x0
 right: 0x0
 -------------------
@@ -966,9 +1027,9 @@ right: 0x0
 Was removed:
  
 -------------------
- Item: 0xc00002e420
+ Item: 0xc0000e2440
 -------------------
-value: 1
+value: %!s(int=1)
  left: 0x0
 right: 0x0
 -------------------
@@ -987,7 +1048,7 @@ List become:
     --- PASS: TestDListSimple/DList_init_test. (0.00s)
     --- PASS: TestDListSimple/Little_DList_test. (0.00s)
 PASS
-ok  	command-line-arguments	0.007s
+ok  	github.com/BorisPlus/golang_notes/dlist	0.008s
 
 ```
 
@@ -996,7 +1057,7 @@ ok  	command-line-arguments	0.007s
 * TestDListComplex
 
 ```shell
-go test -v -run TestDListComplex ./dlist.go ./dlist_stringer.go ./dlist_test.go  > dlist_test.go.complex.txt
+go test -v -run TestDListComplex > dlist_test.go.complex.txt
 ```
 
 <details>
@@ -1021,7 +1082,7 @@ Check for dList.LeftEdge().Left() and dList.RightEdge().Right() is nils. OK.
 --- PASS: TestDListComplex (0.00s)
     --- PASS: TestDListComplex/Сomplex_DList_processing_test. (0.00s)
 PASS
-ok  	command-line-arguments	0.007s
+ok  	github.com/BorisPlus/golang_notes/dlist	0.008s
 
 ```
 
@@ -1030,7 +1091,7 @@ ok  	command-line-arguments	0.007s
 * TestDListComplex
 
 ```shell
-go test -v -run TestDListSwap ./dlist.go ./dlist_stringer.go ./dlist_test.go  > dlist_test.go.swap.txt
+go test -v -run TestDListSwap > dlist_test.go.swap.txt
 ```
 
 <details>
@@ -1060,7 +1121,7 @@ swap different element-pairs
 --- PASS: TestDListSwap (0.00s)
     --- PASS: TestDListSwap/DList_swap_test. (0.00s)
 PASS
-ok  	command-line-arguments	0.007s
+ok  	github.com/BorisPlus/golang_notes/dlist	0.006s
 
 ```
 
@@ -1083,6 +1144,8 @@ go doc -all ./ > dlist.doc.txt
 
 ## Сортировка
 
+* TestListSortInterface
+  
 Я, как мне кажется (😉), подобрал хороший пример для наглядной демонстрации интерфейса, требуемого sort.Sort (уже присутствуют в коде выше):
 
 * `func (list *DList) Len()`
@@ -1091,20 +1154,21 @@ go doc -all ./ > dlist.doc.txt
 
 В данном варианте не подойдет sort.Slice, так как перестановка элементов в двусвязном списке влечет перестановку указателей на соседей и с соседей на переставляемые элементы.
 
-Особенность в том, что заранее зная, что будет реализован интерфейс sort.Sort, пришлось отказаться от именования Swap в самой структуре двусвязного списка, так как сигнатура должна быть `Swap (i, j int)`, а не как положено для двусвязного `Swap (i, j *DListItem)`. Это подводный камень для рефакторинга - стоит заранее избегать именований интерфейсных методов.
+Особенность реализации:
 
-* TestListSortInterface
+* заранее зная, что будет реализован интерфейс sort.Sort, пришлось отказаться от именования Swap в самой структуре двусвязного списка, так как сигнатура должна быть `Swap (i, j int)`, а не как положено для двусвязного `Swap (i, j *DListItem)`. Это подводный камень для рефакторинга - стоит заранее избегать именований интерфейсных методов;
+* поскольку элементы могут хранить различные структуры, а для сортировки необходимо проводить сравнения `Less(i, j int)`, в структуру списка введена функция по получению результата сравнения элементов списка `less func(x, y *DListItem) bool`. Так в тесте приведены варианты упорядочивания двусвязного списка со значениями с `int`, `rune` и `custom-stuct` без необходимости вмещательства в целевой пакет.
 
 ```shell
-go test -v -run TestDListSortInterface ./dlist.go ./dlist_stringer.go ./dlist_test.go  > dlist_test.go.sort.txt
+go test -v -run TestDListSortInterface > dlist_test.go.sort.txt
 ```
 
 <details>
-<summary>см. лог "TestDListSortInterface" (список упорядочился):</summary>
+<summary>см. лог "TestDListSortInterface" (списки упорядочились):</summary>
 
 ```text
 === RUN   TestDListSortInterface
-=== RUN   TestDListSortInterface/Let's_sort_Dlist.
+=== RUN   TestDListSortInterface/Let's_sort_int-Dlist.
 
 Test dList before sort: [10 30 20 50 40]. OK.
 
@@ -1115,20 +1179,10 @@ List before sort with Stringer() formatting:
     L|R
      |v
 -------------------
- Item: 0xc00002e300
--------------------
-value: 10
- left: 0x0
-right: 0xc00002e320
--------------------
-    ^|
-    L|R
-     |v
--------------------
  Item: 0xc00002e320
 -------------------
-value: 30
- left: 0xc00002e300
+value: %!s(int=10)
+ left: 0x0
 right: 0xc00002e340
 -------------------
     ^|
@@ -1137,7 +1191,7 @@ right: 0xc00002e340
 -------------------
  Item: 0xc00002e340
 -------------------
-value: 20
+value: %!s(int=30)
  left: 0xc00002e320
 right: 0xc00002e360
 -------------------
@@ -1147,7 +1201,7 @@ right: 0xc00002e360
 -------------------
  Item: 0xc00002e360
 -------------------
-value: 50
+value: %!s(int=20)
  left: 0xc00002e340
 right: 0xc00002e380
 -------------------
@@ -1157,8 +1211,18 @@ right: 0xc00002e380
 -------------------
  Item: 0xc00002e380
 -------------------
-value: 40
+value: %!s(int=50)
  left: 0xc00002e360
+right: 0xc00002e3a0
+-------------------
+    ^|
+    L|R
+     |v
+-------------------
+ Item: 0xc00002e3a0
+-------------------
+value: %!s(int=40)
+ left: 0xc00002e380
 right: 0x0
 -------------------
     ^|
@@ -1175,10 +1239,20 @@ List after sort with Stringer() formatting:
     L|R
      |v
 -------------------
- Item: 0xc00002e300
+ Item: 0xc00002e320
 -------------------
-value: 10
+value: %!s(int=10)
  left: 0x0
+right: 0xc00002e360
+-------------------
+    ^|
+    L|R
+     |v
+-------------------
+ Item: 0xc00002e360
+-------------------
+value: %!s(int=20)
+ left: 0xc00002e320
 right: 0xc00002e340
 -------------------
     ^|
@@ -1187,17 +1261,17 @@ right: 0xc00002e340
 -------------------
  Item: 0xc00002e340
 -------------------
-value: 20
- left: 0xc00002e300
-right: 0xc00002e320
+value: %!s(int=30)
+ left: 0xc00002e360
+right: 0xc00002e3a0
 -------------------
     ^|
     L|R
      |v
 -------------------
- Item: 0xc00002e320
+ Item: 0xc00002e3a0
 -------------------
-value: 30
+value: %!s(int=40)
  left: 0xc00002e340
 right: 0xc00002e380
 -------------------
@@ -1207,18 +1281,226 @@ right: 0xc00002e380
 -------------------
  Item: 0xc00002e380
 -------------------
-value: 40
- left: 0xc00002e320
-right: 0xc00002e360
+value: %!s(int=50)
+ left: 0xc00002e3a0
+right: 0x0
+-------------------
+    ^|
+    L|R
+     |v
+ (nil:0x0)
+=== RUN   TestDListSortInterface/Let's_sort_rune-Dlist.
+
+Test dList before sort: [97 99 98 101 100]. OK.
+
+List before sort with Stringer() formatting:
+
+ (nil:0x0)
+    ^|
+    L|R
+     |v
+-------------------
+ Item: 0xc00002e400
+-------------------
+value: %!s(int32=97)
+ left: 0x0
+right: 0xc00002e420
 -------------------
     ^|
     L|R
      |v
 -------------------
- Item: 0xc00002e360
+ Item: 0xc00002e420
 -------------------
-value: 50
- left: 0xc00002e380
+value: %!s(int32=99)
+ left: 0xc00002e400
+right: 0xc00002e440
+-------------------
+    ^|
+    L|R
+     |v
+-------------------
+ Item: 0xc00002e440
+-------------------
+value: %!s(int32=98)
+ left: 0xc00002e420
+right: 0xc00002e460
+-------------------
+    ^|
+    L|R
+     |v
+-------------------
+ Item: 0xc00002e460
+-------------------
+value: %!s(int32=101)
+ left: 0xc00002e440
+right: 0xc00002e480
+-------------------
+    ^|
+    L|R
+     |v
+-------------------
+ Item: 0xc00002e480
+-------------------
+value: %!s(int32=100)
+ left: 0xc00002e460
+right: 0x0
+-------------------
+    ^|
+    L|R
+     |v
+ (nil:0x0)
+
+Test dList after sort: [97 98 99 100 101]. OK.
+
+List after sort with Stringer() formatting:
+
+ (nil:0x0)
+    ^|
+    L|R
+     |v
+-------------------
+ Item: 0xc00002e400
+-------------------
+value: %!s(int32=97)
+ left: 0x0
+right: 0xc00002e440
+-------------------
+    ^|
+    L|R
+     |v
+-------------------
+ Item: 0xc00002e440
+-------------------
+value: %!s(int32=98)
+ left: 0xc00002e400
+right: 0xc00002e420
+-------------------
+    ^|
+    L|R
+     |v
+-------------------
+ Item: 0xc00002e420
+-------------------
+value: %!s(int32=99)
+ left: 0xc00002e440
+right: 0xc00002e480
+-------------------
+    ^|
+    L|R
+     |v
+-------------------
+ Item: 0xc00002e480
+-------------------
+value: %!s(int32=100)
+ left: 0xc00002e420
+right: 0xc00002e460
+-------------------
+    ^|
+    L|R
+     |v
+-------------------
+ Item: 0xc00002e460
+-------------------
+value: %!s(int32=101)
+ left: 0xc00002e480
+right: 0x0
+-------------------
+    ^|
+    L|R
+     |v
+ (nil:0x0)
+=== RUN   TestDListSortInterface/Let's_sort_struct-Dlist.
+
+List before sort with Stringer() formatting:
+
+ (nil:0x0)
+    ^|
+    L|R
+     |v
+-------------------
+ Item: 0xc00002e4e0
+-------------------
+value: {%!s(int=1) one}
+ left: 0x0
+right: 0xc00002e500
+-------------------
+    ^|
+    L|R
+     |v
+-------------------
+ Item: 0xc00002e500
+-------------------
+value: {%!s(int=2) two}
+ left: 0xc00002e4e0
+right: 0xc00002e520
+-------------------
+    ^|
+    L|R
+     |v
+-------------------
+ Item: 0xc00002e520
+-------------------
+value: {%!s(int=3) three}
+ left: 0xc00002e500
+right: 0xc00002e540
+-------------------
+    ^|
+    L|R
+     |v
+-------------------
+ Item: 0xc00002e540
+-------------------
+value: {%!s(int=4) four}
+ left: 0xc00002e520
+right: 0x0
+-------------------
+    ^|
+    L|R
+     |v
+ (nil:0x0)
+
+List after sort with Stringer() formatting:
+
+ (nil:0x0)
+    ^|
+    L|R
+     |v
+-------------------
+ Item: 0xc00002e540
+-------------------
+value: {%!s(int=4) four}
+ left: 0x0
+right: 0xc00002e4e0
+-------------------
+    ^|
+    L|R
+     |v
+-------------------
+ Item: 0xc00002e4e0
+-------------------
+value: {%!s(int=1) one}
+ left: 0xc00002e540
+right: 0xc00002e520
+-------------------
+    ^|
+    L|R
+     |v
+-------------------
+ Item: 0xc00002e520
+-------------------
+value: {%!s(int=3) three}
+ left: 0xc00002e4e0
+right: 0xc00002e500
+-------------------
+    ^|
+    L|R
+     |v
+-------------------
+ Item: 0xc00002e500
+-------------------
+value: {%!s(int=2) two}
+ left: 0xc00002e520
 right: 0x0
 -------------------
     ^|
@@ -1226,9 +1508,11 @@ right: 0x0
      |v
  (nil:0x0)
 --- PASS: TestDListSortInterface (0.00s)
-    --- PASS: TestDListSortInterface/Let's_sort_Dlist. (0.00s)
+    --- PASS: TestDListSortInterface/Let's_sort_int-Dlist. (0.00s)
+    --- PASS: TestDListSortInterface/Let's_sort_rune-Dlist. (0.00s)
+    --- PASS: TestDListSortInterface/Let's_sort_struct-Dlist. (0.00s)
 PASS
-ok  	command-line-arguments	0.007s
+ok  	github.com/BorisPlus/golang_notes/dlist	0.007s
 
 ```
 
