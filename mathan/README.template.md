@@ -75,6 +75,17 @@ go test -v ./ > ./classificator.go.txt
 
 </details>
 
+Критерии останова (самые простые и без логического обоснования)
+
+<details>
+<summary>см. "breakpoints.go"</summary>
+
+```go
+{{ breakpoints.go }}
+```
+
+</details>
+
 #### Тестирование кластеризации
 
 <details>

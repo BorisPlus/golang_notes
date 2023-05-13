@@ -533,6 +533,33 @@ func (clz *Clusterizator) Clusterize() []*Cluster {
 
 </details>
 
+Критерии останова (самые простые и без логического обоснования)
+
+<details>
+<summary>см. "breakpoints.go"</summary>
+
+```go
+package clusterizator
+
+func CountLimit(clz *Clusterizator, count int) bool {
+    if count < 1 {
+        count = 1
+    }
+    return clz.Clusters().Len() <= count
+}
+
+func Limit10(clz *Clusterizator) bool {
+    return CountLimit(clz, 10)
+}
+
+func MustBeOne(clz *Clusterizator) bool {
+    return CountLimit(clz, 1)
+}
+
+```
+
+</details>
+
 #### Тестирование кластеризации
 
 <details>
@@ -655,102 +682,236 @@ go test -v ./ > ./clusterizator.go.txt
 Лог:
 
 ```text
-=== RUN   TestClusterizatorLoop
-========================================================================
-Исходные точки:
-(0;0)
-(0;1)
-(10;0)
-(10;2)
-========================================================================
-Исходные Кластеры:
+=== RUN   TestClusterizatorPointValue
+=== RUN   TestClusterizatorPointValue/4_points
+
 ╒=====================╕
-|Cluster: 0xc00010e4e0|
+|Cluster: 0xc0000a88d0|
 ├---------------------┤
-|centroid:(0;0)
-|branchA: <nil>
-|branchB: <nil>
-╘=====================
-╒=====================╕
-|Cluster: 0xc00010e510|
-├---------------------┤
-|centroid:(0;1)
-|branchA: <nil>
-|branchB: <nil>
-╘=====================
-╒=====================╕
-|Cluster: 0xc00010e540|
-├---------------------┤
-|centroid:(10;0)
-|branchA: <nil>
-|branchB: <nil>
-╘=====================
-╒=====================╕
-|Cluster: 0xc00010e570|
-├---------------------┤
-|centroid:(10;2)
-|branchA: <nil>
-|branchB: <nil>
-╘=====================
-========================================================================
-Кластеризация
-  * шаг кластеризации...
-  * шаг кластеризации...
-  * шаг кластеризации...
-========================================================================
-Итоговые кластеры:
-╒=====================╕
-|Cluster: 0xc00010e630|
-├---------------------┤
-|centroid:(5;0.75)
+|centroid:(5;0.375)
+|abDist:  25.062500
 |branchA: ⤵
+|    
 |    ╒=====================╕
-|    |Cluster: 0xc00010e660|
+|    |Cluster: 0xc0000a8900|
 |    ├---------------------┤
-|    |centroid:(0;0.5)
+|    |centroid:(2.5;0.25)
+|    |abDist:  25.250000
 |    |branchA: ⤵
+|    |    
 |    |    ╒=====================╕
-|    |    |Cluster: 0xc00010e690|
+|    |    |Cluster: 0xc0000a8930|
 |    |    ├---------------------┤
-|    |    |centroid:(0;0)
-|    |    |branchA: <nil>
-|    |    |branchB: <nil>
+|    |    |centroid:(0;0.5)
+|    |    |abDist:  1.000000
+|    |    |branchA: ⤵
+|    |    |    
+|    |    |    ╒=====================╕
+|    |    |    |Cluster: 0xc0000a8960|
+|    |    |    ├---------------------┤
+|    |    |    |centroid:(0;1)
+|    |    |    |abDist:  0.000000
+|    |    |    |branchA: <nil>
+|    |    |    |branchB: <nil>
+|    |    |    ╘=====================
+|    |    |branchB: ⤵
+|    |    |    
+|    |    |    ╒=====================╕
+|    |    |    |Cluster: 0xc0000a8990|
+|    |    |    ├---------------------┤
+|    |    |    |centroid:(0;0)
+|    |    |    |abDist:  0.000000
+|    |    |    |branchA: <nil>
+|    |    |    |branchB: <nil>
+|    |    |    ╘=====================
 |    |    ╘=====================
 |    |branchB: ⤵
+|    |    
 |    |    ╒=====================╕
-|    |    |Cluster: 0xc00010e6c0|
+|    |    |Cluster: 0xc0000a89c0|
 |    |    ├---------------------┤
-|    |    |centroid:(0;1)
-|    |    |branchA: <nil>
-|    |    |branchB: <nil>
+|    |    |centroid:(5;0)
+|    |    |abDist:  100.000000
+|    |    |branchA: ⤵
+|    |    |    
+|    |    |    ╒=====================╕
+|    |    |    |Cluster: 0xc0000a89f0|
+|    |    |    ├---------------------┤
+|    |    |    |centroid:(10;0)
+|    |    |    |abDist:  0.000000
+|    |    |    |branchA: <nil>
+|    |    |    |branchB: <nil>
+|    |    |    ╘=====================
+|    |    |branchB: ⤵
+|    |    |    
+|    |    |    ╒=====================╕
+|    |    |    |Cluster: 0xc0000a8a20|
+|    |    |    ├---------------------┤
+|    |    |    |centroid:(0;0)
+|    |    |    |abDist:  0.000000
+|    |    |    |branchA: <nil>
+|    |    |    |branchB: <nil>
+|    |    |    ╘=====================
 |    |    ╘=====================
 |    ╘=====================
 |branchB: ⤵
+|    
 |    ╒=====================╕
-|    |Cluster: 0xc00010e6f0|
+|    |Cluster: 0xc0000a8a50|
 |    ├---------------------┤
-|    |centroid:(10;1)
+|    |centroid:(7.5;0.5)
+|    |abDist:  26.000000
 |    |branchA: ⤵
+|    |    
 |    |    ╒=====================╕
-|    |    |Cluster: 0xc00010e720|
+|    |    |Cluster: 0xc0000a8a80|
 |    |    ├---------------------┤
-|    |    |centroid:(10;0)
+|    |    |centroid:(10;1)
+|    |    |abDist:  4.000000
+|    |    |branchA: ⤵
+|    |    |    
+|    |    |    ╒=====================╕
+|    |    |    |Cluster: 0xc0000a8ab0|
+|    |    |    ├---------------------┤
+|    |    |    |centroid:(10;2)
+|    |    |    |abDist:  0.000000
+|    |    |    |branchA: <nil>
+|    |    |    |branchB: <nil>
+|    |    |    ╘=====================
+|    |    |branchB: ⤵
+|    |    |    
+|    |    |    ╒=====================╕
+|    |    |    |Cluster: 0xc0000a8ae0|
+|    |    |    ├---------------------┤
+|    |    |    |centroid:(10;0)
+|    |    |    |abDist:  0.000000
+|    |    |    |branchA: <nil>
+|    |    |    |branchB: <nil>
+|    |    |    ╘=====================
+|    |    ╘=====================
+|    |branchB: ⤵
+|    |    
+|    |    ╒=====================╕
+|    |    |Cluster: 0xc0000a8b10|
+|    |    ├---------------------┤
+|    |    |centroid:(5;0)
+|    |    |abDist:  100.000000
+|    |    |branchA: ⤵
+|    |    |    
+|    |    |    ╒=====================╕
+|    |    |    |Cluster: 0xc0000a8b40|
+|    |    |    ├---------------------┤
+|    |    |    |centroid:(10;0)
+|    |    |    |abDist:  0.000000
+|    |    |    |branchA: <nil>
+|    |    |    |branchB: <nil>
+|    |    |    ╘=====================
+|    |    |branchB: ⤵
+|    |    |    
+|    |    |    ╒=====================╕
+|    |    |    |Cluster: 0xc0000a8b70|
+|    |    |    ├---------------------┤
+|    |    |    |centroid:(0;0)
+|    |    |    |abDist:  0.000000
+|    |    |    |branchA: <nil>
+|    |    |    |branchB: <nil>
+|    |    |    ╘=====================
+|    |    ╘=====================
+|    ╘=====================
+╘=====================
+=== RUN   TestClusterizatorPointValue/3_points
+
+╒=====================╕
+|Cluster: 0xc0000a8d80|
+├---------------------┤
+|centroid:(0.425;0.625)
+|abDist:  1.285000
+|branchA: ⤵
+|    
+|    ╒=====================╕
+|    |Cluster: 0xc0000a8db0|
+|    ├---------------------┤
+|    |centroid:(0;1)
+|    |abDist:  0.000000
+|    |branchA: <nil>
+|    |branchB: <nil>
+|    ╘=====================
+|branchB: ⤵
+|    
+|    ╒=====================╕
+|    |Cluster: 0xc0000a8de0|
+|    ├---------------------┤
+|    |centroid:(0.85;0.25)
+|    |abDist:  0.340000
+|    |branchA: ⤵
+|    |    
+|    |    ╒=====================╕
+|    |    |Cluster: 0xc0000a8e10|
+|    |    ├---------------------┤
+|    |    |centroid:(0.7;0.5)
+|    |    |abDist:  0.000000
 |    |    |branchA: <nil>
 |    |    |branchB: <nil>
 |    |    ╘=====================
 |    |branchB: ⤵
+|    |    
 |    |    ╒=====================╕
-|    |    |Cluster: 0xc00010e750|
+|    |    |Cluster: 0xc0000a8e40|
 |    |    ├---------------------┤
-|    |    |centroid:(10;2)
+|    |    |centroid:(1;0)
+|    |    |abDist:  0.000000
 |    |    |branchA: <nil>
 |    |    |branchB: <nil>
 |    |    ╘=====================
 |    ╘=====================
 ╘=====================
---- PASS: TestClusterizatorLoop (0.00s)
+=== RUN   TestClusterizatorPointValue/twice_point
+
+╒=====================╕
+|Cluster: 0xc0000a8f90|
+├---------------------┤
+|centroid:(0;0)
+|abDist:  0.000000
+|branchA: ⤵
+|    
+|    ╒=====================╕
+|    |Cluster: 0xc0000a8fc0|
+|    ├---------------------┤
+|    |centroid:(0;0)
+|    |abDist:  0.000000
+|    |branchA: <nil>
+|    |branchB: <nil>
+|    ╘=====================
+|branchB: ⤵
+|    
+|    ╒=====================╕
+|    |Cluster: 0xc0000a8ff0|
+|    ├---------------------┤
+|    |centroid:(0;0)
+|    |abDist:  0.000000
+|    |branchA: <nil>
+|    |branchB: <nil>
+|    ╘=====================
+╘=====================
+=== RUN   TestClusterizatorPointValue/1_point
+
+╒=====================╕
+|Cluster: 0xc0000a90e0|
+├---------------------┤
+|centroid:(1;0)
+|abDist:  0.000000
+|branchA: <nil>
+|branchB: <nil>
+╘=====================
+=== RUN   TestClusterizatorPointValue/No_points
+--- PASS: TestClusterizatorPointValue (0.00s)
+    --- PASS: TestClusterizatorPointValue/4_points (0.00s)
+    --- PASS: TestClusterizatorPointValue/3_points (0.00s)
+    --- PASS: TestClusterizatorPointValue/twice_point (0.00s)
+    --- PASS: TestClusterizatorPointValue/1_point (0.00s)
+    --- PASS: TestClusterizatorPointValue/No_points (0.00s)
 PASS
-ok      github.com/BorisPlus/golang_notes/mathan/clusterizator    0.006s
+ok      github.com/BorisPlus/golang_notes/mathan/clusterizator    (cached)
 
 ```
 
